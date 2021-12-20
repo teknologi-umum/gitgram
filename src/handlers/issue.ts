@@ -3,18 +3,18 @@ import type { Context } from "telegraf";
 
 export const issueCommentCreated = 
   (ctx: Context): HandlerFunction<"issue_comment.created", unknown> => 
-    (event) => {
+    async (event) => {
   //
 }
 
 export const issueClosed = 
   (ctx: Context): HandlerFunction<"issues.closed", unknown> => 
-    (event) => {
+    async (event) => {
   //
 }
 
 export const issueOpened = 
   (ctx: Context): HandlerFunction<"issues.opened", unknown> => 
-    (event) => {
+    async (event) => {
   //
 }

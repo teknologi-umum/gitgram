@@ -8,6 +8,8 @@ import { release } from "./handlers/release";
 import { vulnerabilityAlert } from "./handlers/vulnerability";
 import { Telegraf } from "telegraf";
 import kleur from "kleur";
+import EventSource from "eventsource";
+import { ping } from "./handlers/ping";
 
 const webhook = new Webhooks({
   secret: process.env.WEBHOOK_SECRET ?? "",
@@ -19,6 +21,26 @@ bot.catch((e) => {
 })
 
 bot.start((ctx) => {
+  console.log(kleur.green("Telegram bot /start triggered"));
+
+  // Development purposes
+  // See: https://github.com/octokit/webhooks.js#local-development
+  if (process.env.NODE_ENV === "development") {
+    console.log(kleur.inverse("Running on development EventSource with proxy"));
+    const source = new EventSource(process.env.DEV_PROXY_URL ?? "");
+    source.onmessage = async (event) => {
+      const webhookEvent = JSON.parse(event.data);
+      webhook
+        .verifyAndReceive({
+          id: webhookEvent["x-request-id"],
+          name: webhookEvent["x-github-event"],
+          signature: webhookEvent["x-hub-signature"],
+          payload: webhookEvent.body,
+        })
+        .catch(console.error);
+    };
+  }
+
   /**
    * For the list of events that can be listened to, go see:
    * https://github.com/octokit/webhooks.js#webhook-events
@@ -61,9 +83,7 @@ bot.start((ctx) => {
    * This event isn't stored so it isn't retrievable via the Events API endpoint.
    * https://docs.github.com/en/developers/webhooks-and-events/webhooks/webhook-events-and-payloads#ping
    */
-  webhook.on("ping", (event) => {
-    console.log(`pong! zen: ${event.payload.zen}`)
-  })
+  webhook.on("ping", ping(ctx))
 
   /**
    * Activity related to pull requests. The type of activity is specified in the action property of the payload object.
@@ -133,7 +153,7 @@ const webhookMiddleware = createNodeMiddleware(
 );
 
 const app = createServer(webhookMiddleware);
-app.listen(process.env.PORT ?? 3000);
+app.listen(process.env.PORT ?? 3000, () => console.log(kleur.green(`Server running on http://localhost:${process.env.PORT ?? 3000}`)));
 bot.launch();
 
 // Enable graceful stop
