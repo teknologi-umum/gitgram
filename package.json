@@ -1,0 +1,31 @@
+{
+  "name": "gitgram",
+  "version": "1.0.0",
+  "description": "Github notifications for Telegram",
+  "main": "index.ts",
+  "scripts": {
+    "build": "tsc --noEmit && node build.js",
+    "test:unit": "uvu -r esbuild-register tests \".(test|spec).ts\"",
+    "test:coverage": "c8 --reporter=text --reporter=lcov npm run test:unit",
+    "test:tdd": "npm run test:unit; watchlist src tests -- npm run test:unit",
+    "test": "npm run test:coverage"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/teknologi-umum/gitgram.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/teknologi-umum/gitgram/issues"
+  },
+  "homepage": "https://github.com/teknologi-umum/gitgram#readme",
+  "devDependencies": {
+    "typescript": "^4.5.4"
+  },
+  "dependencies": {
+    "esbuild": "^0.14.6",
+    "nodemon": "^2.0.15",
+    "uvu": "^0.5.2"
+  }
+}
