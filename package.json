@@ -11,8 +11,8 @@
     "test:coverage": "c8 --reporter=text --reporter=lcov npm run test:unit",
     "test:tdd": "npm run test:unit; watchlist src tests -- npm run test:unit",
     "test": "npm run test:coverage",
-    "lint:fix": "eslint --fix --ignore-path .gitignore .",
-    "lint:check": "eslint --ignore-path .gitignore ."
+    "lint:fix": "eslint --fix --ext .js,.ts --ignore-path .gitignore .",
+    "lint:check": "eslint --ext .js,.ts --ignore-path .gitignore ."
   },
   "repository": {
     "type": "git",
