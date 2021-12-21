@@ -30,8 +30,7 @@ export function prClosed(
         url: event.payload.pull_request.html_url,
         no: event.payload.pull_request.number,
         title: event.payload.pull_request.title,
-        body:
-          event.payload.pull_request.body || "<i>No description provided.</i>",
+        body: event.payload.pull_request.body || "<i>No description provided.</i>",
         author: event.payload.pull_request.user.name
       }) + transformLabels(event.payload.pull_request.labels);
 
@@ -61,8 +60,7 @@ export function prOpened(
         repoName: event.payload.repository.full_name,
         no: event.payload.pull_request.number,
         title: event.payload.pull_request.title,
-        body:
-          event.payload.pull_request.body || "<i>No description provided.</i>",
+        body: event.payload.pull_request.body || "<i>No description provided.</i>",
         assignee: event.payload.pull_request.assignee?.login ?? "No Assignee",
         author: event.payload.pull_request.user.login
       }) + transformLabels(event.payload.pull_request.labels);
