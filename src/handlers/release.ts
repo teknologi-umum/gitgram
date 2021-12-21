@@ -3,4 +3,4 @@ import type { Context } from "telegraf";
 
 export const release = (ctx: Context): HandlerFunction<"release.published", unknown> => async (event) => {
   //
-}
+};
