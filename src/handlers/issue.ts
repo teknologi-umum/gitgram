@@ -20,7 +20,7 @@ export function issueCommentCreated(
       url: event.payload.issue.html_url,
       no: event.payload.issue.number,
       title: event.payload.issue.title,
-      body: event.payload.comment.body ?? "<i>Comment was empty.</i>",
+      body: event.payload.comment.body || "<i>Comment was empty.</i>",
       author: event.payload.comment.user.login
     });
 
@@ -80,7 +80,7 @@ export function issueOpened(
         url: event.payload.issue.html_url,
         no: event.payload.issue.number,
         title: event.payload.issue.title,
-        body: event.payload.issue.body ?? "<i>No description provided.</i>",
+        body: event.payload.issue.body || "<i>No description provided.</i>",
         assignee: event.payload.issue.assignee?.login ?? "No Assignee",
         author: event.payload.issue.user.login
       }) + transformLabels(event.payload.issue.labels);
