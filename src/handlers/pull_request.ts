@@ -1,7 +1,27 @@
+import { Subject, throttleTime, asyncScheduler } from "rxjs";
 import type { HandlerFunction } from "@octokit/webhooks/dist-types/types";
 import type { Context } from "telegraf";
 import templite from "templite";
 import { transformLabels } from "../utils/transformLabels";
+
+const prSubject = new Subject<[Context, string]>();
+
+prSubject
+  .pipe(
+    throttleTime(60 * 1000, asyncScheduler, {
+      leading: true,
+      trailing: true
+    })
+  )
+  .subscribe({
+    async next([ctx, response]) {
+      await ctx.telegram.sendMessage(
+        ctx.chat?.id ?? String(process.env.HOME_ID ?? ""),
+        response,
+        { parse_mode: "HTML", disable_web_page_preview: true }
+      );
+    }
+  });
 
 export function prClosed(
   ctx: Context
@@ -34,11 +54,15 @@ export function prClosed(
         author: event.payload.pull_request.user.name
       }) + transformLabels(event.payload.pull_request.labels);
 
-    await ctx.telegram.sendMessage(
-      ctx.chat?.id ?? String(process.env.HOME_ID ?? ""),
-      response,
-      { parse_mode: "HTML", disable_web_page_preview: true }
-    );
+    try {
+      await ctx.telegram.sendMessage(
+        ctx.chat?.id ?? String(process.env.HOME_ID ?? ""),
+        response,
+        { parse_mode: "HTML", disable_web_page_preview: true }
+      );
+    } catch (err) {
+      console.error(err);
+    }
   };
 }
 
@@ -65,40 +89,44 @@ export function prOpened(
         author: event.payload.pull_request.user.login
       }) + transformLabels(event.payload.pull_request.labels);
 
-    await ctx.telegram.sendMessage(
-      ctx.chat?.id ?? String(process.env.HOME_ID ?? ""),
-      response,
-      { parse_mode: "HTML", disable_web_page_preview: true }
-    );
+    try {
+      await ctx.telegram.sendMessage(
+        ctx.chat?.id ?? String(process.env.HOME_ID ?? ""),
+        response,
+        { parse_mode: "HTML", disable_web_page_preview: true }
+      );
+    } catch (e) {
+      console.error(e);
+    }
   };
 }
 
-export function prReviewComment(
+export function prEdited(
   ctx: Context
-): HandlerFunction<"pull_request_review_comment.created", unknown> {
+): HandlerFunction<"pull_request.edited", unknown> {
   const template = `
-<b>💬 New pull request review comment in <a href="https://github.com/{{repoName}}">{{repoName}}</a></b>
+<b>🔮 A pull request was edited in <a href="https://github.com/{{repoName}}">{{repoName}}</a></b>
 <b><a href="{{url}}">#{{no}} {{title}}</a></b>
 
 {{body}}
 
+<b>Assignee</b>: {{assignee}}
 <b>Author</b>: {{author}}`;
-  return async (event) => {
-    const response = templite(template, {
-      repoName: event.payload.repository.full_name,
-      url: event.payload.pull_request.html_url,
-      no: event.payload.pull_request.number,
-      title: event.payload.pull_request.title,
-      body: event.payload.comment.body || "<i>Comment was empty.</i>",
-      author: event.payload.comment.user.login,
-      reviewUrl: event.payload.comment.html_url
-    });
 
-    await ctx.telegram.sendMessage(
-      ctx.chat?.id ?? String(process.env.HOME_ID ?? ""),
-      response,
-      { parse_mode: "HTML", disable_web_page_preview: true }
-    );
+  return (event) => {
+    const response =
+      templite(template, {
+        url: event.payload.pull_request.html_url,
+        repoName: event.payload.repository.full_name,
+        no: event.payload.pull_request.number,
+        title: event.payload.pull_request.title,
+        body:
+          event.payload.pull_request.body || "<i>No description provided.</i>",
+        assignee: event.payload.pull_request.assignee?.login ?? "No Assignee",
+        author: event.payload.pull_request.user.login
+      }) + transformLabels(event.payload.pull_request.labels);
+
+    prSubject.next([ctx, response]);
   };
 }
 
@@ -107,11 +135,11 @@ export function prReviewSubmitted(
 ): HandlerFunction<"pull_request_review.submitted", unknown> {
   const TITLE: Record<string, string> = {
     commented:
-      "<b>💬 new pull request review submitted in <a href=\"https://github.com/{{reponame}}\">{{reponame}}</a></b>",
+      '<b>💬 new pull request review submitted in <a href="https://github.com/{{reponame}}">{{reponame}}</a></b>',
     approved:
-      "<b>✅ a pull request has been approved in <a href=\"https://github.com/{{reponame}}\">{{reponame}}</a></b>",
+      '<b>✅ a pull request has been approved in <a href="https://github.com/{{reponame}}">{{reponame}}</a></b>',
     changes_requested:
-      "<b>🚫 change requested for a pull request in <a href=\"https://github.com/{{reponame}}\">{{reponame}}</a></b>"
+      '<b>🚫 change requested for a pull request in <a href="https://github.com/{{reponame}}">{{reponame}}</a></b>'
   };
   const template = `
 <b><a href="{{url}}">#{{no}} {{title}}</a></b>
@@ -136,10 +164,42 @@ export function prReviewSubmitted(
       }
     );
 
-    await ctx.telegram.sendMessage(
-      ctx.chat?.id ?? String(process.env.HOME_ID ?? ""),
-      response,
-      { parse_mode: "HTML", disable_web_page_preview: true }
-    );
+    try {
+      await ctx.telegram.sendMessage(
+        ctx.chat?.id ?? String(process.env.HOME_ID ?? ""),
+        response,
+        { parse_mode: "HTML", disable_web_page_preview: true }
+      );
+    } catch (e) {
+      console.error(e);
+    }
+  };
+}
+
+export function prReviewEdited(
+  ctx: Context
+): HandlerFunction<"pull_request_review.edited", unknown> {
+  const template = `
+<b>🔮 A pull request review was edited in <a href="https://github.com/{{repoName}}">{{repoName}}</a></b>
+<b><a href="{{url}}">#{{no}} {{title}}</a></b>
+
+{{body}}
+
+<b>Assignee</b>: {{assignee}}
+<b>Author</b>: {{author}}`;
+  return (event) => {
+    if (!event.payload.review.body) return;
+
+    const response = templite(template, {
+      repoName: event.payload.repository.full_name,
+      url: event.payload.pull_request.html_url,
+      no: event.payload.pull_request.number,
+      title: event.payload.pull_request.title,
+      body: event.payload.review.body,
+      author: event.payload.review.user.login,
+      reviewUrl: event.payload.review.html_url
+    });
+
+    prSubject.next([ctx, response]);
   };
 }

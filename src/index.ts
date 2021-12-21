@@ -6,12 +6,15 @@ import {
   issueClosed,
   issueCommentCreated,
   issueOpened,
-  issueReopened
+  issueReopened,
+  issueEdited,
+  issueCommentEdited
 } from "./handlers/issue";
 import {
   prClosed,
+  prEdited,
   prOpened,
-  prReviewComment,
+  prReviewEdited,
   prReviewSubmitted
 } from "./handlers/pull_request";
 import { release } from "./handlers/release";
@@ -38,7 +41,7 @@ bot.start((ctx) => {
   if (process.env.NODE_ENV === "development") {
     console.log(kleur.inverse("Running on development EventSource with proxy"));
     const source = new EventSource(process.env.DEV_PROXY_URL ?? "");
-    source.onmessage = async (event) => {
+    source.onmessage = (event) => {
       const webhookEvent = JSON.parse(event.data);
       webhook
         .verifyAndReceive({
@@ -75,7 +78,9 @@ bot.start((ctx) => {
   webhook.on("issues.closed", issueClosed(ctx));
   webhook.on("issues.opened", issueOpened(ctx));
   webhook.on("issues.reopened", issueReopened(ctx));
+  webhook.on("issues.edited", issueEdited(ctx));
   webhook.on("issue_comment.created", issueCommentCreated(ctx));
+  webhook.on("issue_comment.edited", issueCommentEdited(ctx));
 
   /**
    * When you create a new webhook, we'll send you a simple ping event to let you know you've set up the webhook correctly.
@@ -93,14 +98,8 @@ bot.start((ctx) => {
    * Also see: https://docs.github.com/en/rest/reference/pulls
    */
   webhook.on("pull_request.closed", prClosed(ctx));
-
-  /**
-   * Activity related to pull requests. The type of activity is specified in the action property of the payload object.
-   *
-   * https://docs.github.com/en/developers/webhooks-and-events/webhooks/webhook-events-and-payloads#pull_request
-   * Also see: https://docs.github.com/en/rest/reference/pulls
-   */
   webhook.on("pull_request.opened", prOpened(ctx));
+  webhook.on("pull_request.edited", prEdited(ctx));
 
   /**
    * Activity related to pull request reviews. The type of activity is specified in the action property of the payload object.
@@ -110,7 +109,7 @@ bot.start((ctx) => {
    * Also see: https://docs.github.com/en/rest/reference/pulls#reviews
    */
   webhook.on("pull_request_review.submitted", prReviewSubmitted(ctx));
-  webhook.on("pull_request_review_comment.created", prReviewComment(ctx));
+  webhook.on("pull_request_review.edited", prReviewEdited(ctx));
 
   /**
    * a release, pre-release, or draft of a release is published
