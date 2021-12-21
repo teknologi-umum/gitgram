@@ -110,12 +110,6 @@ bot.start((ctx) => {
    * Also see: https://docs.github.com/en/rest/reference/pulls#reviews
    */
   webhook.on("pull_request_review.submitted", prReviewSubmitted(ctx));
-
-  /**
-   * A comment is added to a pull request review
-   * https://docs.github.com/en/developers/webhooks-and-events/webhooks/webhook-events-and-payloads#pull_request_review_comment
-   * Also see: https://docs.github.com/en/rest/reference/pulls#reviews
-   */
   webhook.on("pull_request_review_comment.created", prReviewComment(ctx));
 
   /**
