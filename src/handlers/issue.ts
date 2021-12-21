@@ -1,12 +1,7 @@
 import type { HandlerFunction } from "@octokit/webhooks/dist-types/types";
-import type { Label } from "@octokit/webhooks-types";
 import type { Context } from "telegraf";
 import templite from "templite";
-
-function transformLabels(labels: Label[] | undefined): string {
-  if (!labels) return "";
-  return "\n<b>Tags</b>: " + labels.map((l) => l.name).join(", ");
-}
+import { transformLabels } from "../utils/transformLabels";
 
 export function issueCommentCreated(
   ctx: Context
