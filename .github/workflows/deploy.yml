@@ -25,8 +25,8 @@ jobs:
       - name: ESLint check
         run: npx eslint --ignore-path .gitignore .
 
-      - name: Test
-        run: npm run test
+      # - name: Test
+      #   run: npm run test
 
       # - name: Initialize CodeQL
       #   uses: github/codeql-action/init@v1
