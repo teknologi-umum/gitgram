@@ -4,9 +4,9 @@ import type { Context } from "telegraf";
 import templite from "templite";
 import { transformLabels } from "../utils/transformLabels";
 
-const issueSubject = new Subject<[Context, string]>();
+const issueSubject$ = new Subject<[Context, string]>();
 
-issueSubject
+issueSubject$
   .pipe(
     throttleTime(60 * 1000, asyncScheduler, {
       leading: true,
@@ -181,7 +181,7 @@ export function issueEdited(
         author: event.payload.issue.user.login
       }) + transformLabels(event.payload.issue.labels);
 
-    issueSubject.next([ctx, response]);
+    issueSubject$.next([ctx, response]);
   };
 }
 
@@ -207,6 +207,6 @@ export function issueCommentEdited(
         author: event.payload.issue.user.login
       }) + transformLabels(event.payload.issue.labels);
 
-    issueSubject.next([ctx, response]);
+    issueSubject$.next([ctx, response]);
   };
 }

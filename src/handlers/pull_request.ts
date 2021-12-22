@@ -4,9 +4,9 @@ import type { Context } from "telegraf";
 import templite from "templite";
 import { transformLabels } from "../utils/transformLabels";
 
-const prSubject = new Subject<[Context, string]>();
+const prSubject$ = new Subject<[Context, string]>();
 
-prSubject
+prSubject$
   .pipe(
     throttleTime(60 * 1000, asyncScheduler, {
       leading: true,
@@ -126,7 +126,7 @@ export function prEdited(
         author: event.payload.pull_request.user.login
       }) + transformLabels(event.payload.pull_request.labels);
 
-    prSubject.next([ctx, response]);
+    prSubject$.next([ctx, response]);
   };
 }
 
@@ -200,6 +200,6 @@ export function prReviewEdited(
       reviewUrl: event.payload.review.html_url
     });
 
-    prSubject.next([ctx, response]);
+    prSubject$.next([ctx, response]);
   };
 }
