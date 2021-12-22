@@ -17,7 +17,9 @@ export const deploymentStatus =
         description: event.payload.repository.description
       });
       
-      await ctx.chat?.id ?? String(process.env.HOME_ID ?? ""),
-      response,
-      { parse_mode: "HTML", disable_web_page_preview: true };
+      await ctx.telegram.sendMessage(
+        ctx.chat?.id ?? String(process.env.HOME_ID ?? ""),
+        response,
+        { parse_mode: "HTML", disable_web_page_preview: true }
+      );
     };
