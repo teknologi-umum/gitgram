@@ -1,7 +1,27 @@
+import { Subject, throttleTime, asyncScheduler } from "rxjs";
 import type { HandlerFunction } from "@octokit/webhooks/dist-types/types";
 import type { Context } from "telegraf";
 import templite from "templite";
 import { transformLabels } from "../utils/transformLabels";
+
+const issueSubject$ = new Subject<[Context, string]>();
+
+issueSubject$
+  .pipe(
+    throttleTime(60 * 1000, asyncScheduler, {
+      leading: true,
+      trailing: true
+    })
+  )
+  .subscribe({
+    async next([ctx, response]) {
+      await ctx.telegram.sendMessage(
+        ctx.chat?.id ?? String(process.env.HOME_ID ?? ""),
+        response,
+        { parse_mode: "HTML", disable_web_page_preview: true }
+      );
+    }
+  });
 
 export function issueCommentCreated(
   ctx: Context
@@ -24,11 +44,15 @@ export function issueCommentCreated(
       author: event.payload.comment.user.login
     });
 
-    await ctx.telegram.sendMessage(
-      ctx.chat?.id ?? String(process.env.HOME_ID ?? ""),
-      response,
-      { parse_mode: "HTML", disable_web_page_preview: true }
-    );
+    try {
+      await ctx.telegram.sendMessage(
+        ctx.chat?.id ?? String(process.env.HOME_ID ?? ""),
+        response,
+        { parse_mode: "HTML", disable_web_page_preview: true }
+      );
+    } catch (e) {
+      console.error(e);
+    }
   };
 }
 
@@ -53,11 +77,15 @@ export function issueClosed(
         author: event.payload.issue.user.login
       }) + transformLabels(event.payload.issue.labels);
 
-    await ctx.telegram.sendMessage(
-      ctx.chat?.id ?? String(process.env.HOME_ID ?? ""),
-      response,
-      { parse_mode: "HTML", disable_web_page_preview: true }
-    );
+    try {
+      await ctx.telegram.sendMessage(
+        ctx.chat?.id ?? String(process.env.HOME_ID ?? ""),
+        response,
+        { parse_mode: "HTML", disable_web_page_preview: true }
+      );
+    } catch (e) {
+      console.error(e);
+    }
   };
 }
 
@@ -85,11 +113,15 @@ export function issueOpened(
         author: event.payload.issue.user.login
       }) + transformLabels(event.payload.issue.labels);
 
-    await ctx.telegram.sendMessage(
-      ctx.chat?.id ?? String(process.env.HOME_ID ?? ""),
-      response,
-      { parse_mode: "HTML", disable_web_page_preview: true }
-    );
+    try {
+      await ctx.telegram.sendMessage(
+        ctx.chat?.id ?? String(process.env.HOME_ID ?? ""),
+        response,
+        { parse_mode: "HTML", disable_web_page_preview: true }
+      );
+    } catch (e) {
+      console.error(e);
+    }
   };
 }
 
@@ -115,10 +147,66 @@ export function issueReopened(
         author: event.payload.issue.user.login
       }) + transformLabels(event.payload.issue.labels);
 
-    await ctx.telegram.sendMessage(
-      ctx.chat?.id ?? String(process.env.HOME_ID ?? ""),
-      response,
-      { parse_mode: "HTML", disable_web_page_preview: true }
-    );
+    try {
+      await ctx.telegram.sendMessage(
+        ctx.chat?.id ?? String(process.env.HOME_ID ?? ""),
+        response,
+        { parse_mode: "HTML", disable_web_page_preview: true }
+      );
+    } catch (e) {
+      console.error(e);
+    }
+  };
+}
+
+export function issueEdited(
+  ctx: Context
+): HandlerFunction<"issues.edited", unknown> {
+  const template = `
+<b>🌱 An issue was edited in <a href="https://github.com/{{repoName}}">{{repoName}}</a></b>
+
+<b><a href="{{url}}">#{{no}} {{title}}</a></b>
+
+<b>Assignee</b>: {{assignee}}
+<b>Author</b>: <a href="https://github.com/{{author}}">{{author}}</a>`;
+
+  return (event) => {
+    const response =
+      templite(template, {
+        repoName: event.payload.repository.full_name,
+        url: event.payload.issue.html_url,
+        no: event.payload.issue.number,
+        title: event.payload.issue.title,
+        assignee: event.payload.issue.assignee?.login ?? "No Assignee",
+        author: event.payload.issue.user.login
+      }) + transformLabels(event.payload.issue.labels);
+
+    issueSubject$.next([ctx, response]);
+  };
+}
+
+export function issueCommentEdited(
+  ctx: Context
+): HandlerFunction<"issue_comment.edited", unknown> {
+  const template = `
+<b>💬 An issue comment was edited in <a href="https://github.com/{{repoName}}">{{repoName}}</a></b>
+<b><a href="{{url}}">#{{no}} {{title}}</a></b>
+
+{{ body }}
+
+<b>Author</b>: <a href="https://github.com/{{author}}">{{author}}</a>`;
+
+  return (event) => {
+    const response =
+      templite(template, {
+        repoName: event.payload.repository.full_name,
+        url: event.payload.issue.html_url,
+        no: event.payload.issue.number,
+        title: event.payload.issue.title,
+        assignee: event.payload.issue.assignee?.login ?? "No Assignee",
+        author: event.payload.issue.user.login
+      }) + transformLabels(event.payload.issue.labels);
+
+    issueSubject$.next([ctx, response]);
   };
 }
