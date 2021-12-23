@@ -8,13 +8,14 @@ export const deploymentStatus =
       const template = `♻️ Deployment Status:
         <b>Repo Name: </b> <a href="https://github.com/{{repoName}}">{{repoName}}</a>
         <b>Status: </b> {{status}}
-        <b>Description: </b>
-        {{description}}`;
+        <b>Target URL: </b> {{targetUrl}}
+        <b>Description: </b> {{description}}`;
 
       const response = templite(template, {
         repoName: event.payload.repository.full_name,
         status: event.payload.deployment_status.state,
-        description: event.payload.repository.description
+        description: event.payload.deployment_status?.description ?? "",
+        targetUrl: event.payload.deployment_status?.target_url ?? ""
       });
       
       await ctx.telegram.sendMessage(
