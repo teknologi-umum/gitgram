@@ -29,12 +29,17 @@ const webhook = new Webhooks({
 });
 
 const bot = new Telegraf(process.env.BOT_TOKEN ?? "");
-bot.catch((e) => {
+bot.catch(async (e, ctx) => {
+  await ctx.telegram.sendMessage(
+    ctx.chat?.id ?? String(process.env.HOME_GROUP ?? ""),
+    `An error was thrown: ${e}`
+  );
   console.error(e);
 });
 
-bot.start((ctx) => {
+bot.start(async (ctx) => {
   console.log(kleur.green("Telegram bot /start triggered"));
+  await ctx.telegram.sendMessage(ctx.chat.id, "I'm alive!");
 
   // Development purposes
   // See: https://github.com/octokit/webhooks.js#local-development
