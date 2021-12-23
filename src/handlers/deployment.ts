@@ -6,7 +6,7 @@ export const deploymentStatus =
   (ctx: Context): HandlerFunction<"deployment_status", unknown> => 
     async (event) => {
       const template = `♻️ Deployment Status:
-        <b>Repo Name: </b> <a href="https://github.com/{{repoName}}">{{repoName}}</a>
+        <b>Repo Name: </b><a href="https://github.com/{{repoName}}">{{repoName}}</a>
         <b>Status:</b> {{status}}
         <b>Target URL:</b> {{targetUrl}}
         <b>Description:</b> {{description}}`;
