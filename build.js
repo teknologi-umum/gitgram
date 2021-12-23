@@ -1,21 +1,25 @@
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const esbuild = require("esbuild");
+import esbuild from "esbuild";
 
 esbuild
   .build({
     entryPoints: ["src/index.ts"],
     sourcemap: "external",
     bundle: true,
-    format: "cjs",
+    format: "esm",
     platform: "node",
     external: [
       "@octokit/webhooks",
       "dotenv",
+      "dompurify",
       "eventsource",
       "kleur",
+      "remark-gfm",
+      "remark-html",
+      "remark-parse",
       "rxjs",
       "telegraf",
-      "templite"
+      "templite",
+      "unified"
     ],
     outdir: "./dist",
     target: ["es2020", "node16.10"],

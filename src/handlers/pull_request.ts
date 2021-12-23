@@ -3,6 +3,7 @@ import type { HandlerFunction } from "@octokit/webhooks/dist-types/types";
 import type { Context } from "telegraf";
 import templite from "templite";
 import { transformLabels } from "../utils/transformLabels";
+import { markdownToHTML } from "../utils/markdown";
 
 const prSubject$ = new Subject<[Context, string]>();
 
@@ -50,7 +51,7 @@ export function prClosed(
         url: event.payload.pull_request.html_url,
         no: event.payload.pull_request.number,
         title: event.payload.pull_request.title,
-        body: event.payload.pull_request.body || "<i>No description provided.</i>",
+        body: markdownToHTML(event.payload.pull_request?.body ?? "") || "<i>No description provided.</i>",
         author: event.payload.pull_request.user.name
       }) + transformLabels(event.payload.pull_request.labels);
 
@@ -84,7 +85,7 @@ export function prOpened(
         repoName: event.payload.repository.full_name,
         no: event.payload.pull_request.number,
         title: event.payload.pull_request.title,
-        body: event.payload.pull_request.body || "<i>No description provided.</i>",
+        body: markdownToHTML(event.payload.pull_request?.body ?? "") || "<i>No description provided.</i>",
         assignee: event.payload.pull_request.assignee?.login ?? "No Assignee",
         author: event.payload.pull_request.user.login
       }) + transformLabels(event.payload.pull_request.labels);
@@ -121,7 +122,7 @@ export function prEdited(
         no: event.payload.pull_request.number,
         title: event.payload.pull_request.title,
         body:
-          event.payload.pull_request.body || "<i>No description provided.</i>",
+          markdownToHTML(event.payload.pull_request?.body ?? "") || "<i>No description provided.</i>",
         assignee: event.payload.pull_request.assignee?.login ?? "No Assignee",
         author: event.payload.pull_request.user.login
       }) + transformLabels(event.payload.pull_request.labels);
@@ -158,7 +159,7 @@ export function prReviewSubmitted(
         url: event.payload.pull_request.html_url,
         no: event.payload.pull_request.number,
         title: event.payload.pull_request.title,
-        body: event.payload.review.body,
+        body: markdownToHTML(event.payload.review.body),
         author: event.payload.review.user.login,
         reviewUrl: event.payload.review.html_url
       }
@@ -195,7 +196,7 @@ export function prReviewEdited(
       url: event.payload.pull_request.html_url,
       no: event.payload.pull_request.number,
       title: event.payload.pull_request.title,
-      body: event.payload.review.body,
+      body: markdownToHTML(event.payload.review.body),
       author: event.payload.review.user.login,
       reviewUrl: event.payload.review.html_url
     });

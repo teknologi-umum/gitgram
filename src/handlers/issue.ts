@@ -3,6 +3,7 @@ import type { HandlerFunction } from "@octokit/webhooks/dist-types/types";
 import type { Context } from "telegraf";
 import templite from "templite";
 import { transformLabels } from "../utils/transformLabels";
+import { markdownToHTML } from "../utils/markdown";
 
 const issueSubject$ = new Subject<[Context, string]>();
 
@@ -40,7 +41,7 @@ export function issueCommentCreated(
       url: event.payload.issue.html_url,
       no: event.payload.issue.number,
       title: event.payload.issue.title,
-      body: event.payload.comment.body || "<i>Comment was empty.</i>",
+      body: markdownToHTML(event.payload.comment.body) || "<i>Comment was empty.</i>",
       author: event.payload.comment.user.login
     });
 
@@ -108,7 +109,7 @@ export function issueOpened(
         url: event.payload.issue.html_url,
         no: event.payload.issue.number,
         title: event.payload.issue.title,
-        body: event.payload.issue.body || "<i>No description provided.</i>",
+        body: markdownToHTML(event.payload.issue?.body ?? "") || "<i>No description provided.</i>",
         assignee: event.payload.issue.assignee?.login ?? "No Assignee",
         author: event.payload.issue.user.login
       }) + transformLabels(event.payload.issue.labels);
@@ -192,7 +193,7 @@ export function issueCommentEdited(
 <b>💬 An issue comment was edited in <a href="https://github.com/{{repoName}}">{{repoName}}</a></b>
 <b><a href="{{url}}">#{{no}} {{title}}</a></b>
 
-{{ body }}
+{{body}}
 
 <b>Author</b>: <a href="https://github.com/{{author}}">{{author}}</a>`;
 
@@ -203,6 +204,7 @@ export function issueCommentEdited(
         url: event.payload.issue.html_url,
         no: event.payload.issue.number,
         title: event.payload.issue.title,
+        body: markdownToHTML(event.payload.issue?.body ?? "") || "<i>No description provided.</i>",
         assignee: event.payload.issue.assignee?.login ?? "No Assignee",
         author: event.payload.issue.user.login
       }) + transformLabels(event.payload.issue.labels);
