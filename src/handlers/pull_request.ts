@@ -143,11 +143,11 @@ export function prReviewSubmitted(
 ): HandlerFunction<"pull_request_review.submitted", unknown> {
   const TITLE: Record<string, string> = {
     commented:
-      "<b>💬 new pull request review submitted in <a href=\"https://github.com/{{reponame}}\">{{reponame}}</a></b>",
+      "<b>💬 new pull request review submitted in <a href=\"https://github.com/{{repoName}}\">{{repoName}}</a></b>",
     approved:
-      "<b>✅ a pull request has been approved in <a href=\"https://github.com/{{reponame}}\">{{reponame}}</a></b>",
+      "<b>✅ a pull request has been approved in <a href=\"https://github.com/{{repoName}}\">{{repoName}}</a></b>",
     changes_requested:
-      "<b>🚫 change requested for a pull request in <a href=\"https://github.com/{{reponame}}\">{{reponame}}</a></b>"
+      "<b>🚫 change requested for a pull request in <a href=\"https://github.com/{{repoName}}\">{{repoName}}</a></b>"
   };
   const template = `
 <b><a href="{{url}}">#{{no}} {{title}}</a></b>
