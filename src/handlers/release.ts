@@ -1,26 +1,26 @@
 import type { HandlerFunction } from "@octokit/webhooks/dist-types/types";
 import type { Context } from "telegraf";
 import templite from "templite";
-import { remark } from "remark";
-import html from "remark-html";
-
-// start dulu, baru kirim event
+import { markdownToHTML } from "../utils/markdown";
 
 export function release(
   ctx: Context
 ): HandlerFunction<"release.published", unknown> {
   return async (event) => {
-    const template = `<b>🌱 New Release !!!</b>
+    const template = `<b>🌱 New Release for <a href="https://github.com/{{repoName}}>{{repoName}}</a></b>
 
-  {{body}}
+<a href="{{url}}">{{name}}</a>
 
-  <b>Tag Name:</b> {{tag_name}}`;
+{{body}}
 
-    const test = await remark().use(html).process(event.payload.release.body);
+<b>Tag Name:</b> {{tag_name}}`;
 
     const response = templite(template, {
       tag_name: event.payload.release.tag_name,
-      body: test || "<i>No description provided.</i>"
+      repoName: event.payload.repository.name,
+      name: event.payload.release.name,
+      url: event.payload.release.url,
+      body: markdownToHTML(event.payload.release.body) || "<i>No description provided.</i>"
     });
 
     await ctx.telegram.sendMessage(
