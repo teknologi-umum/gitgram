@@ -1,6 +1,7 @@
 import remarkGfm from "remark-gfm";
 import remarkHtml from "remark-html";
 import remarkParse from "remark-parse";
+import sanitize from "sanitize-html";
 import { unified } from "unified";
 
 /**
@@ -13,9 +14,24 @@ export function markdownToHTML(payload: string): string {
   // string or any other types which I don't know.
   if (!payload) return "";
 
-  return unified()
+  return sanitize(unified()
     .use(remarkParse)
     .use(remarkGfm)
-    .use(remarkHtml, { sanitize: true })
-    .processSync(payload).toString("utf-8");
+    .use(remarkHtml)
+    .processSync(payload).toString("utf-8"),
+  {
+    allowedTags: ["a",
+      "b",
+      "i",
+      "s",
+      "u",
+      "em",
+      "strong",
+      "strike",
+      "del",
+      "code",
+      "pre",
+      "br"],
+    allowedAttributes: {"a": ["href"] }
+  });
 }

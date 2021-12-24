@@ -16,6 +16,7 @@ esbuild
       "remark-html",
       "remark-parse",
       "rxjs",
+      "sanitize-html",
       "telegraf",
       "templite",
       "unified"

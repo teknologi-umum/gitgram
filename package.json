@@ -30,6 +30,7 @@
     "@teknologi-umum/eslint-config-typescript": "^0.0.5",
     "@types/eventsource": "^1.1.8",
     "@types/node": "^17.0.1",
+    "@types/sanitize-html": "^2.6.1",
     "esbuild": "^0.14.6",
     "esbuild-node-loader": "^0.6.3",
     "esbuild-register": "^3.2.1",
@@ -48,6 +49,7 @@
     "remark-html": "^15.0.1",
     "remark-parse": "^10.0.1",
     "rxjs": "^7.4.0",
+    "sanitize-html": "^2.6.1",
     "telegraf": "^4.5.2",
     "templite": "^1.2.0",
     "unified": "^10.1.1"
