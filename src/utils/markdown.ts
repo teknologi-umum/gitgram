@@ -1,7 +1,6 @@
 import remarkGfm from "remark-gfm";
 import remarkHtml from "remark-html";
 import remarkParse from "remark-parse";
-import DOMPurify from "dompurify";
 import { unified } from "unified";
 
 /**
@@ -14,30 +13,9 @@ export function markdownToHTML(payload: string): string {
   // string or any other types which I don't know.
   if (!payload) return "";
 
-  const result = unified()
+  return unified()
     .use(remarkParse)
     .use(remarkGfm)
-    .use(remarkHtml)
-    .processSync(payload);
-  return DOMPurify.sanitize(
-    result.toString("utf-8"), 
-    {
-      ALLOWED_TAGS: [
-        "a",
-        "b",
-        "i",
-        "s",
-        "u",
-        "em",
-        "strong",
-        "strike",
-        "del",
-        "code",
-        "pre",
-        "br"], 
-      ALLOWED_ATTR: ["href"],
-      RETURN_DOM: false,
-      RETURN_DOM_FRAGMENT: false
-    }
-  );
+    .use(remarkHtml, { sanitize: true })
+    .processSync(payload).toString("utf-8");
 }

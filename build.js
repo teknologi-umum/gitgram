@@ -10,7 +10,6 @@ esbuild
     external: [
       "@octokit/webhooks",
       "dotenv",
-      "dompurify",
       "eventsource",
       "kleur",
       "remark-gfm",
