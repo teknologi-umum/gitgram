@@ -51,8 +51,12 @@ export function prClosed(
         url: event.payload.pull_request.html_url,
         no: event.payload.pull_request.number,
         title: event.payload.pull_request.title,
-        body: markdownToHTML(event.payload.pull_request?.body ?? "") || "<i>No description provided.</i>",
-        author: event.payload.pull_request.user.name
+        body:
+          markdownToHTML(event.payload.pull_request?.body ?? "") ||
+          "<i>No description provided.</i>",
+        assignee: event.payload.pull_request.assignee?.login ?? "No Assignee",
+        author: event.payload.pull_request.user.login,
+        repoName: event.payload.repository.name
       }) + transformLabels(event.payload.pull_request.labels);
 
     try {
@@ -85,7 +89,9 @@ export function prOpened(
         repoName: event.payload.repository.full_name,
         no: event.payload.pull_request.number,
         title: event.payload.pull_request.title,
-        body: markdownToHTML(event.payload.pull_request?.body ?? "") || "<i>No description provided.</i>",
+        body:
+          markdownToHTML(event.payload.pull_request?.body ?? "") ||
+          "<i>No description provided.</i>",
         assignee: event.payload.pull_request.assignee?.login ?? "No Assignee",
         author: event.payload.pull_request.user.login
       }) + transformLabels(event.payload.pull_request.labels);
@@ -122,7 +128,8 @@ export function prEdited(
         no: event.payload.pull_request.number,
         title: event.payload.pull_request.title,
         body:
-          markdownToHTML(event.payload.pull_request?.body ?? "") || "<i>No description provided.</i>",
+          markdownToHTML(event.payload.pull_request?.body ?? "") ||
+          "<i>No description provided.</i>",
         assignee: event.payload.pull_request.assignee?.login ?? "No Assignee",
         author: event.payload.pull_request.user.login
       }) + transformLabels(event.payload.pull_request.labels);
@@ -136,11 +143,11 @@ export function prReviewSubmitted(
 ): HandlerFunction<"pull_request_review.submitted", unknown> {
   const TITLE: Record<string, string> = {
     commented:
-      "<b>💬 new pull request review submitted in <a href=\"https://github.com/{{reponame}}\">{{reponame}}</a></b>",
+      '<b>💬 new pull request review submitted in <a href="https://github.com/{{reponame}}">{{reponame}}</a></b>',
     approved:
-      "<b>✅ a pull request has been approved in <a href=\"https://github.com/{{reponame}}\">{{reponame}}</a></b>",
+      '<b>✅ a pull request has been approved in <a href="https://github.com/{{reponame}}">{{reponame}}</a></b>',
     changes_requested:
-      "<b>🚫 change requested for a pull request in <a href=\"https://github.com/{{reponame}}\">{{reponame}}</a></b>"
+      '<b>🚫 change requested for a pull request in <a href="https://github.com/{{reponame}}">{{reponame}}</a></b>'
   };
   const template = `
 <b><a href="{{url}}">#{{no}} {{title}}</a></b>
