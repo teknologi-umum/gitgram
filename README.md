@@ -1,19 +1,47 @@
 # Gitgram
-Github notifications for Telegram created by Teknologi Umum from Indonesia Country
+Github notifications for Telegram
+
+**BackStory of Gitgram**:
+
+Gitgram created because our team at that time was working on a big project and because our team used telegram to discuss the project, a bot on telegram called Gitgram was created to help us anywhere without having to check directly on github
+
+**Feature**:
+
+- deployment status
+- issue
+- ping 
+- pull request
+- release
+- vulnerabillity
 
 **How to use**:
 
-First you can clone this repo
+First you will need to clone this repo
 
-``` git clone https://github.com/teknologi-umum/gitgram.git ```
+``` 
+git clone https://github.com/teknologi-umum/gitgram.git 
+```
 
-then you type
+and then install all of it's dependencies
 
-``` npm i ```
+```bash
+# if you're using npm
+npm install 
+# or yarn
+yarn install
+```
 
-If it's already you can rename ```.env.example``` to ```.env```
-
-After you rename this file you, fill in the required data in ```.env```
+To make the bot work properly, you will need these environment variables.
+- `NODE_ENV`
+	Used for NodeJS to determine whether the bot is running in production or development.
+- `PORT`
+	Which port to run the bot.
+- `WEBHOOK_SECRET`
+	Your webhook secret. You should see it when you create your Github webhook.
+- `BOT_TOKEN`
+	Your telegram bot token.
+- `DEV_PROXY_URL`
+	Webhook proxy URL used for easier development process.
 
 **Example:**
 ```
@@ -24,7 +52,7 @@ BOT_TOKEN=xyzx:isyelacuapwodncnmzdcmajwo
 DEV_PROXY_URL=web.com/duffUGHIUGsdsd
 ```
 
-If you don't know how to make bot and bot token on telegram you can visit them here [Telegram Bot](https://core.telegram.org/bots)
+If you don't know how to make a Telegram bot and get its token, you can refer to [Telegram Bot Documentation](https://core.telegram.org/bots)
 
-If you don't know how to make webhook configuration you can visit them here
-[Github Webhook](https://docs.github.com/en/developers/webhooks-and-events/webhooks/about-webhooks)
+If you don't know how to make a webhook for Github, you can visit
+[Github Webhook Documentation](https://docs.github.com/en/developers/webhooks-and-events/webhooks/about-webhooks)
