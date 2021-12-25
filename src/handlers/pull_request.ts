@@ -27,14 +27,14 @@ prSubject$
 export function prClosed(
   ctx: Context
 ): HandlerFunction<"pull_request.closed", unknown> {
-  let template = `
+  return async (event) => {
+    let template = `
 {{body}}
 
 <b>Assignee</b>: {{assignee}}
 <b>PR author</b>: {{author}}
 <b>Repo</b>: <a href="https://github.com/{{repoName}}">{{repoName}}</a>`;
 
-  return async (event) => {
     if (event.payload.pull_request.merged) {
       template =
         "<b>🎉 PR <a href=\"{{url}}\">#{{no}} {{title}}</a> was merged by {{actor}}</b>\n" + template;
