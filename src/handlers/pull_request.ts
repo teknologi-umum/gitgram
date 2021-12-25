@@ -27,13 +27,13 @@ prSubject$
 export function prClosed(
   ctx: Context
 ): HandlerFunction<"pull_request.closed", unknown> {
-  let template = `
+  return async (event) => {
+    let template = `
 {{body}}
 
 <b>Assignee</b>: {{assignee}}
 <b>Author</b>: {{author}}`;
 
-  return async (event) => {
     if (event.payload.pull_request.merged) {
       template =
         `
@@ -143,11 +143,11 @@ export function prReviewSubmitted(
 ): HandlerFunction<"pull_request_review.submitted", unknown> {
   const TITLE: Record<string, string> = {
     commented:
-      "<b>💬 new pull request review submitted in <a href=\"https://github.com/{{repoName}}\">{{repoName}}</a></b>",
+      '<b>💬 new pull request review submitted in <a href="https://github.com/{{repoName}}">{{repoName}}</a></b>',
     approved:
-      "<b>✅ a pull request has been approved in <a href=\"https://github.com/{{repoName}}\">{{repoName}}</a></b>",
+      '<b>✅ a pull request has been approved in <a href="https://github.com/{{repoName}}">{{repoName}}</a></b>',
     changes_requested:
-      "<b>🚫 change requested for a pull request in <a href=\"https://github.com/{{repoName}}\">{{repoName}}</a></b>"
+      '<b>🚫 change requested for a pull request in <a href="https://github.com/{{repoName}}">{{repoName}}</a></b>'
   };
   const template = `
 <b><a href="{{url}}">#{{no}} {{title}}</a></b>
