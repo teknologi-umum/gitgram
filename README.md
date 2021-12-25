@@ -3,7 +3,7 @@ Github notifications for Telegram
 
 ## BackStory of Gitgram:
 
-Gitgram created because our team at that time was working on a big project and because our team used telegram to discuss the project, a bot on telegram called Gitgram was created to help us anywhere without having to check directly on github
+Gitgram created because our team at that time was working on a big project and we uses Telegram to discuss the project. A bot was created to receive Github webhook notifications and send them to the Telegram group to ease our communication without having to check directly on Github
 
 ## Feature:
 
@@ -22,7 +22,7 @@ First you will need to clone this repo
 git clone https://github.com/teknologi-umum/gitgram.git 
 ```
 
-and then install all of it's dependencies
+and then install all of its dependencies
 
 ```bash
 # if you're using npm
@@ -35,7 +35,7 @@ To make the bot work properly, you will need these environment variables.
 - `NODE_ENV`
 	Used for NodeJS to determine whether the bot is running in production or development.
 - `PORT`
-	Which port to run the bot.
+	Which port to run the HTTP server.
 - `WEBHOOK_SECRET`
 	Your webhook secret. You should see it when you create your Github webhook.
 - `BOT_TOKEN`
@@ -60,7 +60,7 @@ If you don't know how to make a webhook for Github, you can visit
 ## License
 
 ```
-<one line to give the program's name and a brief idea of what it does.>
+Gitgram is a bot send Github notifications to Telegram.
 Copyright (C) 2021-present  Teknologi Umum Gitgram contributors
 
 This program is free software: you can redistribute it and/or modify
