@@ -27,22 +27,25 @@ issueSubject$
 export function issueCommentCreated(
   ctx: Context
 ): HandlerFunction<"issue_comment.created", unknown> {
-  const template = `
-<b>💬 New issue comment in <a href="https://github.com/{{repoName}}">{{repoName}}</a></b>
-<b><a href="{{url}}">#{{no}} {{title}}</a></b>
+  const template = `<b>💬 New issue comment in <a href="{{url}}">#{{no}} {{title}}</a> by {{actor}}</b>
 
-{{ body }}
+{{body}}
 
-<b>Author</b>: <a href="https://github.com/{{author}}">{{author}}</a>`;
+<b>Issue author</b>: {{author}}
+<b>Repo</b>: <a href="https://github.com/{{repoName}}">{{repoName}}</a>`;
 
   return async (event) => {
+    const body = markdownToHTML(event.payload.comment.body);
     const response = templite(template, {
       repoName: event.payload.repository.full_name,
       url: event.payload.issue.html_url,
       no: event.payload.issue.number,
       title: event.payload.issue.title,
-      body: markdownToHTML(event.payload.comment.body) || "<i>Comment was empty.</i>",
-      author: event.payload.comment.user.login
+      body: 
+        (body.length > 100 ? body.slice(0, 100) + "..." : body) || 
+        "<i>Comment was empty.</i>",
+      author: event.payload.comment.user.login,
+      actor: event.payload.sender.login
     });
 
     try {
@@ -60,12 +63,11 @@ export function issueCommentCreated(
 export function issueClosed(
   ctx: Context
 ): HandlerFunction<"issues.closed", unknown> {
-  const template = `
-<b>🚫 Issue was closed in <a href="https://github.com/{{repoName}}">{{repoName}}</a></b>
-<b><a href="{{url}}">#{{no}} {{title}}</a></b>
+  const template = `<b>🚫 Issue <a href="{{url}}">#{{no}} {{title}}</a> was closed by {{actor}}</b>
 
 <b>Assignee</b>: {{assignee}}
-<b>Author</b>: <a href="https://github.com/{{author}}">{{author}}</a>`;
+<b>Issue author</b>: <a href="https://github.com/{{author}}">{{author}}</a>
+<b>Repo</b>: <a href="https://github.com/{{repoName}}">{{repoName}}</a>`;
 
   return async (event) => {
     const response =
@@ -75,7 +77,8 @@ export function issueClosed(
         no: event.payload.issue.number,
         title: event.payload.issue.title,
         assignee: event.payload.issue.assignee?.login ?? "No Assignee",
-        author: event.payload.issue.user.login
+        author: event.payload.issue.user.login,
+        actor: event.payload.sender.login
       }) + transformLabels(event.payload.issue.labels);
 
     try {
@@ -94,22 +97,24 @@ export function issueOpened(
   ctx: Context
 ): HandlerFunction<"issues.opened", unknown> {
   const template = `
-<b>🌱 New issue was opened in <a href="https://github.com/{{repoName}}">{{repoName}}</a></b>
-<b><a href="{{url}}">#{{no}} {{title}}</a></b>
+<b>🌱 New issue <a href="{{url}}">#{{no}} {{title}}</a> was opened by {{author}}</b>
 
 {{body}}
 
 <b>Assignee</b>: {{assignee}}
-<b>Author</b>: {{author}}`;
+<b>Repo</b>: <a href="https://github.com/{{repoName}}">{{repoName}}</a>`;
 
   return async (event) => {
+    const body = markdownToHTML(event.payload.issue?.body ?? "");
     const response =
       templite(template, {
         repoName: event.payload.repository.full_name,
         url: event.payload.issue.html_url,
         no: event.payload.issue.number,
         title: event.payload.issue.title,
-        body: markdownToHTML(event.payload.issue?.body ?? "") || "<i>No description provided.</i>",
+        body: 
+          (body.length > 100 ? body.slice(0, 100) + "..." : body) || 
+          "<i>No description provided.</i>",
         assignee: event.payload.issue.assignee?.login ?? "No Assignee",
         author: event.payload.issue.user.login
       }) + transformLabels(event.payload.issue.labels);
@@ -130,12 +135,11 @@ export function issueReopened(
   ctx: Context
 ): HandlerFunction<"issues.reopened", unknown> {
   const template = `
-<b>🌱 An issue was reopened in <a href="https://github.com/{{repoName}}">{{repoName}}</a></b>
-
-<b><a href="{{url}}">#{{no}} {{title}}</a></b>
+<b>🌱 Issue <a href="{{url}}">#{{no}} {{title}}</a> was reopened by {{actor}}</b>
 
 <b>Assignee</b>: {{assignee}}
-<b>Author</b>: <a href="https://github.com/{{author}}">{{author}}</a>`;
+<b>Issue author</b>: {{author}}
+<b>Repo</b>: <a href="https://github.com/{{repoName}}">{{repoName}}</a>`;
 
   return async (event) => {
     const response =
@@ -145,7 +149,8 @@ export function issueReopened(
         no: event.payload.issue.number,
         title: event.payload.issue.title,
         assignee: event.payload.issue.assignee?.login ?? "No Assignee",
-        author: event.payload.issue.user.login
+        author: event.payload.issue.user.login,
+        actor: event.payload.sender.login
       }) + transformLabels(event.payload.issue.labels);
 
     try {
@@ -164,12 +169,11 @@ export function issueEdited(
   ctx: Context
 ): HandlerFunction<"issues.edited", unknown> {
   const template = `
-<b>🌱 An issue was edited in <a href="https://github.com/{{repoName}}">{{repoName}}</a></b>
-
-<b><a href="{{url}}">#{{no}} {{title}}</a></b>
+<b>🌱 Issue <a href="{{url}}">#{{no}} {{title}}</a> was edited by {{actor}}</b>
 
 <b>Assignee</b>: {{assignee}}
-<b>Author</b>: <a href="https://github.com/{{author}}">{{author}}</a>`;
+<b>Issue author</b>: {{author}}
+<b>Repo</b>: <a href="https://github.com/{{repoName}}">{{repoName}}</a>`;
 
   return (event) => {
     const response =
@@ -179,7 +183,8 @@ export function issueEdited(
         no: event.payload.issue.number,
         title: event.payload.issue.title,
         assignee: event.payload.issue.assignee?.login ?? "No Assignee",
-        author: event.payload.issue.user.login
+        author: event.payload.issue.user.login,
+        actor: event.payload.sender.login
       }) + transformLabels(event.payload.issue.labels);
 
     issueSubject$.next([ctx, response]);
@@ -190,23 +195,27 @@ export function issueCommentEdited(
   ctx: Context
 ): HandlerFunction<"issue_comment.edited", unknown> {
   const template = `
-<b>💬 An issue comment was edited in <a href="https://github.com/{{repoName}}">{{repoName}}</a></b>
-<b><a href="{{url}}">#{{no}} {{title}}</a></b>
+<b>💬 Issue comment on <a href="{{url}}">#{{no}} {{title}}</a> was edited by {{actor}}</b>
 
 {{body}}
 
-<b>Author</b>: <a href="https://github.com/{{author}}">{{author}}</a>`;
+<b>Issue author</b>: {{author}}
+<b>Repo</b>: <a href="https://github.com/{{repoName}}">{{repoName}}</a>`;
 
   return (event) => {
+    const body = markdownToHTML(event.payload.issue?.body ?? "");
     const response =
       templite(template, {
         repoName: event.payload.repository.full_name,
         url: event.payload.issue.html_url,
         no: event.payload.issue.number,
         title: event.payload.issue.title,
-        body: markdownToHTML(event.payload.issue?.body ?? "") || "<i>No description provided.</i>",
+        body: 
+          (body.length > 100 ? body.slice(0, 100) + "..." : body) || 
+          "<i>No description provided.</i>",
         assignee: event.payload.issue.assignee?.login ?? "No Assignee",
-        author: event.payload.issue.user.login
+        author: event.payload.issue.user.login,
+        actor: event.payload.sender.login
       }) + transformLabels(event.payload.issue.labels);
 
     issueSubject$.next([ctx, response]);
