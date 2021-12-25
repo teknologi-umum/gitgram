@@ -3,7 +3,7 @@ Github notifications for Telegram
 
 ## BackStory of Gitgram:
 
-Gitgram created because our team at that time was working on a big project and we uses Telegram to discuss the project. A bot was created to receive Github webhook notifications and send them to the Telegram group to ease our communication without having to check directly on Github
+Gitgram was created because our team at that time was working on a big project and we uses Telegram to discuss the project. A bot was created to receive Github webhook notifications and send them to the Telegram group to ease our communication without having to check directly on Github.
 
 ## Feature:
 
