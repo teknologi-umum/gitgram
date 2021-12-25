@@ -27,7 +27,7 @@ issueSubject$
 export function issueCommentCreated(
   ctx: Context
 ): HandlerFunction<"issue_comment.created", unknown> {
-  const template = `<b>💬 New issue comment in <a href="{{url}}">#{{no}} {{title}}</a> by {{actor}}</b>
+  const template = `<b>💬 New {{where}} comment in <a href="{{url}}">#{{no}} {{title}}</a> by {{actor}}</b>
 
 {{body}}
 
@@ -35,17 +35,19 @@ export function issueCommentCreated(
 <b>Repo</b>: <a href="https://github.com/{{repoName}}">{{repoName}}</a>`;
 
   return async (event) => {
+    const isPR = event.payload.issue.pull_request?.url;
     const body = markdownToHTML(event.payload.comment.body);
     const response = templite(template, {
       repoName: event.payload.repository.full_name,
-      url: event.payload.issue.html_url,
+      url: event.payload.comment.html_url,
       no: event.payload.issue.number,
       title: event.payload.issue.title,
       body: 
         (body.length > 100 ? body.slice(0, 100) + "..." : body) || 
         "<i>Comment was empty.</i>",
-      author: event.payload.comment.user.login,
-      actor: event.payload.sender.login
+      author: event.payload.issue.user.login,
+      actor: event.payload.comment.user.login,
+      where: isPR ? "PR" : "issue"
     });
 
     try {

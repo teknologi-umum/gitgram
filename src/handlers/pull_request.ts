@@ -37,10 +37,10 @@ export function prClosed(
 
     if (event.payload.pull_request.merged) {
       template =
-        "<b>🎉 PR <a href=\"{{url}}\">#{{no}} {{title}}</a> was merged by {{actor}}</b>\n" + template;
+        "<b>🎉 PR <a href=\"{{url}}\">#{{no}} {{title}}</a> was merged by {{actor}}</b>" + template;
     } else {
       template =
-        "<b>🚫 PR <a href=\"{{url}}\">#{{no}} {{title}}</a> was closed with unmerged commits by {{actor}}</b>\n" + template;
+        "<b>🚫 PR <a href=\"{{url}}\">#{{no}} {{title}}</a> was closed with unmerged commits by {{actor}}</b>" + template;
     }
 
     const body = markdownToHTML(event.payload.pull_request?.body ?? "");
