@@ -32,31 +32,30 @@ export function prClosed(
 {{body}}
 
 <b>Assignee</b>: {{assignee}}
-<b>Author</b>: {{author}}`;
+<b>PR author</b>: {{author}}
+<b>Repo</b>: <a href="https://github.com/{{repoName}}">{{repoName}}</a>`;
 
     if (event.payload.pull_request.merged) {
       template =
-        `
-<b>🔮 Pull request was merged in <a href="https://github.com/{{repoName}}">{{repoName}}</a></b>
-<b><a href="{{url}}">#{{no}} {{title}}</a></b>` + template;
+        "<b>🎉 PR <a href=\"{{url}}\">#{{no}} {{title}}</a> was merged by {{actor}}</b>\n" + template;
     } else {
       template =
-        `
-<b>🔮 Pull request was closed with unmerged commits in <a href="https://github.com/{{repoName}}">{{repoName}}</a></b>
-<b><a href="{{url}}">#{{no}} {{title}}</a></b>` + template;
+        "<b>🚫 PR <a href=\"{{url}}\">#{{no}} {{title}}</a> was closed with unmerged commits by {{actor}}</b>\n" + template;
     }
 
+    const body = markdownToHTML(event.payload.pull_request?.body ?? "");
     const response =
       templite(template, {
         url: event.payload.pull_request.html_url,
         no: event.payload.pull_request.number,
         title: event.payload.pull_request.title,
         body:
-          markdownToHTML(event.payload.pull_request?.body ?? "") ||
+          (body.length > 100 ? body.slice(0, 100) + "..." : body) ||
           "<i>No description provided.</i>",
         assignee: event.payload.pull_request.assignee?.login ?? "No Assignee",
         author: event.payload.pull_request.user.login,
-        repoName: event.payload.repository.name
+        repoName: event.payload.repository.name,
+        actor: event.payload.sender.login
       }) + transformLabels(event.payload.pull_request.labels);
 
     try {
@@ -75,14 +74,15 @@ export function prOpened(
   ctx: Context
 ): HandlerFunction<"pull_request.opened", unknown> {
   const template = `
-<b>🔮 New pull request was opened in <a href="https://github.com/{{repoName}}">{{repoName}}</a></b>
-<b><a href="{{url}}">#{{no}} {{title}}</a></b>
+<b>🔮 New PR <a href="{{url}}">#{{no}} {{title}}</a> by {{author}}</b>
+<b></b>
 
 {{body}}
 
 <b>Assignee</b>: {{assignee}}
-<b>Author</b>: {{author}}`;
+<b>Repo</b>: <a href="https://github.com/{{repoName}}">{{repoName}}</a>`;
   return async (event) => {
+    const body = markdownToHTML(event.payload.pull_request?.body ?? "");
     const response =
       templite(template, {
         url: event.payload.pull_request.html_url,
@@ -90,7 +90,7 @@ export function prOpened(
         no: event.payload.pull_request.number,
         title: event.payload.pull_request.title,
         body:
-          markdownToHTML(event.payload.pull_request?.body ?? "") ||
+          (body.length > 100 ? body.slice(0, 100) + "..." : body) ||
           "<i>No description provided.</i>",
         assignee: event.payload.pull_request.assignee?.login ?? "No Assignee",
         author: event.payload.pull_request.user.login
@@ -112,15 +112,17 @@ export function prEdited(
   ctx: Context
 ): HandlerFunction<"pull_request.edited", unknown> {
   const template = `
-<b>🔮 A pull request was edited in <a href="https://github.com/{{repoName}}">{{repoName}}</a></b>
-<b><a href="{{url}}">#{{no}} {{title}}</a></b>
+<b>🔮 PR <a href="{{url}}">#{{no}} {{title}}</a> was edited by {{actor}}</b>
+<b></b>
 
 {{body}}
 
 <b>Assignee</b>: {{assignee}}
-<b>Author</b>: {{author}}`;
+<b>PR author</b>: {{author}}
+<b>Repo</b>: <a href="https://github.com/{{repoName}}">{{repoName}}</a>`;
 
   return (event) => {
+    const body = markdownToHTML(event.payload.pull_request?.body ?? "");
     const response =
       templite(template, {
         url: event.payload.pull_request.html_url,
@@ -128,10 +130,11 @@ export function prEdited(
         no: event.payload.pull_request.number,
         title: event.payload.pull_request.title,
         body:
-          markdownToHTML(event.payload.pull_request?.body ?? "") ||
+          (body.length > 100 ? body.slice(0, 100) + "..." : body) ||
           "<i>No description provided.</i>",
         assignee: event.payload.pull_request.assignee?.login ?? "No Assignee",
-        author: event.payload.pull_request.user.login
+        author: event.payload.pull_request.user.login,
+        actor: event.payload.sender.login
       }) + transformLabels(event.payload.pull_request.labels);
 
     prSubject$.next([ctx, response]);
@@ -143,22 +146,20 @@ export function prReviewSubmitted(
 ): HandlerFunction<"pull_request_review.submitted", unknown> {
   const TITLE: Record<string, string> = {
     commented:
-      '<b>💬 new pull request review submitted in <a href="https://github.com/{{repoName}}">{{repoName}}</a></b>',
+      "<b>💬 PR review submitted in <a href=\"{{url}}\">#{{no}} {{title}}</a> by {{actor}}</b>",
     approved:
-      '<b>✅ a pull request has been approved in <a href="https://github.com/{{repoName}}">{{repoName}}</a></b>',
+      "<b>✅ PR <a href=\"{{url}}\">#{{no}} {{title}}</a> has been approved by {{actor}}</b>",
     changes_requested:
-      '<b>🚫 change requested for a pull request in <a href="https://github.com/{{repoName}}">{{repoName}}</a></b>'
+      "<b>🚫 {{actor}} requested a change for PR <a href=\"{{url}}\">#{{no}} {{title}}</a></b>"
   };
   const template = `
-<b><a href="{{url}}">#{{no}} {{title}}</a></b>
 
 {{body}}
 
-<b>Author</b>: {{author}}
+<b>PR author</b>: {{author}}
 <b>See</b>: {{reviewUrl}}`;
   return async (event) => {
-    if (!event.payload.review.body) return;
-
+    const body = markdownToHTML(event.payload.review?.body ?? "");
     const response = templite(
       TITLE[event.payload.review.state.toLowerCase()] + template,
       {
@@ -166,9 +167,12 @@ export function prReviewSubmitted(
         url: event.payload.pull_request.html_url,
         no: event.payload.pull_request.number,
         title: event.payload.pull_request.title,
-        body: markdownToHTML(event.payload.review.body),
+        body: 
+          (body.length > 100 ? body.slice(0, 100) + "..." : body) ||
+          "<i>No description provided.</i>",
         author: event.payload.review.user.login,
-        reviewUrl: event.payload.review.html_url
+        reviewUrl: event.payload.review.html_url,
+        actor: event.payload.sender.login
       }
     );
 
@@ -188,24 +192,25 @@ export function prReviewEdited(
   ctx: Context
 ): HandlerFunction<"pull_request_review.edited", unknown> {
   const template = `
-<b>🔮 A pull request review was edited in <a href="https://github.com/{{repoName}}">{{repoName}}</a></b>
-<b><a href="{{url}}">#{{no}} {{title}}</a></b>
+<b>🔮 PR review on <a href="{{url}}">#{{no}} {{title}}</a> was edited by {{actor}}</b>
 
 {{body}}
 
 <b>Assignee</b>: {{assignee}}
-<b>Author</b>: {{author}}`;
+<b>PR author</b>: {{author}}
+<b>Repo</b>: <a href="https://github.com/{{repoName}}">{{repoName}}</a>`;
   return (event) => {
     if (!event.payload.review.body) return;
-
+    const body = markdownToHTML(event.payload.review.body);
     const response = templite(template, {
       repoName: event.payload.repository.full_name,
       url: event.payload.pull_request.html_url,
       no: event.payload.pull_request.number,
       title: event.payload.pull_request.title,
-      body: markdownToHTML(event.payload.review.body),
+      body: body.length > 100 ? body.slice(0, 100) + "..." : body,
       author: event.payload.review.user.login,
-      reviewUrl: event.payload.review.html_url
+      reviewUrl: event.payload.review.html_url,
+      actor: event.payload.sender.login
     });
 
     prSubject$.next([ctx, response]);
