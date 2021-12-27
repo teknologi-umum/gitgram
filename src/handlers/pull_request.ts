@@ -170,7 +170,7 @@ export function prReviewSubmitted(
         body: 
           (body.length > 100 ? body.slice(0, 100) + "..." : body) ||
           "<i>No description provided.</i>",
-        author: event.payload.review.user.login,
+        author: event.payload.pull_request.user.login,
         reviewUrl: event.payload.review.html_url,
         actor: event.payload.sender.login
       }
@@ -208,7 +208,7 @@ export function prReviewEdited(
       no: event.payload.pull_request.number,
       title: event.payload.pull_request.title,
       body: body.length > 100 ? body.slice(0, 100) + "..." : body,
-      author: event.payload.review.user.login,
+      author: event.payload.pull_request.user.login,
       reviewUrl: event.payload.review.html_url,
       actor: event.payload.sender.login
     });

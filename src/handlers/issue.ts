@@ -31,7 +31,7 @@ export function issueCommentCreated(
 
 {{body}}
 
-<b>Issue author</b>: {{author}}
+<b>{{where}} author</b>: {{author}}
 <b>Repo</b>: <a href="https://github.com/{{repoName}}">{{repoName}}</a>`;
 
   return async (event) => {
@@ -47,7 +47,7 @@ export function issueCommentCreated(
         "<i>Comment was empty.</i>",
       author: event.payload.issue.user.login,
       actor: event.payload.comment.user.login,
-      where: isPR ? "PR" : "issue"
+      where: isPR ? "PR" : "Issue"
     });
 
     try {
