@@ -54,7 +54,7 @@ export function prClosed(
           "<i>No description provided.</i>",
         assignee: event.payload.pull_request.assignee?.login ?? "No Assignee",
         author: event.payload.pull_request.user.login,
-        repoName: event.payload.repository.name,
+        repoName: event.payload.repository.full_name,
         actor: event.payload.sender.login
       }) + transformLabels(event.payload.pull_request.labels);
 

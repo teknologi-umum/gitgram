@@ -17,7 +17,7 @@ export function release(
     const body = markdownToHTML(event.payload.release.body);
     const response = templite(template, {
       tag_name: event.payload.release.tag_name,
-      repoName: event.payload.repository.name,
+      repoName: event.payload.repository.full_name,
       name: event.payload.release.name,
       url: event.payload.release.url,
       body: 
