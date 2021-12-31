@@ -42,6 +42,7 @@
   },
   "dependencies": {
     "@octokit/webhooks": "^9.20.0",
+    "cheerio": "^1.0.0-rc.10",
     "dotenv": "^10.0.0",
     "eventsource": "^1.1.0",
     "kleur": "^4.1.4",
