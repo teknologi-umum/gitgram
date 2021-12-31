@@ -42,9 +42,7 @@ export function issueCommentCreated(
       url: event.payload.comment.html_url,
       no: event.payload.issue.number,
       title: event.payload.issue.title,
-      body: 
-        (body.length > 100 ? body.slice(0, 100) + "..." : body) || 
-        "<i>Comment was empty.</i>",
+      body: body || "<i>Comment was empty.</i>",
       author: event.payload.issue.user.login,
       actor: event.payload.comment.user.login,
       where: isPR ? "PR" : "Issue"
@@ -114,9 +112,7 @@ export function issueOpened(
         url: event.payload.issue.html_url,
         no: event.payload.issue.number,
         title: event.payload.issue.title,
-        body: 
-          (body.length > 100 ? body.slice(0, 100) + "..." : body) || 
-          "<i>No description provided.</i>",
+        body: body || "<i>No description provided.</i>",
         assignee: event.payload.issue.assignee?.login ?? "No Assignee",
         author: event.payload.issue.user.login
       }) + transformLabels(event.payload.issue.labels);
@@ -212,9 +208,7 @@ export function issueCommentEdited(
         url: event.payload.issue.html_url,
         no: event.payload.issue.number,
         title: event.payload.issue.title,
-        body: 
-          (body.length > 100 ? body.slice(0, 100) + "..." : body) || 
-          "<i>No description provided.</i>",
+        body: body || "<i>No description provided.</i>",
         assignee: event.payload.issue.assignee?.login ?? "No Assignee",
         author: event.payload.issue.user.login,
         actor: event.payload.sender.login

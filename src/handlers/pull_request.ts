@@ -49,9 +49,7 @@ export function prClosed(
         url: event.payload.pull_request.html_url,
         no: event.payload.pull_request.number,
         title: event.payload.pull_request.title,
-        body:
-          (body.length > 100 ? body.slice(0, 100) + "..." : body) ||
-          "<i>No description provided.</i>",
+        body: body || "<i>No description provided.</i>",
         assignee: event.payload.pull_request.assignee?.login ?? "No Assignee",
         author: event.payload.pull_request.user.login,
         repoName: event.payload.repository.full_name,
@@ -89,9 +87,7 @@ export function prOpened(
         repoName: event.payload.repository.full_name,
         no: event.payload.pull_request.number,
         title: event.payload.pull_request.title,
-        body:
-          (body.length > 100 ? body.slice(0, 100) + "..." : body) ||
-          "<i>No description provided.</i>",
+        body: body || "<i>No description provided.</i>",
         assignee: event.payload.pull_request.assignee?.login ?? "No Assignee",
         author: event.payload.pull_request.user.login
       }) + transformLabels(event.payload.pull_request.labels);
@@ -129,9 +125,7 @@ export function prEdited(
         repoName: event.payload.repository.full_name,
         no: event.payload.pull_request.number,
         title: event.payload.pull_request.title,
-        body:
-          (body.length > 100 ? body.slice(0, 100) + "..." : body) ||
-          "<i>No description provided.</i>",
+        body: body || "<i>No description provided.</i>",
         assignee: event.payload.pull_request.assignee?.login ?? "No Assignee",
         author: event.payload.pull_request.user.login,
         actor: event.payload.sender.login
@@ -167,9 +161,7 @@ export function prReviewSubmitted(
         url: event.payload.pull_request.html_url,
         no: event.payload.pull_request.number,
         title: event.payload.pull_request.title,
-        body: 
-          (body.length > 100 ? body.slice(0, 100) + "..." : body) ||
-          "<i>No description provided.</i>",
+        body: body || "<i>No description provided.</i>",
         author: event.payload.pull_request.user.login,
         reviewUrl: event.payload.review.html_url,
         actor: event.payload.sender.login
@@ -207,7 +199,7 @@ export function prReviewEdited(
       url: event.payload.pull_request.html_url,
       no: event.payload.pull_request.number,
       title: event.payload.pull_request.title,
-      body: body.length > 100 ? body.slice(0, 100) + "..." : body,
+      body: body,
       author: event.payload.pull_request.user.login,
       reviewUrl: event.payload.review.html_url,
       actor: event.payload.sender.login

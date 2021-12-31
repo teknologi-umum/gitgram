@@ -3,6 +3,7 @@ import remarkHtml from "remark-html";
 import remarkParse from "remark-parse";
 import sanitize from "sanitize-html";
 import { unified } from "unified";
+import { trimHtml } from "./validateHtml";
 
 /**
  * Converts markdown to html with convinience!💃💃
@@ -14,24 +15,28 @@ export function markdownToHTML(payload: string): string {
   // string or any other types which I don't know.
   if (!payload) return "";
 
-  return sanitize(unified()
+  const html = unified()
     .use(remarkParse)
     .use(remarkGfm)
     .use(remarkHtml)
-    .processSync(payload).toString("utf-8"),
-  {
-    allowedTags: ["a",
-      "b",
-      "i",
-      "s",
-      "u",
-      "em",
-      "strong",
-      "strike",
-      "del",
-      "code",
-      "pre",
-      "br"],
-    allowedAttributes: {"a": ["href"] }
-  });
+    .processSync(payload).toString("utf-8");
+  const trimmedHtml = trimHtml(100, html);
+  const sanitized = sanitize(trimmedHtml,
+    {
+      allowedTags: ["a",
+        "b",
+        "i",
+        "s",
+        "u",
+        "em",
+        "strong",
+        "strike",
+        "del",
+        "code",
+        "pre",
+        "br"],
+      allowedAttributes: {"a": ["href"] }
+    });
+    
+  return sanitized;
 }

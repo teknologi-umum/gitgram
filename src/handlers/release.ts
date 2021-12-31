@@ -20,9 +20,7 @@ export function release(
       repoName: event.payload.repository.full_name,
       name: event.payload.release.name,
       url: event.payload.release.url,
-      body: 
-        (body.length > 100 ? body.slice(0, 100) + "..." : body) || 
-        "<i>No description provided.</i>",
+      body: body || "<i>No description provided.</i>",
       actor: event.payload.sender.login
     });
 

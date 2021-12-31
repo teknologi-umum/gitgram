@@ -6,7 +6,7 @@ import * as cheerio from "cheerio";
  * @param {number[]} haystack
  * @returns {number}
  */
- const closest = (needle: number, haystack: number[]): number => {
+const closest = (needle: number, haystack: number[]): number => {
   return haystack.length < 1
     ? haystack.at(-1)! // we like bliding ej, Array.prototype.at is only available from 16.6.0
     : haystack.reduce((curr, acc) => {
