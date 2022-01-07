@@ -1,3 +1,10 @@
+<kbd>
+
+![logo.png](./logo.png)
+
+</kbd>
+
+
 # Gitgram
 
 Github notifications for Telegram
@@ -13,7 +20,7 @@ It sends every notification to the group within these events:
 - deployment status
 - issue
 - issue comment
-- ping 
+- ping
 - pull request
 - pull request reviews
 - release
@@ -27,7 +34,7 @@ A preferably simple and straightforward way to deploy the bot
 without any hassle on configuring your machine and such.
 
 ```sh
-git clone https://github.com/teknologi-umum/gitgram.git 
+git clone https://github.com/teknologi-umum/gitgram.git
 cd gitgram
 docker build -t gitgram:latest .
 docker run -d -p 3000:3000 --name gitgram gitgram:latest
@@ -39,15 +46,15 @@ Don't forget to supply your own environment variables.
 
 First you will need to clone this repo
 
-``` 
-git clone https://github.com/teknologi-umum/gitgram.git 
+```
+git clone https://github.com/teknologi-umum/gitgram.git
 ```
 
 and then install all of its dependencies
 
 ```bash
 # if you're using npm
-npm install 
+npm install
 # or yarn
 yarn install
 ```
@@ -70,7 +77,7 @@ Example:
 NODE_ENV=development
 PORT=3000
 WEBHOOK_SECRET=123456789
-BOT_TOKEN=xyzx:isyelacuapwodncnmzdcmajwo 
+BOT_TOKEN=xyzx:isyelacuapwodncnmzdcmajwo
 DEV_PROXY_URL=web.com/duffUGHIUGsdsd
 ```
 
