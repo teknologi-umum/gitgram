@@ -73,7 +73,6 @@ export function prOpened(
 ): HandlerFunction<"pull_request.opened", unknown> {
   const template = `
 <b>🔮 New PR <a href="{{url}}">#{{no}} {{title}}</a> by {{author}}</b>
-<b></b>
 
 {{body}}
 
