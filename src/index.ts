@@ -24,6 +24,11 @@ import kleur from "kleur";
 import EventSource from "eventsource";
 import { ping } from "./handlers/ping";
 
+const applicationState = {
+  isStarted: false,
+  startedDate: new Date()
+};
+
 const webhook = new Webhooks({
   secret: process.env.WEBHOOK_SECRET ?? ""
 });
@@ -39,7 +44,19 @@ bot.catch(async (e, ctx) => {
 
 bot.start(async (ctx) => {
   console.log(kleur.green("Telegram bot /start triggered"));
+  
+  if (applicationState.isStarted) {
+    await ctx.reply(
+      `This bot is already running since ${applicationState.startedDate.toLocaleDateString()} To restart it, please stop it first.`
+    );
+    return;
+  }
+
   await ctx.telegram.sendMessage(ctx.chat.id, "I'm alive!");
+
+  // Register application state
+  applicationState.isStarted = true;
+  applicationState.startedDate = new Date();
 
   // Development purposes
   // See: https://github.com/octokit/webhooks.js#local-development
