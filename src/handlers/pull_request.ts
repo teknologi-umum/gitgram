@@ -158,7 +158,7 @@ export function prReviewSubmitted(
       return;
     }
 
-    const body = markdownToHTML(event.payload.review?.body ?? "");
+    const body = markdownToHTML(event.payload.review.body);
     const response = templite(
       TITLE[event.payload.review.state.toLowerCase()] + template,
       {
@@ -166,7 +166,7 @@ export function prReviewSubmitted(
         url: event.payload.pull_request.html_url,
         no: event.payload.pull_request.number,
         title: event.payload.pull_request.title,
-        body: body || "<i>No description provided.</i>",
+        body: body,
         author: event.payload.pull_request.user.login,
         reviewUrl: event.payload.review.html_url,
         actor: event.payload.sender.login
