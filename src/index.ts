@@ -14,6 +14,7 @@ import {
   prClosed,
   prEdited,
   prOpened,
+  prReviewCommentCreated,
   prReviewEdited,
   prReviewSubmitted
 } from "./handlers/pull_request";
@@ -132,6 +133,7 @@ bot.start(async (ctx) => {
    */
   webhook.on("pull_request_review.submitted", prReviewSubmitted(ctx));
   webhook.on("pull_request_review.edited", prReviewEdited(ctx));
+  webhook.on("pull_request_review_comment.created", prReviewCommentCreated(ctx));
 
   /**
    * a release, pre-release, or draft of a release is published
