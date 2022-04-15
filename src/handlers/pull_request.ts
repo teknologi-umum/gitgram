@@ -219,7 +219,7 @@ export function prReviewCommentCreated(
   ctx: Context
 ): HandlerFunction<"pull_request_review_comment.created", unknown> {
   const template = `
-<b>🔮 PR review comment on <a href="{{url}}">#{{no}} {{title}}</a> was created by {{actor}}</b>
+<b>💬 PR review comment on <a href="{{url}}">#{{no}} {{title}}</a> was created by {{actor}}</b>
 
 {{body}}
 
