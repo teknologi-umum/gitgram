@@ -50,7 +50,7 @@ export function prClosed(
         no: event.payload.pull_request.number,
         title: event.payload.pull_request.title,
         body: body || "<i>No description provided.</i>",
-        assignee: event.payload.pull_request.assignee?.login ?? "No Assignee",
+        assignee: event.payload.pull_request.assignee?.login || "No Assignee",
         author: event.payload.pull_request.user.login,
         repoName: event.payload.repository.full_name,
         actor: event.payload.sender.login
@@ -87,7 +87,7 @@ export function prOpened(
         no: event.payload.pull_request.number,
         title: event.payload.pull_request.title,
         body: body || "<i>No description provided.</i>",
-        assignee: event.payload.pull_request.assignee?.login ?? "No Assignee",
+        assignee: event.payload.pull_request.assignee?.login || "No Assignee",
         author: event.payload.pull_request.user.login
       }) + transformLabels(event.payload.pull_request.labels);
 
@@ -125,7 +125,7 @@ export function prEdited(
         no: event.payload.pull_request.number,
         title: event.payload.pull_request.title,
         body: body || "<i>No description provided.</i>",
-        assignee: event.payload.pull_request.assignee?.login ?? "No Assignee",
+        assignee: event.payload.pull_request.assignee?.login || "No Assignee",
         author: event.payload.pull_request.user.login,
         actor: event.payload.sender.login
       }) + transformLabels(event.payload.pull_request.labels);
@@ -152,7 +152,13 @@ export function prReviewSubmitted(
 <b>PR author</b>: {{author}}
 <b>See</b>: {{reviewUrl}}`;
   return async (event) => {
-    const body = markdownToHTML(event.payload.review?.body ?? "");
+    if (event.payload.review.body === null) {
+      // don't do anything because Github sends this event with `null` body whenever
+      // someone commented on a review.
+      return;
+    }
+
+    const body = markdownToHTML(event.payload.review.body);
     const response = templite(
       TITLE[event.payload.review.state.toLowerCase()] + template,
       {
@@ -160,7 +166,7 @@ export function prReviewSubmitted(
         url: event.payload.pull_request.html_url,
         no: event.payload.pull_request.number,
         title: event.payload.pull_request.title,
-        body: body || "<i>No description provided.</i>",
+        body: body,
         author: event.payload.pull_request.user.login,
         reviewUrl: event.payload.review.html_url,
         actor: event.payload.sender.login
@@ -205,5 +211,44 @@ export function prReviewEdited(
     });
 
     prSubject$.next([ctx, response]);
+  };
+}
+
+
+export function prReviewCommentCreated(
+  ctx: Context
+): HandlerFunction<"pull_request_review_comment.created", unknown> {
+  const template = `
+<b>💬 PR review comment on <a href="{{url}}">#{{no}} {{title}}</a> was created by {{actor}}</b>
+
+{{body}}
+
+<b>PR author</b>: {{author}}
+<b>See</b>: {{reviewUrl}}`;
+  return async (event) => {
+    const body = markdownToHTML(event.payload.comment.body);
+    const response = templite(
+      template,
+      {
+        repoName: event.payload.repository.full_name,
+        url: event.payload.pull_request.html_url,
+        no: event.payload.pull_request.number,
+        title: event.payload.pull_request.title,
+        body: body || "<i>No description provided.</i>",
+        author: event.payload.pull_request.user.login,
+        reviewUrl: event.payload.comment.url,
+        actor: event.payload.sender.login
+      }
+    );
+
+    try {
+      await ctx.telegram.sendMessage(
+        ctx.chat?.id ?? String(process.env.HOME_ID ?? ""),
+        response,
+        { parse_mode: "HTML", disable_web_page_preview: true }
+      );
+    } catch (e) {
+      console.error(e);
+    }
   };
 }
