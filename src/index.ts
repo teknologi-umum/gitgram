@@ -1,6 +1,10 @@
 import type { IncomingMessage, ServerResponse } from "http";
 import { createServer } from "http";
+import console from "console";
 import { Webhooks, createNodeMiddleware } from "@octokit/webhooks";
+import { Telegraf } from "telegraf";
+import kleur from "kleur";
+import EventSource from "eventsource";
 import { deploymentStatus } from "./handlers/deployment";
 import {
   issueClosed,
@@ -20,15 +24,10 @@ import {
 } from "./handlers/pull_request";
 import { release } from "./handlers/release";
 import { vulnerabilityAlert } from "./handlers/vulnerability";
-import { Telegraf } from "telegraf";
-import kleur from "kleur";
-import EventSource from "eventsource";
 import { ping } from "./handlers/ping";
+import { GroupMapping } from "./groupMapping";
 
-const applicationState = {
-  isStarted: false,
-  startedDate: new Date()
-};
+const groupMapping = new GroupMapping();
 
 const webhook = new Webhooks({
   secret: process.env.WEBHOOK_SECRET ?? ""
@@ -44,20 +43,25 @@ bot.catch(async (e, ctx) => {
 });
 
 bot.start(async (ctx) => {
-  console.log(kleur.green("Telegram bot /start triggered"));
-  
-  if (applicationState.isStarted) {
-    await ctx.reply(
-      `This bot is already running since ${applicationState.startedDate.toLocaleDateString()} To restart it, please stop it first.`
-    );
+  if (ctx.chat.type === "private") {
     return;
   }
 
-  await ctx.telegram.sendMessage(ctx.chat.id, "I'm alive!");
+  console.log(kleur.green("Telegram bot /start triggered"));
+  const repositoryUrl = ctx.message.text.slice(7);
+  if (repositoryUrl === "") {
+    await ctx.reply("Please provide a repository URL. Example: /start https://github.com/teknologi-umum/bot");
+  }
 
-  // Register application state
-  applicationState.isStarted = true;
-  applicationState.startedDate = new Date();
+  const started = groupMapping.has(repositoryUrl, ctx.chat.id);
+
+  if (started) {
+    await ctx.reply("The bot has already subscribed to the repository. To unsubcribe, use /stop <repository url>");
+    return;
+  }
+
+  groupMapping.add(repositoryUrl, ctx.chat.id);
+  await ctx.telegram.sendMessage(ctx.chat.id, "I'm alive!");
 
   // Development purposes
   // See: https://github.com/octokit/webhooks.js#local-development
