@@ -45,7 +45,7 @@ bot.catch(async (e, ctx) => {
 
 bot.start(async (ctx) => {
   console.log(kleur.green("Telegram bot /start triggered"));
-  
+
   if (applicationState.isStarted) {
     await ctx.reply(
       `This bot is already running since ${applicationState.startedDate.toLocaleDateString()} To restart it, please stop it first.`
@@ -155,7 +155,7 @@ bot.start(async (ctx) => {
 const webhookMiddleware = createNodeMiddleware(webhook, {
   path: "/",
   onUnhandledRequest: (req: IncomingMessage, res: ServerResponse) => {
-    res.writeHead(404, "Not found");
+    res.writeHead(404).end("Not found");
   },
   log: {
     debug: (data) => console.log(`${kleur.bold().blue("Debug:")} ${data}`),
