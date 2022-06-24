@@ -2,7 +2,7 @@ import type { IncomingMessage, ServerResponse } from "http";
 import { createServer } from "http";
 import console from "console";
 import { Webhooks, createNodeMiddleware } from "@octokit/webhooks";
-import { Telegraf } from "telegraf";
+import { Bot, GrammyError, HttpError } from "grammy";
 import kleur from "kleur";
 import EventSource from "eventsource";
 import { deploymentStatus } from "./handlers/deployment";
@@ -38,16 +38,22 @@ const webhook = new Webhooks({
   secret: process.env.WEBHOOK_SECRET ?? ""
 });
 
-const bot = new Telegraf(process.env.BOT_TOKEN ?? "");
-bot.catch(async (e, ctx) => {
-  await ctx.telegram.sendMessage(
-    ctx.chat?.id ?? String(process.env.HOME_GROUP ?? ""),
-    `An error was thrown: ${e}`
-  );
-  console.error(e);
+const bot = new Bot(process.env.BOT_TOKEN ?? "");
+bot.catch(async ({ ctx, error }) => {
+  const chatId = ctx.chat?.id ?? String(process.env.HOME_GROUP ?? "");
+  if (error instanceof GrammyError) {
+    await ctx.api.sendMessage(chatId, `Error in request. Reason: ${error}`);
+  } else if (error instanceof HttpError) {
+    await ctx.api.sendMessage(
+      chatId,
+      `Couldn't contact telegram. Reason: ${error}`
+    );
+  } else if (error instanceof Error) {
+    await ctx.api.sendMessage(chatId, `Application error. Reason: ${error}`);
+  }
 });
 
-bot.start(async (ctx) => {
+bot.command("start", async (ctx) => {
   console.log(kleur.green("Telegram bot /start triggered"));
 
   if (applicationState.isStarted) {
@@ -58,7 +64,7 @@ bot.start(async (ctx) => {
   }
 
   console.log(kleur.green("Telegram bot /start triggered"));
-  const repositoryUrl = ctx.message.text.slice(7);
+  const repositoryUrl = ctx.msg.text.slice(7);
   if (repositoryUrl === "") {
     await ctx.reply(
       "Please provide a repository URL. Example: /start https://github.com/teknologi-umum/bot"
@@ -75,7 +81,7 @@ bot.start(async (ctx) => {
   }
 
   groupMapping.add(repositoryUrl, ctx.chat.id);
-  await ctx.telegram.sendMessage(ctx.chat.id, "I'm alive!");
+  await ctx.api.sendMessage(ctx.chat.id, "I'm alive!");
 
   // Development purposes
   // See: https://github.com/octokit/webhooks.js#local-development
@@ -194,14 +200,14 @@ app.listen(process.env.PORT ?? 3000, () =>
     )
   )
 );
-bot.launch();
+bot.start();
 
 // Enable graceful stop
 process.once("SIGINT", () => {
-  bot.stop("SIGINT");
+  bot.stop();
   app.close();
 });
 process.once("SIGTERM", () => {
-  bot.stop("SIGTERM");
+  bot.stop();
   app.close();
 });

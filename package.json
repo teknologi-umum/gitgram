@@ -45,6 +45,7 @@
     "cheerio": "^1.0.0-rc.11",
     "dotenv": "^16.0.1",
     "eventsource": "^2.0.2",
+    "grammy": "^1.9.0",
     "kleur": "^4.1.4",
     "polka": "^1.0.0-next.22",
     "remark-gfm": "^3.0.1",
@@ -52,7 +53,6 @@
     "remark-parse": "^10.0.1",
     "rxjs": "^7.5.5",
     "sanitize-html": "^2.7.0",
-    "telegraf": "^4.8.5",
     "templite": "^1.2.0",
     "unified": "^10.1.2"
   },
