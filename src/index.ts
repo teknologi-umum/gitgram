@@ -26,6 +26,7 @@ import { release } from "./handlers/release";
 import { vulnerabilityAlert } from "./handlers/vulnerability";
 import { ping } from "./handlers/ping";
 import { GroupMapping } from "./groupMapping";
+import { BOT_TOKEN, DEV, DEV_PROXY_URL, HOME_GROUP, WEBHOOK_SECRET } from "../env";
 
 const groupMapping = new GroupMapping();
 
@@ -35,12 +36,12 @@ const applicationState = {
 };
 
 const webhook = new Webhooks({
-  secret: process.env.WEBHOOK_SECRET ?? ""
+  secret: WEBHOOK_SECRET
 });
 
-const bot = new Bot(process.env.BOT_TOKEN ?? "");
+const bot = new Bot(BOT_TOKEN);
 bot.catch(async ({ ctx, error }) => {
-  const chatId = ctx.chat?.id ?? String(process.env.HOME_GROUP ?? "");
+  const chatId = ctx.chat?.id ?? String(HOME_GROUP);
   if (error instanceof GrammyError) {
     await ctx.api.sendMessage(chatId, `Error in request. Reason: ${error}`);
   } else if (error instanceof HttpError) {
@@ -85,9 +86,9 @@ bot.command("start", async (ctx) => {
 
   // Development purposes
   // See: https://github.com/octokit/webhooks.js#local-development
-  if (process.env.NODE_ENV === "development") {
+  if (DEV) {
     console.log(kleur.inverse("Running on development EventSource with proxy"));
-    const source = new EventSource(process.env.DEV_PROXY_URL ?? "");
+    const source = new EventSource(DEV_PROXY_URL);
     source.onmessage = (event) => {
       const webhookEvent = JSON.parse(event.data);
       webhook
