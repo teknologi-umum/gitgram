@@ -1,9 +1,12 @@
 type GroupMap = {
-  repositoryUrl: string,
-  groupId: number,
-  activeSince: Date
-}
+  repositoryUrl: string;
+  groupId: number;
+  activeSince: Date;
+};
 
+/**
+ * A group mapping for multiple repositories and groups support
+ */
 export class GroupMapping {
   groupMapping: GroupMap[];
 
@@ -11,11 +14,21 @@ export class GroupMapping {
     this.groupMapping = [];
   }
 
+  private groupExists(groupId: number, repositoryUrl: string) {
+    return (
+      this.groupMapping.findIndex(
+        (item) =>
+          item.groupId === groupId && item.repositoryUrl === repositoryUrl
+      ) > 0
+    );
+  }
+
   add(repositoryUrl: string, groupId: number) {
     // Check if it's registered before
-    const index = this.groupMapping.findIndex(item => item.groupId === groupId && item.repositoryUrl === repositoryUrl);
-    if (index > 0) {
-      throw new Error(`Group ${groupId} is already registered for ${repositoryUrl}`);
+    if (this.groupExists(groupId, repositoryUrl)) {
+      throw new Error(
+        `Group ${groupId} is already registered for ${repositoryUrl}`
+      );
     }
 
     this.groupMapping.push({
@@ -26,18 +39,19 @@ export class GroupMapping {
   }
 
   remove(repositoryUrl: string, groupId: number) {
-    const index = this.groupMapping.findIndex(item => item.groupId === groupId && item.repositoryUrl === repositoryUrl);
-    if (index < 0) {
-      throw new Error(`Group ${groupId} is not registered for ${repositoryUrl}`);
+    if (!this.groupExists(groupId, repositoryUrl)) {
+      throw new Error(
+        `Group ${groupId} is not registered for ${repositoryUrl}`
+      );
     }
 
-    const temporaryMapping = this.groupMapping.filter(item => item.groupId !== groupId && item.repositoryUrl !== repositoryUrl);
-    this.groupMapping.length = 0;
-    this.groupMapping.push(...temporaryMapping);
+    const removedIndex = this.groupMapping.findIndex(
+      (item) => item.groupId === groupId && item.repositoryUrl === repositoryUrl
+    );
+    this.groupMapping.splice(removedIndex, 1);
   }
 
   has(repositoryUrl: string, groupId: number): boolean {
-    const index = this.groupMapping.findIndex(item => item.groupId === groupId && item.repositoryUrl === repositoryUrl);
-    return index > 0;
+    return this.groupExists(groupId, repositoryUrl);
   }
 }
