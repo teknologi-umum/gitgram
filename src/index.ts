@@ -29,6 +29,11 @@ import { GroupMapping } from "./groupMapping";
 
 const groupMapping = new GroupMapping();
 
+const applicationState = {
+  isStarted: false,
+  startedDate: new Date()
+};
+
 const webhook = new Webhooks({
   secret: process.env.WEBHOOK_SECRET ?? ""
 });
@@ -43,29 +48,29 @@ bot.catch(async (e, ctx) => {
 });
 
 bot.start(async (ctx) => {
-<<<<<<< HEAD
-  if (ctx.chat.type === "private") {
-=======
   console.log(kleur.green("Telegram bot /start triggered"));
 
   if (applicationState.isStarted) {
     await ctx.reply(
       `This bot is already running since ${applicationState.startedDate.toLocaleDateString()} To restart it, please stop it first.`
     );
->>>>>>> origin
     return;
   }
 
   console.log(kleur.green("Telegram bot /start triggered"));
   const repositoryUrl = ctx.message.text.slice(7);
   if (repositoryUrl === "") {
-    await ctx.reply("Please provide a repository URL. Example: /start https://github.com/teknologi-umum/bot");
+    await ctx.reply(
+      "Please provide a repository URL. Example: /start https://github.com/teknologi-umum/bot"
+    );
   }
 
   const started = groupMapping.has(repositoryUrl, ctx.chat.id);
 
   if (started) {
-    await ctx.reply("The bot has already subscribed to the repository. To unsubcribe, use /stop <repository url>");
+    await ctx.reply(
+      "The bot has already subscribed to the repository. To unsubcribe, use /stop <repository url>"
+    );
     return;
   }
 
@@ -146,7 +151,10 @@ bot.start(async (ctx) => {
    */
   webhook.on("pull_request_review.submitted", prReviewSubmitted(ctx));
   webhook.on("pull_request_review.edited", prReviewEdited(ctx));
-  webhook.on("pull_request_review_comment.created", prReviewCommentCreated(ctx));
+  webhook.on(
+    "pull_request_review_comment.created",
+    prReviewCommentCreated(ctx)
+  );
 
   /**
    * a release, pre-release, or draft of a release is published
