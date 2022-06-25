@@ -1,4 +1,4 @@
-import type { ILogger } from "application/ILogger";
+import type { ILogger } from "../application/interfaces/ILogger";
 import * as c from "colorette";
 
 export class ConsoleLogger implements ILogger {

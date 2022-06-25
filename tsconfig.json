@@ -9,7 +9,7 @@
     "module": "esnext",
     "rootDir": "./",
     "moduleResolution": "node",
-    "baseUrl": "./src/",
+    "baseUrl": ".",
     // "paths": {},
     "allowJs": false,
 

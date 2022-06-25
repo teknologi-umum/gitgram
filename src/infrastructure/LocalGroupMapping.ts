@@ -1,3 +1,5 @@
+import type { IGroupMapping } from "../application/interfaces/IGroupMapping";
+
 type GroupMap = {
   repositoryUrl: string;
   groupId: number;
@@ -5,9 +7,10 @@ type GroupMap = {
 };
 
 /**
- * A group mapping for multiple repositories and groups support
+ * A group mapping for multiple repositories and groups support. This version stores
+ * the group mapping using an array in memory.
  */
-export class GroupMapping {
+export class LocalGroupMapping implements IGroupMapping {
   groupMapping: GroupMap[];
 
   constructor() {
