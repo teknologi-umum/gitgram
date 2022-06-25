@@ -27,13 +27,19 @@ const bot = new Bot(BOT_TOKEN);
 const logger = new ConsoleLogger();
 const groupMapping = new LocalGroupMapping();
 
-const app = new App(bot, webhook, logger, groupMapping, {
-  deployment: new DeploymentEventHandler(config.templates.deployment),
-  issues: new IssuesEventHandler(config.templates.issues),
-  review: new ReviewEventHandler(config.templates.review),
-  pr: new PullRequestEventHandler(config.templates.pr),
-  alert: new VulnerabilityEventHandler(config.templates.vulnerability),
-  release: new ReleaseEventHandler(config.templates.release)
+const app = new App({
+  bot,
+  webhook,
+  logger,
+  groupMapping,
+  eventHandlers: {
+    deployment: new DeploymentEventHandler(config.templates.deployment),
+    issues: new IssuesEventHandler(config.templates.issues),
+    review: new ReviewEventHandler(config.templates.review),
+    pr: new PullRequestEventHandler(config.templates.pr),
+    alert: new VulnerabilityEventHandler(config.templates.vulnerability),
+    release: new ReleaseEventHandler(config.templates.release)
+  }
 });
 
 const webhookMiddleware = createNodeMiddleware(webhook, {

@@ -1,4 +1,4 @@
-import type { Webhooks } from "@octokit/webhooks";
+import { Webhooks } from "@octokit/webhooks";
 import { Bot, Context, GrammyError, HttpError } from "grammy";
 import { DEV, DEV_PROXY_URL, HOME_GROUP } from "../../env";
 import type {
@@ -25,14 +25,41 @@ export class App {
   private _hasStarted = false;
   private _startedDate = new Date();
   private readonly _supportedProviders = ["github"];
+  private readonly _bot: Bot;
+  private readonly _webhook: Webhooks;
+  private readonly _logger: ILogger;
+  private readonly _groupMapping: IGroupMapping;
+  private readonly _eventHandlerMapping: EventHandlerMapping;
 
-  constructor(
-    private readonly _bot: Bot,
-    private readonly _webhook: Webhooks,
-    private readonly _logger: ILogger,
-    private readonly _groupMapping: IGroupMapping,
-    private readonly _eventHandlerMapping: EventHandlerMapping
-  ) {}
+  constructor(config: {
+    bot: Bot;
+    webhook: Webhooks;
+    logger: ILogger;
+    groupMapping: IGroupMapping;
+    eventHandlers: EventHandlerMapping;
+  }) {
+    if (!(config.bot instanceof Bot)) throw new Error("config.bot is not an instance of grammy bot.");
+    if (!(config.webhook instanceof Webhooks)) throw new Error("config.webhook is not an instance of octokit webhook.");
+    if (config.logger === undefined || config.logger === null || typeof config.logger !== "object") {
+      throw new Error("config.logger should be an instance implementing ILogger.");
+    }
+    if (config.groupMapping === undefined || config.groupMapping === null || typeof config.groupMapping !== "object") {
+      throw new Error("config.groupMapping should be an instance implementing IGroupMapping.");
+    }
+    if (
+      config.eventHandlers === undefined ||
+      config.eventHandlers === null ||
+      typeof config.eventHandlers !== "object"
+    ) {
+      throw new Error("config.eventHandlers should be provided to handle webhook events.");
+    }
+
+    this._bot = config.bot;
+    this._webhook = config.webhook;
+    this._logger = config.logger;
+    this._groupMapping = config.groupMapping;
+    this._eventHandlerMapping = config.eventHandlers;
+  }
 
   private addGroupAdditionCommand() {
     this._bot.command("add", async (ctx) => {
