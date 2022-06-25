@@ -7,10 +7,22 @@ import { markdownToHTML } from "src/utils/markdown";
 import { transformLabels } from "src/utils/transformLabels";
 import templite from "templite";
 
+export type PullRequestTemplate = {
+  closed: {
+    base: string;
+    type: {
+      merged: string;
+      closed: string;
+    };
+  };
+  opened: string;
+  edited: string;
+};
+
 export class PullRequestEventHandler implements IPullRequestEvent {
   private readonly _prSubject$ = new Subject<[Context, string]>();
 
-  constructor() {
+  constructor(private readonly _templates: PullRequestTemplate) {
     this._prSubject$
       .pipe(
         throttleTime(60 * 1000, asyncScheduler, {
@@ -30,19 +42,12 @@ export class PullRequestEventHandler implements IPullRequestEvent {
 
   closed(ctx: Context): HandlerFunction<"pull_request.closed", unknown> {
     return async (event) => {
-      let template = `
-  {{body}}
-  
-  <b>Assignee</b>: {{assignee}}
-  <b>PR author</b>: {{author}}
-  <b>Repo</b>: <a href="https://github.com/{{repoName}}">{{repoName}}</a>`;
+      let template = this._templates.closed.base;
 
       if (event.payload.pull_request.merged) {
-        template = '<b>🎉 PR <a href="{{url}}">#{{no}} {{title}}</a> was merged by {{actor}}</b>' + template;
+        template = this._templates.closed.type.merged + this._templates.closed.base;
       } else {
-        template =
-          '<b>🚫 PR <a href="{{url}}">#{{no}} {{title}}</a> was closed with unmerged commits by {{actor}}</b>' +
-          template;
+        template = this._templates.closed.type.closed + this._templates.closed.base;
       }
 
       const body = markdownToHTML(event.payload.pull_request?.body ?? "");
@@ -68,15 +73,9 @@ export class PullRequestEventHandler implements IPullRequestEvent {
       }
     };
   }
-  
+
   opened(ctx: Context): HandlerFunction<"pull_request.opened", unknown> {
-    const template = `
-    <b>🔮 New PR <a href="{{url}}">#{{no}} {{title}}</a> by {{author}}</b>
-    
-    {{body}}
-    
-    <b>Assignee</b>: {{assignee}}
-    <b>Repo</b>: <a href="https://github.com/{{repoName}}">{{repoName}}</a>`;
+    const template = this._templates.opened;
     return async (event) => {
       const body = markdownToHTML(event.payload.pull_request?.body ?? "");
       const response =
@@ -102,20 +101,10 @@ export class PullRequestEventHandler implements IPullRequestEvent {
   }
 
   edited(ctx: Context): HandlerFunction<"pull_request.edited", unknown> {
-    const template = `
-<b>🔮 PR <a href="{{url}}">#{{no}} {{title}}</a> was edited by {{actor}}</b>
-<b></b>
-
-{{body}}
-
-<b>Assignee</b>: {{assignee}}
-<b>PR author</b>: {{author}}
-<b>Repo</b>: <a href="https://github.com/{{repoName}}">{{repoName}}</a>`;
-
     return (event) => {
       const body = markdownToHTML(event.payload.pull_request?.body ?? "");
       const response =
-        templite(template, {
+        templite(this._templates.edited, {
           url: event.payload.pull_request.html_url,
           repoName: event.payload.repository.full_name,
           no: event.payload.pull_request.number,

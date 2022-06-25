@@ -6,10 +6,19 @@ import type { IReviewEvent } from "src/application/interfaces/events";
 import { markdownToHTML } from "src/utils/markdown";
 import templite from "templite";
 
+export type ReviewTemplate = {
+  submitted: {
+    base: string;
+    type: Record<string, string>;
+  };
+  edited: string;
+  created: string;
+};
+
 export class ReviewEventHandler implements IReviewEvent {
   private readonly _prSubject$ = new Subject<[Context, string]>();
 
-  constructor() {
+  constructor(private readonly _templates: ReviewTemplate) {
     this._prSubject$
       .pipe(
         throttleTime(60 * 1000, asyncScheduler, {
@@ -28,17 +37,6 @@ export class ReviewEventHandler implements IReviewEvent {
   }
 
   submitted(ctx: Context): HandlerFunction<"pull_request_review.submitted", unknown> {
-    const TITLE: Record<string, string> = {
-      commented: '<b>💬 PR review submitted in <a href="{{url}}">#{{no}} {{title}}</a> by {{actor}}</b>',
-      approved: '<b>✅ PR <a href="{{url}}">#{{no}} {{title}}</a> has been approved by {{actor}}</b>',
-      changes_requested: '<b>🚫 {{actor}} requested a change for PR <a href="{{url}}">#{{no}} {{title}}</a></b>'
-    };
-    const template = `
-  
-  {{body}}
-  
-  <b>PR author</b>: {{author}}
-  <b>See</b>: {{reviewUrl}}`;
     return async (event) => {
       if (event.payload.review.body === null) {
         // don't do anything because Github sends this event with `null` body whenever
@@ -47,16 +45,19 @@ export class ReviewEventHandler implements IReviewEvent {
       }
 
       const body = markdownToHTML(event.payload.review.body);
-      const response = templite(TITLE[event.payload.review.state.toLowerCase()] + template, {
-        repoName: event.payload.repository.full_name,
-        url: event.payload.pull_request.html_url,
-        no: event.payload.pull_request.number,
-        title: event.payload.pull_request.title,
-        body: body,
-        author: event.payload.pull_request.user.login,
-        reviewUrl: event.payload.review.html_url,
-        actor: event.payload.sender.login
-      });
+      const response = templite(
+        this._templates.submitted.type[event.payload.review.state.toLowerCase()] + this._templates.submitted.base,
+        {
+          repoName: event.payload.repository.full_name,
+          url: event.payload.pull_request.html_url,
+          no: event.payload.pull_request.number,
+          title: event.payload.pull_request.title,
+          body: body,
+          author: event.payload.pull_request.user.login,
+          reviewUrl: event.payload.review.html_url,
+          actor: event.payload.sender.login
+        }
+      );
 
       try {
         await ctx.api.sendMessage(ctx.chat?.id ?? HOME_GROUP, response, {

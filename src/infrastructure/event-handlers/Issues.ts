@@ -7,9 +7,19 @@ import { markdownToHTML } from "src/utils/markdown";
 import { transformLabels } from "src/utils/transformLabels";
 import templite from "templite";
 
+export type IssueTemplate = {
+  closed: string;
+  opened: string;
+  reopened: string;
+  edited: string;
+  commentCreated: string;
+  commentEdited: string;
+};
+
 export class IssuesEventHandler implements IIssueEvent {
   private readonly _issueSubject$ = new Subject<[Context, string]>();
-  constructor() {
+
+  constructor(private readonly _templates: IssueTemplate) {
     this._issueSubject$
       .pipe(
         throttleTime(60 * 1000, asyncScheduler, {
@@ -28,15 +38,9 @@ export class IssuesEventHandler implements IIssueEvent {
   }
 
   closed(ctx: Context): HandlerFunction<"issues.closed", unknown> {
-    const template = `<b>🚫 Issue <a href="{{url}}">#{{no}} {{title}}</a> was closed by {{actor}}</b>
-
-<b>Assignee</b>: {{assignee}}
-<b>Issue author</b>: <a href="https://github.com/{{author}}">{{author}}</a>
-<b>Repo</b>: <a href="https://github.com/{{repoName}}">{{repoName}}</a>`;
-
     return async (event) => {
       const response =
-        templite(template, {
+        templite(this._templates.closed, {
           repoName: event.payload.repository.full_name,
           url: event.payload.issue.html_url,
           no: event.payload.issue.number,
@@ -58,18 +62,10 @@ export class IssuesEventHandler implements IIssueEvent {
   }
 
   opened(ctx: Context): HandlerFunction<"issues.opened", unknown> {
-    const template = `
-<b>🌱 New issue <a href="{{url}}">#{{no}} {{title}}</a> was opened by {{author}}</b>
-
-{{body}}
-
-<b>Assignee</b>: {{assignee}}
-<b>Repo</b>: <a href="https://github.com/{{repoName}}">{{repoName}}</a>`;
-
     return async (event) => {
       const body = markdownToHTML(event.payload.issue?.body ?? "");
       const response =
-        templite(template, {
+        templite(this._templates.opened, {
           repoName: event.payload.repository.full_name,
           url: event.payload.issue.html_url,
           no: event.payload.issue.number,
@@ -91,16 +87,9 @@ export class IssuesEventHandler implements IIssueEvent {
   }
 
   reopened(ctx: Context): HandlerFunction<"issues.reopened", unknown> {
-    const template = `
-<b>🌱 Issue <a href="{{url}}">#{{no}} {{title}}</a> was reopened by {{actor}}</b>
-
-<b>Assignee</b>: {{assignee}}
-<b>Issue author</b>: {{author}}
-<b>Repo</b>: <a href="https://github.com/{{repoName}}">{{repoName}}</a>`;
-
     return async (event) => {
       const response =
-        templite(template, {
+        templite(this._templates.reopened, {
           repoName: event.payload.repository.full_name,
           url: event.payload.issue.html_url,
           no: event.payload.issue.number,
@@ -122,16 +111,9 @@ export class IssuesEventHandler implements IIssueEvent {
   }
 
   edited(ctx: Context): HandlerFunction<"issues.edited", unknown> {
-    const template = `
-    <b>🌱 Issue <a href="{{url}}">#{{no}} {{title}}</a> was edited by {{actor}}</b>
-    
-    <b>Assignee</b>: {{assignee}}
-    <b>Issue author</b>: {{author}}
-    <b>Repo</b>: <a href="https://github.com/{{repoName}}">{{repoName}}</a>`;
-
     return (event) => {
       const response =
-        templite(template, {
+        templite(this._templates.edited, {
           repoName: event.payload.repository.full_name,
           url: event.payload.issue.html_url,
           no: event.payload.issue.number,
@@ -146,17 +128,10 @@ export class IssuesEventHandler implements IIssueEvent {
   }
 
   commentCreated(ctx: Context): HandlerFunction<"issue_comment.created", unknown> {
-    const template = `<b>💬 New {{where}} comment in <a href="{{url}}">#{{no}} {{title}}</a> by {{actor}}</b>
-
-    {{body}}
-    
-    <b>{{where}} author</b>: {{author}}
-    <b>Repo</b>: <a href="https://github.com/{{repoName}}">{{repoName}}</a>`;
-
     return async (event) => {
       const isPR = event.payload.issue.pull_request?.url;
       const body = markdownToHTML(event.payload.comment.body);
-      const response = templite(template, {
+      const response = templite(this._templates.commentCreated, {
         repoName: event.payload.repository.full_name,
         url: event.payload.comment.html_url,
         no: event.payload.issue.number,
@@ -179,18 +154,10 @@ export class IssuesEventHandler implements IIssueEvent {
   }
 
   commentEdited(ctx: Context): HandlerFunction<"issue_comment.edited", unknown> {
-    const template = `
-    <b>💬 Issue comment on <a href="{{url}}">#{{no}} {{title}}</a> was edited by {{actor}}</b>
-    
-    {{body}}
-    
-    <b>Issue author</b>: {{author}}
-    <b>Repo</b>: <a href="https://github.com/{{repoName}}">{{repoName}}</a>`;
-
     return (event) => {
       const body = markdownToHTML(event.payload.issue?.body ?? "");
       const response =
-        templite(template, {
+        templite(this._templates.commentEdited, {
           repoName: event.payload.repository.full_name,
           url: event.payload.issue.html_url,
           no: event.payload.issue.number,

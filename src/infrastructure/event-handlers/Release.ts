@@ -5,18 +5,17 @@ import type { IReleaseEvent } from "src/application/interfaces/events";
 import { markdownToHTML } from "src/utils/markdown";
 import templite from "templite";
 
+export type ReleaseTemplate = {
+  published: string;
+};
+
 export class ReleaseEventHandler implements IReleaseEvent {
+  constructor(private readonly _templates: ReleaseTemplate) {}
+
   published(ctx: Context): HandlerFunction<"release.published", unknown> {
     return async (event) => {
-      const template = `<b>🌱 New Release <a href="{{url}}">{{name}}</a> by {{actor}}</b>
-  
-  {{body}}
-  
-  <b>Tag</b>: {{tag_name}}
-  <b>Repo</b>: <a href="https://github.com/{{repoName}}>{{repoName}}</a>`;
-
       const body = markdownToHTML(event.payload.release.body);
-      const response = templite(template, {
+      const response = templite(this._templates.published, {
         tag_name: event.payload.release.tag_name,
         repoName: event.payload.repository.full_name,
         name: event.payload.release.name,

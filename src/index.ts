@@ -10,10 +10,17 @@ import {
   DeploymentEventHandler,
   IssuesEventHandler,
   PullRequestEventHandler,
+  ReleaseEventHandler,
   ReviewEventHandler,
   VulnerabilityEventHandler
 } from "./infrastructure/event-handlers";
-import { ReleaseEventHandler } from "./infrastructure/event-handlers/Release";
+import { parse as parseGura } from "gura";
+import { readFile } from "fs/promises";
+import path from "path";
+import type { AppConfig } from "./types";
+
+const configFile = await readFile(path.resolve(__dirname, "config.gura"), { encoding: "utf-8" });
+const config = parseGura(configFile) as AppConfig;
 
 const webhook = new Webhooks({ secret: WEBHOOK_SECRET });
 const bot = new Bot(BOT_TOKEN);
@@ -21,12 +28,12 @@ const logger = new ConsoleLogger();
 const groupMapping = new LocalGroupMapping();
 
 const app = new App(bot, webhook, logger, groupMapping, {
-  deployment: new DeploymentEventHandler(),
-  issues: new IssuesEventHandler(),
-  review: new ReviewEventHandler(),
-  pr: new PullRequestEventHandler(),
-  alert: new VulnerabilityEventHandler(),
-  release: new ReleaseEventHandler()
+  deployment: new DeploymentEventHandler(config.templates.deployment),
+  issues: new IssuesEventHandler(config.templates.issues),
+  review: new ReviewEventHandler(config.templates.review),
+  pr: new PullRequestEventHandler(config.templates.pr),
+  alert: new VulnerabilityEventHandler(config.templates.vulnerability),
+  release: new ReleaseEventHandler(config.templates.release)
 });
 
 const webhookMiddleware = createNodeMiddleware(webhook, {
