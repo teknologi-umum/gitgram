@@ -7,7 +7,7 @@ declare global {
       WEBHOOK_SECRET: string;
       BOT_TOKEN: string;
       DEV_PROXY_URL: string;
-      PORT: number;
+      PORT: string;
     }
   }
 }
