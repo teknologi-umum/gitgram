@@ -1,3 +1,4 @@
+import { z } from "zod";
 import type { IIssueEvent } from "~/application/interfaces/events";
 import { markdownToHTML } from "~/utils/markdown";
 import { transformLabels } from "~/utils/transformLabels";
@@ -5,14 +6,16 @@ import type { HandlerFunction } from "~/application/webhook/types";
 import type { IHub } from "~/application/interfaces/IHub";
 import { interpolate } from "~/utils/interpolate";
 
-export type IssueTemplate = {
-  closed: string;
-  opened: string;
-  reopened: string;
-  edited: string;
-  commentCreated: string;
-  commentEdited: string;
-};
+export const issueTemplateSchema = z.object({
+  closed: z.string(),
+  opened: z.string(),
+  reopened: z.string(),
+  edited: z.string(),
+  commentCreated: z.string(),
+  commentEdited: z.string()
+});
+
+export type IssueTemplate = z.infer<typeof issueTemplateSchema>;
 
 export class IssuesEventHandler implements IIssueEvent {
   // eslint-disable-next-line no-useless-constructor

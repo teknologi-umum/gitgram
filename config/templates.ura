@@ -18,6 +18,7 @@ templates:
                 error: """
                 <b>💥 Error deploying <a href="https://github.com/{{repoName}}">{{repoName}}</a> ({{environment}})</b>
                 """
+                
     issues:
         closed: """
         <b>🚫 Issue <a href="{{url}}">#{{no}} {{title}}</a> was closed by {{actor}}</b>
@@ -64,6 +65,7 @@ templates:
         <b>Issue author</b>: {{author}}
         <b>Repo</b>: <a href="https://github.com/{{repoName}}">{{repoName}}</a>
         """
+
     pr:
         closed:
             base: """
@@ -98,23 +100,9 @@ templates:
         <b>PR author</b>: {{author}}
         <b>Repo</b>: <a href="https://github.com/{{repoName}}">{{repoName}}</a>
         """
-    release:
-        published: """
-        <b>🌱 New Release <a href="{{url}}">{{name}}</a> by {{actor}}</b>
-        
-        {{body}}
 
-        <b>Tag</b>: {{tag_name}}
-        <b>Repo</b>: <a href="https://github.com/{{repoName}}>{{repoName}}</a>
-        """
+    review:
         submitted:
-            base: """
-
-            {{body}}
-
-            <b>PR author</b>: {{author}}
-            <b>See</b>: {{reviewUrl}}
-            """
             type:
                 commented: """
                 <b>💬 PR review submitted in <a href="{{url}}">#{{no}} {{title}}</a> by {{actor}}</b>
@@ -125,17 +113,51 @@ templates:
                 changes_requested: """
                 <b>🚫 {{actor}} requested a change for PR <a href="{{url}}">#{{no}} {{title}}</a></b>
                 """
-    created:
-        base: """
-        <b>🚨 New vulnerability alert in <a href="https://github.com/{{repoName}}">{{repoName}}</a></b>
-        
-        <b>Severity</b>: {{severity}}
-        <b>Affected Package</b>: {{affectedPackage}}
-        <b>Affected Range</b>: {{affectedRange}}
-        <b>Fixed In</b>: {{fixedIn}}
-        <b>External Reference</b>: <a href="{{externalUrl}}">{{externalRef}}</a>
+            base: """
+
+            {{body}}
+
+            <b>PR author</b>: {{author}}
+            <b>See</b>: {{reviewUrl}}
+            """
+        edited: """
+        <b>🔮 PR review on <a href="{{url}}">#{{no}} {{title}}</a> was edited by {{actor}}</b>
+
+        {{body}}
+
+        <b>Assignee</b>: {{assignee}}
+        <b>PR author</b>: {{author}}
+        <b>Repo</b>: <a href="https://github.com/{{repoName}}">{{repoName}}</a>
         """
-        severity:
-            moderate: "⚠️ Moderate"
-            high: "‼️ High"
-            critical: "⛔ Critical"
+        created: """
+        <b>💬 PR review comment on <a href="{{url}}">#{{no}} {{title}}</a> was created by {{actor}}</b>
+        {{body}}
+        <b>PR author</b>: {{author}}
+        <b>See</b>: {{reviewUrl}}
+        """
+
+    release:
+        published: """
+        <b>🌱 New Release <a href="{{url}}">{{name}}</a> by {{actor}}</b>
+        
+        {{body}}
+
+        <b>Tag</b>: {{tag_name}}
+        <b>Repo</b>: <a href="https://github.com/{{repoName}}>{{repoName}}</a>
+        """
+
+    vulnerability:
+        created:
+            base: """
+            <b>🚨 New vulnerability alert in <a href="https://github.com/{{repoName}}">{{repoName}}</a></b>
+            
+            <b>Severity</b>: {{severity}}
+            <b>Affected Package</b>: {{affectedPackage}}
+            <b>Affected Range</b>: {{affectedRange}}
+            <b>Fixed In</b>: {{fixedIn}}
+            <b>External Reference</b>: <a href="{{externalUrl}}">{{externalRef}}</a>
+            """
+            severity:
+                moderate: "⚠️ Moderate"
+                high: "‼️ High"
+                critical: "⛔ Critical"

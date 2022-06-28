@@ -1,3 +1,4 @@
+import { z } from "zod";
 import type { IPullRequestEvent } from "~/application/interfaces/events";
 import { markdownToHTML } from "~/utils/markdown";
 import { transformLabels } from "~/utils/transformLabels";
@@ -5,17 +6,19 @@ import type { HandlerFunction } from "~/application/webhook/types";
 import type { IHub } from "~/application/interfaces/IHub";
 import { interpolate } from "~/utils/interpolate";
 
-export type PullRequestTemplate = {
-  closed: {
-    base: string;
-    type: {
-      merged: string;
-      closed: string;
-    };
-  };
-  opened: string;
-  edited: string;
-};
+export const pullRequestTemplateSchema = z.object({
+  closed: z.object({
+    base: z.string().trim(),
+    type: z.object({
+      merged: z.string().trim(),
+      closed: z.string().trim()
+    })
+  }),
+  opened: z.string().trim(),
+  edited: z.string().trim()
+});
+
+export type PullRequestTemplate = z.infer<typeof pullRequestTemplateSchema>;
 
 export class PullRequestEventHandler implements IPullRequestEvent {
   // eslint-disable-next-line no-useless-constructor

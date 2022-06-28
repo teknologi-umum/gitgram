@@ -1,12 +1,15 @@
+import { z } from "zod";
 import type { IReleaseEvent } from "~/application/interfaces/events";
 import { markdownToHTML } from "~/utils/markdown";
 import type { HandlerFunction } from "~/application/webhook/types";
 import type { IHub } from "~/application/interfaces/IHub";
 import { interpolate } from "~/utils/interpolate";
 
-export type ReleaseTemplate = {
-  published: string;
-};
+export const releaseTemplateSchema = z.object({
+  published: z.string().trim()
+});
+
+export type ReleaseTemplate = z.infer<typeof releaseTemplateSchema>;
 
 export class ReleaseEventHandler implements IReleaseEvent {
   // eslint-disable-next-line no-useless-constructor

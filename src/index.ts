@@ -3,6 +3,7 @@ import path from "path";
 import { Bot } from "grammy";
 import { parse as parseGura } from "gura";
 import polka from "polka";
+import { appConfigSchema } from "~/schema";
 import { BOT_TOKEN, GITHUB_WEBHOOK_SECRET, PORT } from "~/env";
 import { InMemoryGroupMapping } from "~/infrastructure/InMemoryGroupMapping";
 import { ConsoleLogger } from "~/infrastructure/ConsoleLogger";
@@ -15,14 +16,13 @@ import {
   ReviewEventHandler,
   VulnerabilityEventHandler
 } from "~/infrastructure/event-handlers";
-import type { AppConfig } from "~/types";
 import { GithubServer } from "~/infrastructure/server/GithubServer";
 import { GithubWebhook } from "~/application/webhook/github";
 import { TelegramHub } from "~/infrastructure/TelegramHub";
 
 // configurations
 const configFile = await readFile(path.resolve("config", "config.ura"), { encoding: "utf-8" });
-const config = parseGura(configFile) as AppConfig;
+const config = appConfigSchema.parse(parseGura(configFile));
 
 // app dependencies
 const bot = new Bot(BOT_TOKEN);

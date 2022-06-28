@@ -1,17 +1,20 @@
+import { z } from "zod";
 import type { IReviewEvent } from "~/application/interfaces/events";
 import { markdownToHTML } from "~/utils/markdown";
 import type { HandlerFunction } from "~/application/webhook/types";
 import type { IHub } from "~/application/interfaces/IHub";
 import { interpolate } from "~/utils/interpolate";
 
-export type ReviewTemplate = {
-  submitted: {
-    base: string;
-    type: Record<string, string>;
-  };
-  edited: string;
-  created: string;
-};
+export const reviewTemplateSchema = z.object({
+  submitted: z.object({
+    base: z.string().trim(),
+    type: z.record(z.string())
+  }),
+  edited: z.string().trim(),
+  created: z.string().trim()
+});
+
+export type ReviewTemplate = z.infer<typeof reviewTemplateSchema>;
 
 export class ReviewEventHandler implements IReviewEvent {
   // eslint-disable-next-line no-useless-constructor
@@ -48,18 +51,10 @@ export class ReviewEventHandler implements IReviewEvent {
   }
 
   edited(): HandlerFunction<"pull_request_review.edited"> {
-    const template = `
-    <b>🔮 PR review on <a href="{{url}}">#{{no}} {{title}}</a> was edited by {{actor}}</b>
-    
-    {{body}}
-    
-    <b>Assignee</b>: {{assignee}}
-    <b>PR author</b>: {{author}}
-    <b>Repo</b>: <a href="https://github.com/{{repoName}}">{{repoName}}</a>`;
     return (event) => {
       if (!event.payload.review.body) return;
       const body = markdownToHTML(event.payload.review.body);
-      const response = interpolate(template, {
+      const response = interpolate(this._templates.edited, {
         repoName: event.payload.repository.full_name,
         url: event.payload.pull_request.html_url,
         no: event.payload.pull_request.number,
@@ -78,16 +73,9 @@ export class ReviewEventHandler implements IReviewEvent {
   }
 
   created(): HandlerFunction<"pull_request_review_comment.created"> {
-    const template = `
-    <b>💬 PR review comment on <a href="{{url}}">#{{no}} {{title}}</a> was created by {{actor}}</b>
-    
-    {{body}}
-    
-    <b>PR author</b>: {{author}}
-    <b>See</b>: {{reviewUrl}}`;
     return (event) => {
       const body = markdownToHTML(event.payload.comment.body);
-      const response = interpolate(template, {
+      const response = interpolate(this._templates.created, {
         repoName: event.payload.repository.full_name,
         url: event.payload.pull_request.html_url,
         no: event.payload.pull_request.number,

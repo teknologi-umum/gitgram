@@ -1,14 +1,17 @@
+import { z } from "zod";
 import type { IDeploymentEvent } from "~/application/interfaces/events/IDeploymentEvent";
 import type { IHub } from "~/application/interfaces/IHub";
 import type { HandlerFunction } from "~/application/webhook/types";
 import { interpolate } from "~/utils/interpolate";
 
-export type DeploymentTemplate = {
-  status: {
-    base: string;
-    statuses: Record<string, string>;
-  };
-};
+export const deploymentTemplateSchema = z.object({
+  status: z.object({
+    base: z.string(),
+    statuses: z.record(z.string())
+  })
+});
+
+export type DeploymentTemplate = z.infer<typeof deploymentTemplateSchema>;
 
 export class DeploymentEventHandler implements IDeploymentEvent {
   // eslint-disable-next-line no-useless-constructor
