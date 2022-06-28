@@ -5,7 +5,7 @@
  */
 export function transformLabels(labels: { name: string }[] | undefined): string {
   if (labels && labels.length > 0) {
-    return "\n<b>Tags</b>: " + labels.map((l) => l.name).join(", ");
+    return "<b>Tags</b>: " + labels.map((l) => l.name).join(", ");
   }
   return "";
 }

@@ -1,9 +1,9 @@
-import templite from "templite";
 import type { IIssueEvent } from "~/application/interfaces/events";
 import { markdownToHTML } from "~/utils/markdown";
 import { transformLabels } from "~/utils/transformLabels";
 import type { HandlerFunction } from "~/application/webhook/types";
 import type { IHub } from "~/application/interfaces/IHub";
+import { interpolate } from "~/utils/interpolate";
 
 export type IssueTemplate = {
   closed: string;
@@ -21,7 +21,7 @@ export class IssuesEventHandler implements IIssueEvent {
   closed(): HandlerFunction<"issue.closed"> {
     return (event) => {
       const response =
-        templite(this._templates.closed, {
+        interpolate(this._templates.closed, {
           repoName: event.payload.repository.full_name,
           url: event.payload.issue.html_url,
           no: event.payload.issue.number,
@@ -42,7 +42,7 @@ export class IssuesEventHandler implements IIssueEvent {
     return (event) => {
       const body = markdownToHTML(event.payload.issue?.body ?? "");
       const response =
-        templite(this._templates.opened, {
+        interpolate(this._templates.opened, {
           repoName: event.payload.repository.full_name,
           url: event.payload.issue.html_url,
           no: event.payload.issue.number,
@@ -62,7 +62,7 @@ export class IssuesEventHandler implements IIssueEvent {
   reopened(): HandlerFunction<"issue.reopened"> {
     return (event) => {
       const response =
-        templite(this._templates.reopened, {
+        interpolate(this._templates.reopened, {
           repoName: event.payload.repository.full_name,
           url: event.payload.issue.html_url,
           no: event.payload.issue.number,
@@ -82,7 +82,7 @@ export class IssuesEventHandler implements IIssueEvent {
   edited(): HandlerFunction<"issue.edited"> {
     return (event) => {
       const response =
-        templite(this._templates.edited, {
+        interpolate(this._templates.edited, {
           repoName: event.payload.repository.full_name,
           url: event.payload.issue.html_url,
           no: event.payload.issue.number,
@@ -103,7 +103,7 @@ export class IssuesEventHandler implements IIssueEvent {
     return (event) => {
       const isPR = event.payload.issue.pull_request?.url;
       const body = markdownToHTML(event.payload.comment.body);
-      const response = templite(this._templates.commentCreated, {
+      const response = interpolate(this._templates.commentCreated, {
         repoName: event.payload.repository.full_name,
         url: event.payload.comment.html_url,
         no: event.payload.issue.number,
@@ -125,7 +125,7 @@ export class IssuesEventHandler implements IIssueEvent {
     return (event) => {
       const body = markdownToHTML(event.payload.issue?.body ?? "");
       const response =
-        templite(this._templates.commentEdited, {
+        interpolate(this._templates.commentEdited, {
           repoName: event.payload.repository.full_name,
           url: event.payload.issue.html_url,
           no: event.payload.issue.number,

@@ -1,8 +1,8 @@
-import templite from "templite";
 import type { IReviewEvent } from "~/application/interfaces/events";
 import { markdownToHTML } from "~/utils/markdown";
 import type { HandlerFunction } from "~/application/webhook/types";
 import type { IHub } from "~/application/interfaces/IHub";
+import { interpolate } from "~/utils/interpolate";
 
 export type ReviewTemplate = {
   submitted: {
@@ -26,7 +26,7 @@ export class ReviewEventHandler implements IReviewEvent {
       }
 
       const body = markdownToHTML(event.payload.review.body);
-      const response = templite(
+      const response = interpolate(
         this._templates.submitted.type[event.payload.review.state.toLowerCase()] + this._templates.submitted.base,
         {
           repoName: event.payload.repository.full_name,
@@ -59,7 +59,7 @@ export class ReviewEventHandler implements IReviewEvent {
     return (event) => {
       if (!event.payload.review.body) return;
       const body = markdownToHTML(event.payload.review.body);
-      const response = templite(template, {
+      const response = interpolate(template, {
         repoName: event.payload.repository.full_name,
         url: event.payload.pull_request.html_url,
         no: event.payload.pull_request.number,
@@ -87,7 +87,7 @@ export class ReviewEventHandler implements IReviewEvent {
     <b>See</b>: {{reviewUrl}}`;
     return (event) => {
       const body = markdownToHTML(event.payload.comment.body);
-      const response = templite(template, {
+      const response = interpolate(template, {
         repoName: event.payload.repository.full_name,
         url: event.payload.pull_request.html_url,
         no: event.payload.pull_request.number,

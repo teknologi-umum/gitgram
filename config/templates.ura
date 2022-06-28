@@ -1,94 +1,94 @@
 templates:
     deployment:
         status:
-            base: '''
+            base: """
             <b>Target URL</b>: {{targetUrl}}
             <b>Description</b>: {{description}}
-            '''
+            """
             statuses:
-                pending: '''
+                pending: """
                 <b>🚄 Pending deployment for <a href="https://github.com/{{repoName}}">{{repoName}}</a> ({{environment}})</b>
-                '''
-                success: '''
+                """
+                success: """
                 <b>🚀 <a href="https://github.com/{{repoName}}">{{repoName}}</a> ({{environment}}) successfully deployed</a></b>
-                '''
-                failure: '''
+                """
+                failure: """
                 <b>🚧 Failed deploying <a href="https://github.com/{{repoName}}">{{repoName}}</a> ({{environment}})</b>
-                '''
-                error: '''
+                """
+                error: """
                 <b>💥 Error deploying <a href="https://github.com/{{repoName}}">{{repoName}}</a> ({{environment}})</b>
-                '''
+                """
     issues:
-        closed: '''
+        closed: """
         <b>🚫 Issue <a href="{{url}}">#{{no}} {{title}}</a> was closed by {{actor}}</b>
 
         <b>Assignee</b>: {{assignee}}
         <b>Issue author</b>: <a href="https://github.com/{{author}}">{{author}}</a>
         <b>Repo</b>: <a href="https://github.com/{{repoName}}">{{repoName}}</a>
-        '''
-        opened: '''
+        """
+        opened: """
         <b>🌱 New issue <a href="{{url}}">#{{no}} {{title}}</a> was opened by {{author}}</b>
 
         {{body}}
 
         <b>Assignee</b>: {{assignee}}
         <b>Repo</b>: <a href="https://github.com/{{repoName}}">{{repoName}}</a>
-        '''
-        reopened: '''
+        """
+        reopened: """
         <b>🌱 Issue <a href="{{url}}">#{{no}} {{title}}</a> was reopened by {{actor}}</b>
 
         <b>Assignee</b>: {{assignee}}
         <b>Issue author</b>: {{author}}
         <b>Repo</b>: <a href="https://github.com/{{repoName}}">{{repoName}}</a>
-        '''
-        edited: '''
+        """
+        edited: """
         <b>🌱 Issue <a href="{{url}}">#{{no}} {{title}}</a> was edited by {{actor}}</b>
 
         <b>Assignee</b>: {{assignee}}
         <b>Issue author</b>: {{author}}
         <b>Repo</b>: <a href="https://github.com/{{repoName}}">{{repoName}}</a>
-        '''
-        commentCreated: '''
+        """
+        commentCreated: """
         <b>💬 New {{where}} comment in <a href="{{url}}">#{{no}} {{title}}</a> by {{actor}}</b>
 
         {{body}}
 
         <b>{{where}} author</b>: {{author}}
         <b>Repo</b>: <a href="https://github.com/{{repoName}}">{{repoName}}</a>
-        '''
-        commentEdited: '''
+        """
+        commentEdited: """
         <b>💬 Issue comment on <a href="{{url}}">#{{no}} {{title}}</a> was edited by {{actor}}</b>
 
         {{body}}
 
         <b>Issue author</b>: {{author}}
         <b>Repo</b>: <a href="https://github.com/{{repoName}}">{{repoName}}</a>
-        '''
+        """
     pr:
         closed:
-            base: '''
+            base: """
             {{body}}
 
             <b>Assignee</b>: {{assignee}}
             <b>PR author</b>: {{author}}
             <b>Repo</b>: <a href="https://github.com/{{repoName}}">{{repoName}}</a>
-            '''
+            """
             type:
-                merged: '''
+                merged: """
                 <b>🎉 PR <a href="{{url}}">#{{no}} {{title}}</a> was merged by {{actor}}</b>
-                '''
-                closed: '''
+                """
+                closed: """
                 <b>🚫 PR <a href="{{url}}">#{{no}} {{title}}</a> was closed with unmerged commits by {{actor}}</b>
-                '''
-        opened: '''
+                """
+        opened: """
         <b>🔮 New PR <a href="{{url}}">#{{no}} {{title}}</a> by {{author}}</b>
 
         {{body}}
 
         <b>Assignee</b>: {{assignee}}
         <b>Repo</b>: <a href="https://github.com/{{repoName}}">{{repoName}}</a>
-        '''
-        edited: '''
+        """
+        edited: """
         <b>🔮 PR <a href="{{url}}">#{{no}} {{title}}</a> was edited by {{actor}}</b>
         <b></b>
 
@@ -97,36 +97,36 @@ templates:
         <b>Assignee</b>: {{assignee}}
         <b>PR author</b>: {{author}}
         <b>Repo</b>: <a href="https://github.com/{{repoName}}">{{repoName}}</a>
-        '''
+        """
     release:
-        published: '''
+        published: """
         <b>🌱 New Release <a href="{{url}}">{{name}}</a> by {{actor}}</b>
         
         {{body}}
 
         <b>Tag</b>: {{tag_name}}
         <b>Repo</b>: <a href="https://github.com/{{repoName}}>{{repoName}}</a>
-        '''
+        """
         submitted:
-            base: '''
+            base: """
 
             {{body}}
 
             <b>PR author</b>: {{author}}
             <b>See</b>: {{reviewUrl}}
-            '''
+            """
             type:
-                commented: '''
+                commented: """
                 <b>💬 PR review submitted in <a href="{{url}}">#{{no}} {{title}}</a> by {{actor}}</b>
-                '''
-                approved: '''
+                """
+                approved: """
                 <b>✅ PR <a href="{{url}}">#{{no}} {{title}}</a> has been approved by {{actor}}</b>
-                '''
-                changes_requested: '''
+                """
+                changes_requested: """
                 <b>🚫 {{actor}} requested a change for PR <a href="{{url}}">#{{no}} {{title}}</a></b>
-                '''
+                """
     created:
-        base: '''
+        base: """
         <b>🚨 New vulnerability alert in <a href="https://github.com/{{repoName}}">{{repoName}}</a></b>
         
         <b>Severity</b>: {{severity}}
@@ -134,7 +134,7 @@ templates:
         <b>Affected Range</b>: {{affectedRange}}
         <b>Fixed In</b>: {{fixedIn}}
         <b>External Reference</b>: <a href="{{externalUrl}}">{{externalRef}}</a>
-        '''
+        """
         severity:
             moderate: "⚠️ Moderate"
             high: "‼️ High"

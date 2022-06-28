@@ -1,7 +1,7 @@
-import templite from "templite";
 import type { IDeploymentEvent } from "~/application/interfaces/events/IDeploymentEvent";
 import type { IHub } from "~/application/interfaces/IHub";
 import type { HandlerFunction } from "~/application/webhook/types";
+import { interpolate } from "~/utils/interpolate";
 
 export type DeploymentTemplate = {
   status: {
@@ -17,7 +17,7 @@ export class DeploymentEventHandler implements IDeploymentEvent {
   status(): HandlerFunction<"deployment_status"> {
     return (event) => {
       const description = event.payload.deployment_status.description;
-      const response = templite(
+      const response = interpolate(
         this._templates.status.statuses[event.payload.deployment_status.state.toLowerCase()] +
           this._templates.status.base,
         {

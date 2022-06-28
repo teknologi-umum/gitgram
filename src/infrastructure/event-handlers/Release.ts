@@ -1,8 +1,8 @@
-import templite from "templite";
 import type { IReleaseEvent } from "~/application/interfaces/events";
 import { markdownToHTML } from "~/utils/markdown";
 import type { HandlerFunction } from "~/application/webhook/types";
 import type { IHub } from "~/application/interfaces/IHub";
+import { interpolate } from "~/utils/interpolate";
 
 export type ReleaseTemplate = {
   published: string;
@@ -15,7 +15,7 @@ export class ReleaseEventHandler implements IReleaseEvent {
   published(): HandlerFunction<"release.published"> {
     return (event) => {
       const body = markdownToHTML(event.payload.release.body);
-      const response = templite(this._templates.published, {
+      const response = interpolate(this._templates.published, {
         tag_name: event.payload.release.tag_name,
         repoName: event.payload.repository.full_name,
         name: event.payload.release.name,

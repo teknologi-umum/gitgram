@@ -21,7 +21,7 @@ import { GithubWebhook } from "~/application/webhook/github";
 import { TelegramHub } from "~/infrastructure/TelegramHub";
 
 // configurations
-const configFile = await readFile(path.resolve("config.gura"), { encoding: "utf-8" });
+const configFile = await readFile(path.resolve("config", "config.ura"), { encoding: "utf-8" });
 const config = parseGura(configFile) as AppConfig;
 
 // app dependencies

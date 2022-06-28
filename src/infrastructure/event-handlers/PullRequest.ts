@@ -1,9 +1,9 @@
-import templite from "templite";
 import type { IPullRequestEvent } from "~/application/interfaces/events";
 import { markdownToHTML } from "~/utils/markdown";
 import { transformLabels } from "~/utils/transformLabels";
 import type { HandlerFunction } from "~/application/webhook/types";
 import type { IHub } from "~/application/interfaces/IHub";
+import { interpolate } from "~/utils/interpolate";
 
 export type PullRequestTemplate = {
   closed: {
@@ -33,7 +33,7 @@ export class PullRequestEventHandler implements IPullRequestEvent {
 
       const body = markdownToHTML(event.payload.pull_request?.body ?? "");
       const response =
-        templite(template, {
+        interpolate(template, {
           url: event.payload.pull_request.html_url,
           no: event.payload.pull_request.number,
           title: event.payload.pull_request.title,
@@ -56,7 +56,7 @@ export class PullRequestEventHandler implements IPullRequestEvent {
     return (event) => {
       const body = markdownToHTML(event.payload.pull_request?.body ?? "");
       const response =
-        templite(template, {
+        interpolate(template, {
           url: event.payload.pull_request.html_url,
           repoName: event.payload.repository.full_name,
           no: event.payload.pull_request.number,
@@ -77,7 +77,7 @@ export class PullRequestEventHandler implements IPullRequestEvent {
     return (event) => {
       const body = markdownToHTML(event.payload.pull_request?.body ?? "");
       const response =
-        templite(this._templates.edited, {
+        interpolate(this._templates.edited, {
           url: event.payload.pull_request.html_url,
           repoName: event.payload.repository.full_name,
           no: event.payload.pull_request.number,
