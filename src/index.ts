@@ -29,34 +29,6 @@ const logger = new ConsoleLogger();
 const groupMapping = new InMemoryGroupMapping();
 const polkaInstance = polka();
 
-polkaInstance.use(async (req, res, next) => {
-  try {
-    let body = "";
-
-    for await (const chunk of req) {
-      body += chunk;
-    }
-
-    switch (req.headers["content-type"]) {
-      case "application/x-www-form-urlencoded": {
-        const url = new URLSearchParams(body);
-        req.body = Object.fromEntries(url.entries());
-        break;
-      }
-      case "application/json":
-      default:
-        req.body = JSON.parse(body);
-    }
-    next();
-  } catch (error) {
-    res.writeHead(400, { "Content-Type": "application/json" }).end(
-      JSON.stringify({
-        msg: "Invalid body content with the Content-Type header specification"
-      })
-    );
-  }
-});
-
 const eventHandlers = {
   deployment: new DeploymentEventHandler(config.templates.deployment),
   issues: new IssuesEventHandler(config.templates.issues),
