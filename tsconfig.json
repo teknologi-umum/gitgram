@@ -10,7 +10,9 @@
     "rootDir": "./",
     "moduleResolution": "node",
     "baseUrl": ".",
-    // "paths": {},
+    "paths": {
+      "~/*": ["./src/*"]
+    },
     "allowJs": false,
 
     "declaration": false,

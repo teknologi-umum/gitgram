@@ -3,6 +3,7 @@ import type { IServer } from "src/application/interfaces/IServer";
 import type { ServerConfig } from "./types";
 
 export class GithubServer implements IServer {
+  // eslint-disable-next-line no-useless-constructor
   constructor(private readonly _polka: Polka<Request>, private readonly _config: ServerConfig) {}
 
   public register() {

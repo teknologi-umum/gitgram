@@ -1,11 +1,11 @@
 import type { HandlerFunction } from "@octokit/webhooks/dist-types/types";
-import { HOME_GROUP } from "env";
 import type { Context } from "grammy";
 import { Subject, throttleTime, asyncScheduler } from "rxjs";
-import type { IPullRequestEvent } from "src/application/interfaces/events";
-import { markdownToHTML } from "src/utils/markdown";
-import { transformLabels } from "src/utils/transformLabels";
 import templite from "templite";
+import { HOME_GROUP } from "~/env";
+import type { IPullRequestEvent } from "~/application/interfaces/events";
+import { markdownToHTML } from "~/utils/markdown";
+import { transformLabels } from "~/utils/transformLabels";
 
 export type PullRequestTemplate = {
   closed: {
@@ -69,6 +69,7 @@ export class PullRequestEventHandler implements IPullRequestEvent {
           disable_web_page_preview: true
         });
       } catch (err) {
+        // TODO: proper logging
         console.error(err);
       }
     };
@@ -95,6 +96,7 @@ export class PullRequestEventHandler implements IPullRequestEvent {
           disable_web_page_preview: true
         });
       } catch (e) {
+        // TODO: proper logging
         console.error(e);
       }
     };

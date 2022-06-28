@@ -5,7 +5,7 @@ import type {
   ReleaseTemplate,
   ReviewTemplate,
   VulnerabilityTemplate
-} from "./infrastructure/event-handlers";
+} from "~/infrastructure/event-handlers";
 
 export interface AppConfig {
   templates: {

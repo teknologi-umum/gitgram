@@ -1,10 +1,10 @@
 import type { HandlerFunction } from "@octokit/webhooks/dist-types/types";
-import { HOME_GROUP } from "env";
 import type { Context } from "grammy";
 import { Subject, throttleTime, asyncScheduler } from "rxjs";
-import type { IReviewEvent } from "src/application/interfaces/events";
-import { markdownToHTML } from "src/utils/markdown";
 import templite from "templite";
+import { HOME_GROUP } from "~/env";
+import type { IReviewEvent } from "~/application/interfaces/events";
+import { markdownToHTML } from "~/utils/markdown";
 
 export type ReviewTemplate = {
   submitted: {
@@ -65,6 +65,7 @@ export class ReviewEventHandler implements IReviewEvent {
           disable_web_page_preview: true
         });
       } catch (e) {
+        // TODO: proper logging
         console.error(e);
       }
     };
@@ -124,6 +125,7 @@ export class ReviewEventHandler implements IReviewEvent {
           disable_web_page_preview: true
         });
       } catch (e) {
+        // TODO: proper logging
         console.error(e);
       }
     };

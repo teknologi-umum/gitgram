@@ -4,10 +4,10 @@ import { Webhooks } from "@octokit/webhooks";
 import { Bot } from "grammy";
 import { parse as parseGura } from "gura";
 import polka from "polka";
-import { BOT_TOKEN, GITHUB_WEBHOOK_SECRET, PORT, WEBHOOK_SECRET } from "../env";
-import { InMemoryGroupMapping } from "./infrastructure/LocalGroupMapping";
-import { ConsoleLogger } from "./infrastructure/ConsoleLogger";
-import { App } from "./application/App";
+import { BOT_TOKEN, GITHUB_WEBHOOK_SECRET, PORT, WEBHOOK_SECRET } from "~/env";
+import { InMemoryGroupMapping } from "~/infrastructure/InMemoryGroupMapping";
+import { ConsoleLogger } from "~/infrastructure/ConsoleLogger";
+import { App } from "~/application/App";
 import {
   DeploymentEventHandler,
   IssuesEventHandler,
@@ -15,10 +15,10 @@ import {
   ReleaseEventHandler,
   ReviewEventHandler,
   VulnerabilityEventHandler
-} from "./infrastructure/event-handlers";
-import type { AppConfig } from "./types";
-import { GithubServer } from "./infrastructure/server/GithubServer";
-import { GithubWebhook } from "./application/webhook/github";
+} from "~/infrastructure/event-handlers";
+import type { AppConfig } from "~/types";
+import { GithubServer } from "~/infrastructure/server/GithubServer";
+import { GithubWebhook } from "~/application/webhook/github";
 
 // configurations
 const configFile = await readFile(path.resolve(__dirname, "config.gura"), { encoding: "utf-8" });

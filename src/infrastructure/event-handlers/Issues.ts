@@ -1,11 +1,11 @@
 import type { HandlerFunction } from "@octokit/webhooks/dist-types/types";
-import { HOME_GROUP } from "env";
 import type { Context } from "grammy";
 import { asyncScheduler, Subject, throttleTime } from "rxjs";
-import type { IIssueEvent } from "src/application/interfaces/events";
-import { markdownToHTML } from "src/utils/markdown";
-import { transformLabels } from "src/utils/transformLabels";
 import templite from "templite";
+import { HOME_GROUP } from "~/env";
+import type { IIssueEvent } from "~/application/interfaces/events";
+import { markdownToHTML } from "~/utils/markdown";
+import { transformLabels } from "~/utils/transformLabels";
 
 export type IssueTemplate = {
   closed: string;
@@ -56,6 +56,7 @@ export class IssuesEventHandler implements IIssueEvent {
           disable_web_page_preview: true
         });
       } catch (e) {
+        // TODO: proper logging
         console.error(e);
       }
     };
@@ -81,6 +82,7 @@ export class IssuesEventHandler implements IIssueEvent {
           disable_web_page_preview: true
         });
       } catch (e) {
+        // TODO: proper logging
         console.error(e);
       }
     };
@@ -105,6 +107,7 @@ export class IssuesEventHandler implements IIssueEvent {
           disable_web_page_preview: true
         });
       } catch (e) {
+        // TODO: proper logging
         console.error(e);
       }
     };
@@ -148,6 +151,7 @@ export class IssuesEventHandler implements IIssueEvent {
           disable_web_page_preview: true
         });
       } catch (e) {
+        // TODO: proper logging
         console.error(e);
       }
     };

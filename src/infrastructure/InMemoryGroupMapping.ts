@@ -1,4 +1,4 @@
-import type { IGroupMapping } from "../application/interfaces/IGroupMapping";
+import type { IGroupMapping } from "~/application/interfaces/IGroupMapping";
 
 type GroupMap = {
   repositoryUrl: string;

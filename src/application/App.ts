@@ -1,6 +1,5 @@
 import { Webhooks } from "@octokit/webhooks";
 import { Bot, Context, GrammyError, HttpError } from "grammy";
-import { DEV, DEV_PROXY_URL, HOME_GROUP } from "../../env";
 import type {
   IDeploymentEvent,
   IIssueEvent,
@@ -12,6 +11,7 @@ import type {
 import type { IGroupMapping } from "./interfaces/IGroupMapping";
 import type { ILogger } from "./interfaces/ILogger";
 import type { IHttpServer, IServer } from "./interfaces/IServer";
+import { DEV, DEV_PROXY_URL, HOME_GROUP } from "~/env";
 
 type EventHandlerMapping = {
   deployment: IDeploymentEvent;
@@ -131,6 +131,7 @@ export class App {
               signature: webhookEvent["x-hub-signature"],
               payload: webhookEvent.body
             })
+            // TODO: proper logging
             .catch(console.error);
         };
       }

@@ -1,5 +1,5 @@
 import * as c from "colorette";
-import type { ILogger } from "../application/interfaces/ILogger";
+import type { ILogger } from "~/application/interfaces/ILogger";
 
 export class ConsoleLogger implements ILogger {
   private readonly _debugPrefix = c.bold(c.blue("[DEBUG] ➤ "));
@@ -12,18 +12,22 @@ export class ConsoleLogger implements ILogger {
   }
 
   debug(text: string) {
+    // eslint-disable-next-line no-console
     console.info(`${this.getTimestamp()} ${this._debugPrefix} ${text}`);
   }
 
   info(text: string) {
+    // eslint-disable-next-line no-console
     console.info(`${this.getTimestamp()} ${this._infoPrefix} ${text}`);
   }
 
   error(text: string) {
+    // eslint-disable-next-line no-console
     console.error(`${this.getTimestamp()} ${this._errorPrefix} ${text}`);
   }
 
   warn(text: string) {
+    // eslint-disable-next-line no-console
     console.warn(`${this.getTimestamp()} ${this._warnPrefix} ${text}`);
   }
 }

@@ -1,8 +1,8 @@
 import type { HandlerFunction } from "@octokit/webhooks/dist-types/types";
-import { HOME_GROUP } from "env";
 import type { Context } from "grammy";
 import templite from "templite";
-import type { IDeploymentEvent } from "../../application/interfaces/events/IDeploymentEvent";
+import { HOME_GROUP } from "~/env";
+import type { IDeploymentEvent } from "~/application/interfaces/events/IDeploymentEvent";
 
 export type DeploymentTemplate = {
   status: {
@@ -12,6 +12,7 @@ export type DeploymentTemplate = {
 };
 
 export class DeploymentEventHandler implements IDeploymentEvent {
+  // eslint-disable-next-line no-useless-constructor
   constructor(private readonly _templates: DeploymentTemplate) {}
 
   status(ctx: Context): HandlerFunction<"deployment_status", unknown> {
@@ -35,6 +36,7 @@ export class DeploymentEventHandler implements IDeploymentEvent {
           disable_web_page_preview: true
         });
       } catch (e) {
+        // TODO: proper logging
         console.error(e);
       }
     };
