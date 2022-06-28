@@ -21,7 +21,7 @@ import { GithubServer } from "~/infrastructure/server/GithubServer";
 import { GithubWebhook } from "~/application/webhook/github";
 
 // configurations
-const configFile = await readFile(path.resolve(__dirname, "config.gura"), { encoding: "utf-8" });
+const configFile = await readFile(path.resolve("config.gura"), { encoding: "utf-8" });
 const config = parseGura(configFile) as AppConfig;
 
 // app dependencies
@@ -30,6 +30,34 @@ const bot = new Bot(BOT_TOKEN);
 const logger = new ConsoleLogger();
 const groupMapping = new InMemoryGroupMapping();
 const polkaInstance = polka();
+
+polkaInstance.use(async (req, res, next) => {
+  try {
+    let body = "";
+
+    for await (const chunk of req) {
+      body += chunk;
+    }
+
+    switch (req.headers["content-type"]) {
+      case "application/x-www-form-urlencoded": {
+        const url = new URLSearchParams(body);
+        req.body = Object.fromEntries(url.entries());
+        break;
+      }
+      case "application/json":
+      default:
+        req.body = JSON.parse(body);
+    }
+    next();
+  } catch (error) {
+    res.writeHead(400, { "Content-Type": "application/json" }).end(
+      JSON.stringify({
+        msg: "Invalid body content with the Content-Type header specification"
+      })
+    );
+  }
+});
 
 // main bot app instance
 const app = new App({
