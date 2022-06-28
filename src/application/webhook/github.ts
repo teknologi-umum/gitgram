@@ -38,13 +38,17 @@ export class GithubWebhook implements IWebhook {
     this._handlers[event]!.push(handler as HandlerFunction<WebhookEventName>);
   }
 
-  public async handle<E extends WebhookEventName>(eventName: E, payload: EventPayload[E]): Promise<void> {
+  public async handle<E extends WebhookEventName>(
+    eventName: E,
+    payload: EventPayload[E],
+    targetsId: number[]
+  ): Promise<void> {
     // no handler available
     const handlers = this._handlers[eventName] as HandlerFunction<WebhookEventName>[];
     if (handlers === undefined || handlers.length === 0) return;
 
     for await (const handler of handlers) {
-      handler({ type: eventName, payload });
+      handler({ type: eventName, payload, targetsId });
     }
   }
 }

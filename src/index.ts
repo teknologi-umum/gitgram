@@ -6,7 +6,7 @@ import polka from "polka";
 import { BOT_TOKEN, GITHUB_WEBHOOK_SECRET, PORT } from "~/env";
 import { InMemoryGroupMapping } from "~/infrastructure/InMemoryGroupMapping";
 import { ConsoleLogger } from "~/infrastructure/ConsoleLogger";
-import { App } from "~/application/App";
+import { App, EventHandlerMapping } from "~/application/App";
 import {
   DeploymentEventHandler,
   IssuesEventHandler,
@@ -18,6 +18,7 @@ import {
 import type { AppConfig } from "~/types";
 import { GithubServer } from "~/infrastructure/server/GithubServer";
 import { GithubWebhook } from "~/application/webhook/github";
+import { TelegramHub } from "~/infrastructure/TelegramHub";
 
 // configurations
 const configFile = await readFile(path.resolve("config.gura"), { encoding: "utf-8" });
@@ -26,23 +27,34 @@ const config = parseGura(configFile) as AppConfig;
 // app dependencies
 const bot = new Bot(BOT_TOKEN);
 const logger = new ConsoleLogger();
+const telegramHub = new TelegramHub(bot, logger);
+
+// insert group_mapping from configuration
 const groupMapping = new InMemoryGroupMapping();
+groupMapping.addMultiple(
+  config.group_mappings.map((g) => ({
+    repositoryUrl: g.repository_url,
+    groupId: g.group_id
+  }))
+);
+
 const polkaInstance = polka();
 
-const eventHandlers = {
-  deployment: new DeploymentEventHandler(config.templates.deployment),
-  issues: new IssuesEventHandler(config.templates.issues),
-  review: new ReviewEventHandler(config.templates.review),
-  pr: new PullRequestEventHandler(config.templates.pr),
-  alert: new VulnerabilityEventHandler(config.templates.vulnerability),
-  release: new ReleaseEventHandler(config.templates.release)
+const eventHandlers: EventHandlerMapping = {
+  deployment: new DeploymentEventHandler(config.templates.deployment, telegramHub),
+  issues: new IssuesEventHandler(config.templates.issues, telegramHub),
+  review: new ReviewEventHandler(config.templates.review, telegramHub),
+  pr: new PullRequestEventHandler(config.templates.pr, telegramHub),
+  alert: new VulnerabilityEventHandler(config.templates.vulnerability, telegramHub),
+  release: new ReleaseEventHandler(config.templates.release, telegramHub)
 };
 
 // webhook server and handlers
 const githubServer = new GithubServer(polkaInstance, {
   path: "/github",
   webhook: new GithubWebhook(GITHUB_WEBHOOK_SECRET),
-  handlers: eventHandlers
+  handlers: eventHandlers,
+  groupMapping: groupMapping
 });
 
 // main bot app instance
@@ -51,7 +63,6 @@ const app = new App({
   port: parseInt(PORT),
   bot,
   logger,
-  groupMapping,
   servers: [githubServer]
 });
 

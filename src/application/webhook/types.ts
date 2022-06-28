@@ -137,9 +137,9 @@ export type ReleaseEventPayload = {
     name: string;
     url: string;
     tag_name: string;
-  }
+  };
   sender: Sender;
-}
+};
 
 export type PushEventPayload = {
   ref: string;
@@ -174,6 +174,7 @@ export type WebhookEventName = keyof EventPayload;
 
 export type TEvent<E extends WebhookEventName> = {
   type: E;
+  targetsId: number[];
   payload: EventPayload[E];
 };
 
@@ -186,5 +187,9 @@ export interface IWebhook {
   sign(payload: string): Promise<string>;
   verify(payload: string, signature: string): Promise<boolean>;
   on<E extends WebhookEventName>(event: E, handler: HandlerFunction<E>): void;
-  handle<E extends WebhookEventName>(eventName: WebhookEventName, payload: EventPayload[E]): Promise<void>;
+  handle<E extends WebhookEventName>(
+    eventName: WebhookEventName,
+    payload: EventPayload[E],
+    targetsId: number[]
+  ): Promise<void>;
 }

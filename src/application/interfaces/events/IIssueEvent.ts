@@ -1,11 +1,10 @@
-import type { Context } from "grammy";
 import type { HandlerFunction } from "~/application/webhook/types";
 
 export interface IIssueEvent {
-  closed(ctx: Context): HandlerFunction<"issue.closed">;
-  opened(ctx: Context): HandlerFunction<"issue.opened">;
-  reopened(ctx: Context): HandlerFunction<"issue.reopened">;
-  edited(ctx: Context): HandlerFunction<"issue.edited">;
-  commentCreated(ctx: Context): HandlerFunction<"issue_comment.created">;
-  commentEdited(ctx: Context): HandlerFunction<"issue_comment.edited">;
+  closed(): HandlerFunction<"issue.closed">;
+  opened(): HandlerFunction<"issue.opened">;
+  reopened(): HandlerFunction<"issue.reopened">;
+  edited(): HandlerFunction<"issue.edited">;
+  commentCreated(): HandlerFunction<"issue_comment.created">;
+  commentEdited(): HandlerFunction<"issue_comment.edited">;
 }

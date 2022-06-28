@@ -16,4 +16,5 @@ export interface AppConfig {
     review: ReviewTemplate;
     vulnerability: VulnerabilityTemplate;
   };
+  group_mappings: { repository_url: string; group_id: number }[];
 }

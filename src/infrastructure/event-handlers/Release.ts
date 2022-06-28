@@ -1,9 +1,8 @@
-import type { Context } from "grammy";
 import templite from "templite";
-import { HOME_GROUP } from "~/env";
 import type { IReleaseEvent } from "~/application/interfaces/events";
 import { markdownToHTML } from "~/utils/markdown";
 import type { HandlerFunction } from "~/application/webhook/types";
+import type { IHub } from "~/application/interfaces/IHub";
 
 export type ReleaseTemplate = {
   published: string;
@@ -11,10 +10,10 @@ export type ReleaseTemplate = {
 
 export class ReleaseEventHandler implements IReleaseEvent {
   // eslint-disable-next-line no-useless-constructor
-  constructor(private readonly _templates: ReleaseTemplate) {}
+  constructor(private readonly _templates: ReleaseTemplate, private readonly _hub: IHub) {}
 
-  published(ctx: Context): HandlerFunction<"release.published"> {
-    return async (event) => {
+  published(): HandlerFunction<"release.published"> {
+    return (event) => {
       const body = markdownToHTML(event.payload.release.body);
       const response = templite(this._templates.published, {
         tag_name: event.payload.release.tag_name,
@@ -25,9 +24,9 @@ export class ReleaseEventHandler implements IReleaseEvent {
         actor: event.payload.sender.login
       });
 
-      await ctx.api.sendMessage(ctx.chat?.id ?? HOME_GROUP, response, {
-        parse_mode: "HTML",
-        disable_web_page_preview: true
+      this._hub.send({
+        targetsId: event.targetsId,
+        payload: response
       });
     };
   }

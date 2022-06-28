@@ -1,11 +1,9 @@
-import type { Context } from "grammy";
-import { Subject, throttleTime, asyncScheduler } from "rxjs";
 import templite from "templite";
-import { HOME_GROUP } from "~/env";
 import type { IPullRequestEvent } from "~/application/interfaces/events";
 import { markdownToHTML } from "~/utils/markdown";
 import { transformLabels } from "~/utils/transformLabels";
 import type { HandlerFunction } from "~/application/webhook/types";
+import type { IHub } from "~/application/interfaces/IHub";
 
 export type PullRequestTemplate = {
   closed: {
@@ -20,28 +18,11 @@ export type PullRequestTemplate = {
 };
 
 export class PullRequestEventHandler implements IPullRequestEvent {
-  private readonly _prSubject$ = new Subject<[Context, string]>();
+  // eslint-disable-next-line no-useless-constructor
+  constructor(private readonly _templates: PullRequestTemplate, private readonly _hub: IHub) {}
 
-  constructor(private readonly _templates: PullRequestTemplate) {
-    this._prSubject$
-      .pipe(
-        throttleTime(60 * 1000, asyncScheduler, {
-          leading: true,
-          trailing: true
-        })
-      )
-      .subscribe({
-        async next([ctx, response]) {
-          await ctx.api.sendMessage(ctx.chat?.id ?? HOME_GROUP, response, {
-            parse_mode: "HTML",
-            disable_web_page_preview: true
-          });
-        }
-      });
-  }
-
-  closed(ctx: Context): HandlerFunction<"pull_request.closed"> {
-    return async (event) => {
+  closed(): HandlerFunction<"pull_request.closed"> {
+    return (event) => {
       let template = this._templates.closed.base;
 
       if (event.payload.pull_request.merged) {
@@ -63,21 +44,16 @@ export class PullRequestEventHandler implements IPullRequestEvent {
           actor: event.payload.sender.login
         }) + transformLabels(event.payload.pull_request.labels);
 
-      try {
-        await ctx.api.sendMessage(ctx.chat?.id ?? HOME_GROUP, response, {
-          parse_mode: "HTML",
-          disable_web_page_preview: true
-        });
-      } catch (err) {
-        // TODO: proper logging
-        console.error(err);
-      }
+      this._hub.send({
+        targetsId: event.targetsId,
+        payload: response
+      });
     };
   }
 
-  opened(ctx: Context): HandlerFunction<"pull_request.opened"> {
+  opened(): HandlerFunction<"pull_request.opened"> {
     const template = this._templates.opened;
-    return async (event) => {
+    return (event) => {
       const body = markdownToHTML(event.payload.pull_request?.body ?? "");
       const response =
         templite(template, {
@@ -90,19 +66,14 @@ export class PullRequestEventHandler implements IPullRequestEvent {
           author: event.payload.pull_request.user.login
         }) + transformLabels(event.payload.pull_request.labels);
 
-      try {
-        await ctx.api.sendMessage(ctx.chat?.id ?? HOME_GROUP, response, {
-          parse_mode: "HTML",
-          disable_web_page_preview: true
-        });
-      } catch (e) {
-        // TODO: proper logging
-        console.error(e);
-      }
+      this._hub.send({
+        targetsId: event.targetsId,
+        payload: response
+      });
     };
   }
 
-  edited(ctx: Context): HandlerFunction<"pull_request.edited"> {
+  edited(): HandlerFunction<"pull_request.edited"> {
     return (event) => {
       const body = markdownToHTML(event.payload.pull_request?.body ?? "");
       const response =
@@ -117,7 +88,10 @@ export class PullRequestEventHandler implements IPullRequestEvent {
           actor: event.payload.sender.login
         }) + transformLabels(event.payload.pull_request.labels);
 
-      this._prSubject$.next([ctx, response]);
+      this._hub.send({
+        targetsId: event.targetsId,
+        payload: response
+      });
     };
   }
 }

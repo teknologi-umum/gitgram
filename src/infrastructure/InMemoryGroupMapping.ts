@@ -1,4 +1,4 @@
-import type { IGroupMapping } from "~/application/interfaces/IGroupMapping";
+import type { IGroupMapping, Pair } from "~/application/interfaces/IGroupMapping";
 
 type GroupMap = {
   repositoryUrl: string;
@@ -11,30 +11,45 @@ type GroupMap = {
  * the group mapping using an array in memory.
  */
 export class InMemoryGroupMapping implements IGroupMapping {
-  groupMapping: GroupMap[];
-
-  constructor() {
-    this.groupMapping = [];
-  }
+  private _groupMapping: GroupMap[] = [];
+  private readonly _supportedProviders = ["github.com", "gitlab.com"];
 
   private groupExists(groupId: number, repositoryUrl: string) {
-    return (
-      this.groupMapping.findIndex(
-        (item) =>
-          item.groupId === groupId && item.repositoryUrl === repositoryUrl
-      ) > 0
-    );
+    return this._groupMapping.findIndex((item) => item.groupId === groupId && item.repositoryUrl === repositoryUrl) > 0;
+  }
+
+  addMultiple(pairs: Pair[]) {
+    for (const pair of pairs) {
+      this.add(pair.repositoryUrl, pair.groupId);
+    }
   }
 
   add(repositoryUrl: string, groupId: number) {
-    // Check if it's registered before
-    if (this.groupExists(groupId, repositoryUrl)) {
-      throw new Error(
-        `Group ${groupId} is already registered for ${repositoryUrl}`
-      );
+    if (repositoryUrl === "") {
+      throw new Error("Please provide a valid repository URL. Example: https://github.com/teknologi-umum/gitgram");
     }
 
-    this.groupMapping.push({
+    // Check if it has been registered before
+    if (this.groupExists(groupId, repositoryUrl)) {
+      throw new Error(`Group ${groupId} is already registered for ${repositoryUrl}`);
+    }
+
+    const url = new URL(repositoryUrl);
+    if (url.protocol !== "http:" && url.protocol !== "https:") {
+      throw new Error("Protocol is not supported. Please use http or https as the repository URL protocol.");
+    }
+
+    if (!this._supportedProviders.includes(url.hostname)) {
+      const supported = this._supportedProviders.join(",");
+      throw new Error(`${url.hostname} git provider is not supported yet. This bot currently supports ${supported}.`);
+    }
+
+    const hasSubscribed = this.has(repositoryUrl, groupId);
+    if (hasSubscribed) {
+      throw new Error(`A group ID of ${groupId} is already exists.`);
+    }
+
+    this._groupMapping.push({
       repositoryUrl: repositoryUrl,
       groupId: groupId,
       activeSince: new Date()
@@ -43,18 +58,20 @@ export class InMemoryGroupMapping implements IGroupMapping {
 
   remove(repositoryUrl: string, groupId: number) {
     if (!this.groupExists(groupId, repositoryUrl)) {
-      throw new Error(
-        `Group ${groupId} is not registered for ${repositoryUrl}`
-      );
+      throw new Error(`Group ${groupId} is not registered for ${repositoryUrl}`);
     }
 
-    const removedIndex = this.groupMapping.findIndex(
+    const removedIndex = this._groupMapping.findIndex(
       (item) => item.groupId === groupId && item.repositoryUrl === repositoryUrl
     );
-    this.groupMapping.splice(removedIndex, 1);
+    this._groupMapping.splice(removedIndex, 1);
   }
 
   has(repositoryUrl: string, groupId: number): boolean {
     return this.groupExists(groupId, repositoryUrl);
+  }
+
+  findGroupsIn(repositoryUrl: string): number[] {
+    return this._groupMapping.filter((g) => g.repositoryUrl === repositoryUrl).map((g) => g.groupId);
   }
 }

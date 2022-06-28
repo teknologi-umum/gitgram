@@ -1,10 +1,8 @@
-import type { Context } from "grammy";
-import { Subject, throttleTime, asyncScheduler } from "rxjs";
 import templite from "templite";
-import { HOME_GROUP } from "~/env";
 import type { IReviewEvent } from "~/application/interfaces/events";
 import { markdownToHTML } from "~/utils/markdown";
 import type { HandlerFunction } from "~/application/webhook/types";
+import type { IHub } from "~/application/interfaces/IHub";
 
 export type ReviewTemplate = {
   submitted: {
@@ -16,28 +14,11 @@ export type ReviewTemplate = {
 };
 
 export class ReviewEventHandler implements IReviewEvent {
-  private readonly _prSubject$ = new Subject<[Context, string]>();
+  // eslint-disable-next-line no-useless-constructor
+  constructor(private readonly _templates: ReviewTemplate, private readonly _hub: IHub) {}
 
-  constructor(private readonly _templates: ReviewTemplate) {
-    this._prSubject$
-      .pipe(
-        throttleTime(60 * 1000, asyncScheduler, {
-          leading: true,
-          trailing: true
-        })
-      )
-      .subscribe({
-        async next([ctx, response]) {
-          await ctx.api.sendMessage(ctx.chat?.id ?? HOME_GROUP, response, {
-            parse_mode: "HTML",
-            disable_web_page_preview: true
-          });
-        }
-      });
-  }
-
-  submitted(ctx: Context): HandlerFunction<"pull_request_review.submitted"> {
-    return async (event) => {
+  submitted(): HandlerFunction<"pull_request_review.submitted"> {
+    return (event) => {
       if (event.payload.review.body === null) {
         // don't do anything because Github sends this event with `null` body whenever
         // someone commented on a review.
@@ -59,19 +40,14 @@ export class ReviewEventHandler implements IReviewEvent {
         }
       );
 
-      try {
-        await ctx.api.sendMessage(ctx.chat?.id ?? HOME_GROUP, response, {
-          parse_mode: "HTML",
-          disable_web_page_preview: true
-        });
-      } catch (e) {
-        // TODO: proper logging
-        console.error(e);
-      }
+      this._hub.send({
+        targetsId: event.targetsId,
+        payload: response
+      });
     };
   }
 
-  edited(ctx: Context): HandlerFunction<"pull_request_review.edited"> {
+  edited(): HandlerFunction<"pull_request_review.edited"> {
     const template = `
     <b>🔮 PR review on <a href="{{url}}">#{{no}} {{title}}</a> was edited by {{actor}}</b>
     
@@ -94,11 +70,14 @@ export class ReviewEventHandler implements IReviewEvent {
         actor: event.payload.sender.login
       });
 
-      this._prSubject$.next([ctx, response]);
+      this._hub.send({
+        targetsId: event.targetsId,
+        payload: response
+      });
     };
   }
 
-  created(ctx: Context): HandlerFunction<"pull_request_review_comment.created"> {
+  created(): HandlerFunction<"pull_request_review_comment.created"> {
     const template = `
     <b>💬 PR review comment on <a href="{{url}}">#{{no}} {{title}}</a> was created by {{actor}}</b>
     
@@ -106,7 +85,7 @@ export class ReviewEventHandler implements IReviewEvent {
     
     <b>PR author</b>: {{author}}
     <b>See</b>: {{reviewUrl}}`;
-    return async (event) => {
+    return (event) => {
       const body = markdownToHTML(event.payload.comment.body);
       const response = templite(template, {
         repoName: event.payload.repository.full_name,
@@ -119,15 +98,10 @@ export class ReviewEventHandler implements IReviewEvent {
         actor: event.payload.sender.login
       });
 
-      try {
-        await ctx.api.sendMessage(ctx.chat?.id ?? HOME_GROUP, response, {
-          parse_mode: "HTML",
-          disable_web_page_preview: true
-        });
-      } catch (e) {
-        // TODO: proper logging
-        console.error(e);
-      }
+      this._hub.send({
+        targetsId: event.targetsId,
+        payload: response
+      });
     };
   }
 }

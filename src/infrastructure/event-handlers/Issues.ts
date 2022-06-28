@@ -1,11 +1,9 @@
-import type { Context } from "grammy";
-import { asyncScheduler, Subject, throttleTime } from "rxjs";
 import templite from "templite";
-import { HOME_GROUP } from "~/env";
 import type { IIssueEvent } from "~/application/interfaces/events";
 import { markdownToHTML } from "~/utils/markdown";
 import { transformLabels } from "~/utils/transformLabels";
 import type { HandlerFunction } from "~/application/webhook/types";
+import type { IHub } from "~/application/interfaces/IHub";
 
 export type IssueTemplate = {
   closed: string;
@@ -17,28 +15,11 @@ export type IssueTemplate = {
 };
 
 export class IssuesEventHandler implements IIssueEvent {
-  private readonly _issueSubject$ = new Subject<[Context, string]>();
+  // eslint-disable-next-line no-useless-constructor
+  constructor(private readonly _templates: IssueTemplate, private readonly _hub: IHub) {}
 
-  constructor(private readonly _templates: IssueTemplate) {
-    this._issueSubject$
-      .pipe(
-        throttleTime(60 * 1000, asyncScheduler, {
-          leading: true,
-          trailing: true
-        })
-      )
-      .subscribe({
-        async next([ctx, response]) {
-          await ctx.api.sendMessage(ctx.chat?.id ?? HOME_GROUP, response, {
-            parse_mode: "HTML",
-            disable_web_page_preview: true
-          });
-        }
-      });
-  }
-
-  closed(ctx: Context): HandlerFunction<"issue.closed"> {
-    return async (event) => {
+  closed(): HandlerFunction<"issue.closed"> {
+    return (event) => {
       const response =
         templite(this._templates.closed, {
           repoName: event.payload.repository.full_name,
@@ -50,20 +31,15 @@ export class IssuesEventHandler implements IIssueEvent {
           actor: event.payload.sender.login
         }) + transformLabels(event.payload.issue.labels);
 
-      try {
-        await ctx.api.sendMessage(ctx.chat?.id ?? HOME_GROUP, response, {
-          parse_mode: "HTML",
-          disable_web_page_preview: true
-        });
-      } catch (e) {
-        // TODO: proper logging
-        console.error(e);
-      }
+      this._hub.send({
+        targetsId: event.targetsId,
+        payload: response
+      });
     };
   }
 
-  opened(ctx: Context): HandlerFunction<"issue.opened"> {
-    return async (event) => {
+  opened(): HandlerFunction<"issue.opened"> {
+    return (event) => {
       const body = markdownToHTML(event.payload.issue?.body ?? "");
       const response =
         templite(this._templates.opened, {
@@ -76,20 +52,15 @@ export class IssuesEventHandler implements IIssueEvent {
           author: event.payload.issue.user.login
         }) + transformLabels(event.payload.issue.labels);
 
-      try {
-        await ctx.api.sendMessage(ctx.chat?.id ?? HOME_GROUP, response, {
-          parse_mode: "HTML",
-          disable_web_page_preview: true
-        });
-      } catch (e) {
-        // TODO: proper logging
-        console.error(e);
-      }
+      this._hub.send({
+        targetsId: event.targetsId,
+        payload: response
+      });
     };
   }
 
-  reopened(ctx: Context): HandlerFunction<"issue.reopened"> {
-    return async (event) => {
+  reopened(): HandlerFunction<"issue.reopened"> {
+    return (event) => {
       const response =
         templite(this._templates.reopened, {
           repoName: event.payload.repository.full_name,
@@ -101,19 +72,14 @@ export class IssuesEventHandler implements IIssueEvent {
           actor: event.payload.sender.login
         }) + transformLabels(event.payload.issue.labels);
 
-      try {
-        await ctx.api.sendMessage(ctx.chat?.id ?? HOME_GROUP, response, {
-          parse_mode: "HTML",
-          disable_web_page_preview: true
-        });
-      } catch (e) {
-        // TODO: proper logging
-        console.error(e);
-      }
+      this._hub.send({
+        targetsId: event.targetsId,
+        payload: response
+      });
     };
   }
 
-  edited(ctx: Context): HandlerFunction<"issue.edited"> {
+  edited(): HandlerFunction<"issue.edited"> {
     return (event) => {
       const response =
         templite(this._templates.edited, {
@@ -126,12 +92,15 @@ export class IssuesEventHandler implements IIssueEvent {
           actor: event.payload.sender.login
         }) + transformLabels(event.payload.issue.labels);
 
-      this._issueSubject$.next([ctx, response]);
+      this._hub.send({
+        targetsId: event.targetsId,
+        payload: response
+      });
     };
   }
 
-  commentCreated(ctx: Context): HandlerFunction<"issue_comment.created"> {
-    return async (event) => {
+  commentCreated(): HandlerFunction<"issue_comment.created"> {
+    return (event) => {
       const isPR = event.payload.issue.pull_request?.url;
       const body = markdownToHTML(event.payload.comment.body);
       const response = templite(this._templates.commentCreated, {
@@ -145,19 +114,14 @@ export class IssuesEventHandler implements IIssueEvent {
         where: isPR ? "PR" : "Issue"
       });
 
-      try {
-        await ctx.api.sendMessage(ctx.chat?.id ?? HOME_GROUP, response, {
-          parse_mode: "HTML",
-          disable_web_page_preview: true
-        });
-      } catch (e) {
-        // TODO: proper logging
-        console.error(e);
-      }
+      this._hub.send({
+        targetsId: event.targetsId,
+        payload: response
+      });
     };
   }
 
-  commentEdited(ctx: Context): HandlerFunction<"issue_comment.edited"> {
+  commentEdited(): HandlerFunction<"issue_comment.edited"> {
     return (event) => {
       const body = markdownToHTML(event.payload.issue?.body ?? "");
       const response =
@@ -172,7 +136,10 @@ export class IssuesEventHandler implements IIssueEvent {
           actor: event.payload.sender.login
         }) + transformLabels(event.payload.issue.labels);
 
-      this._issueSubject$.next([ctx, response]);
+      this._hub.send({
+        targetsId: event.targetsId,
+        payload: response
+      });
     };
   }
 }

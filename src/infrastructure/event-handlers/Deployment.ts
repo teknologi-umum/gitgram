@@ -1,7 +1,6 @@
-import type { Context } from "grammy";
 import templite from "templite";
-import { HOME_GROUP } from "~/env";
 import type { IDeploymentEvent } from "~/application/interfaces/events/IDeploymentEvent";
+import type { IHub } from "~/application/interfaces/IHub";
 import type { HandlerFunction } from "~/application/webhook/types";
 
 export type DeploymentTemplate = {
@@ -13,10 +12,10 @@ export type DeploymentTemplate = {
 
 export class DeploymentEventHandler implements IDeploymentEvent {
   // eslint-disable-next-line no-useless-constructor
-  constructor(private readonly _templates: DeploymentTemplate) {}
+  constructor(private readonly _templates: DeploymentTemplate, private readonly _hub: IHub) {}
 
-  status(ctx: Context): HandlerFunction<"deployment_status"> {
-    return async (event) => {
+  status(): HandlerFunction<"deployment_status"> {
+    return (event) => {
       const description = event.payload.deployment_status.description;
       const response = templite(
         this._templates.status.statuses[event.payload.deployment_status.state.toLowerCase()] +
@@ -30,15 +29,10 @@ export class DeploymentEventHandler implements IDeploymentEvent {
         }
       );
 
-      try {
-        await ctx.api.sendMessage(HOME_GROUP, response, {
-          parse_mode: "HTML",
-          disable_web_page_preview: true
-        });
-      } catch (e) {
-        // TODO: proper logging
-        console.error(e);
-      }
+      this._hub.send({
+        targetsId: event.targetsId,
+        payload: response
+      });
     };
   }
 }
