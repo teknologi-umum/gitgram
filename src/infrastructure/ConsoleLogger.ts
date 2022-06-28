@@ -3,9 +3,9 @@ import type { ILogger } from "~/application/interfaces/ILogger";
 
 export class ConsoleLogger implements ILogger {
   private readonly _debugPrefix = c.bold(c.blue("[DEBUG] ➤ "));
-  private readonly _infoPrefix = c.bold(c.green("[ INFO] ➤ "));
+  private readonly _infoPrefix = c.bold(c.green("[INFO] ➤ "));
   private readonly _errorPrefix = c.bold(c.red("[ERROR] ➤ "));
-  private readonly _warnPrefix = c.bold(c.yellow("[ WARN] ➤ "));
+  private readonly _warnPrefix = c.bold(c.yellow("[WARN] ➤ "));
 
   private getTimestamp() {
     return c.gray(new Date().toLocaleString());
