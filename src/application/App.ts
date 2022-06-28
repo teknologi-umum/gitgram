@@ -11,6 +11,7 @@ import type {
 } from "./interfaces/events";
 import type { IGroupMapping } from "./interfaces/IGroupMapping";
 import type { ILogger } from "./interfaces/ILogger";
+import type { IHttpServer, IServer } from "./interfaces/IServer";
 
 type EventHandlerMapping = {
   deployment: IDeploymentEvent;
@@ -30,13 +31,17 @@ export class App {
   private readonly _logger: ILogger;
   private readonly _groupMapping: IGroupMapping;
   private readonly _eventHandlerMapping: EventHandlerMapping;
+  private readonly _httpServer: IHttpServer;
+  private readonly _port: number;
 
   constructor(config: {
+    port: number;
     bot: Bot;
     webhook: Webhooks;
     logger: ILogger;
     groupMapping: IGroupMapping;
     eventHandlers: EventHandlerMapping;
+    httpServer: IHttpServer;
   }) {
     if (!(config.bot instanceof Bot)) throw new Error("config.bot is not an instance of grammy bot.");
     if (!(config.webhook instanceof Webhooks)) throw new Error("config.webhook is not an instance of octokit webhook.");
@@ -53,12 +58,17 @@ export class App {
     ) {
       throw new Error("config.eventHandlers should be provided to handle webhook events.");
     }
+    if (config.port === undefined || config.port === null || typeof config.port !== "number") {
+      throw new Error("config.port should be a number.");
+    }
 
     this._bot = config.bot;
     this._webhook = config.webhook;
     this._logger = config.logger;
     this._groupMapping = config.groupMapping;
     this._eventHandlerMapping = config.eventHandlers;
+    this._httpServer = config.httpServer;
+    this._port = config.port;
   }
 
   private addGroupAdditionCommand() {
@@ -220,14 +230,22 @@ export class App {
     this._webhook.on("repository_vulnerability_alert.create", this._eventHandlerMapping.alert.created(ctx));
   }
 
+  public addServers(servers: IServer[]) {
+    for (const server of servers) {
+      server.register();
+    }
+  }
+
   public run() {
     this.addErrorHandling();
     this.addOnStartHandler();
     this.addGroupAdditionCommand();
     this._bot.start();
+    this._httpServer.listen(this._port, () => this._logger.info(`Server running on port ${this._port}`));
   }
 
   public stop() {
     this._bot.stop();
+    this._httpServer.server.close();
   }
 }

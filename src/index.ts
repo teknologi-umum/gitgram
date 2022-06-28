@@ -1,6 +1,4 @@
-import type { IncomingMessage, ServerResponse } from "http";
-import { createServer } from "http";
-import { Webhooks, createNodeMiddleware } from "@octokit/webhooks";
+import { Webhooks } from "@octokit/webhooks";
 import { Bot } from "grammy";
 import { LocalGroupMapping } from "./infrastructure/LocalGroupMapping";
 import { BOT_TOKEN, PORT, WEBHOOK_SECRET } from "../env";
@@ -18,16 +16,25 @@ import { parse as parseGura } from "gura";
 import { readFile } from "fs/promises";
 import path from "path";
 import type { AppConfig } from "./types";
+import polka from "polka";
+import { GithubServer } from "./infrastructure/server/GithubServer";
+import { GithubWebhook } from "./application/webhook/github";
 
+// configurations
 const configFile = await readFile(path.resolve(__dirname, "config.gura"), { encoding: "utf-8" });
 const config = parseGura(configFile) as AppConfig;
 
+// app dependencies
 const webhook = new Webhooks({ secret: WEBHOOK_SECRET });
 const bot = new Bot(BOT_TOKEN);
 const logger = new ConsoleLogger();
 const groupMapping = new LocalGroupMapping();
+const polkaInstance = polka();
 
+// main bot app instance
 const app = new App({
+  httpServer: polkaInstance,
+  port: parseInt(PORT),
   bot,
   webhook,
   logger,
@@ -42,24 +49,15 @@ const app = new App({
   }
 });
 
-const webhookMiddleware = createNodeMiddleware(webhook, {
-  path: "/",
-  onUnhandledRequest: (_req: IncomingMessage, res: ServerResponse) => {
-    res.writeHead(404).end("Not found");
-  },
-  log: new ConsoleLogger()
+// webhook server and handlers
+const githubServer = new GithubServer(polkaInstance, {
+  path: "/github",
+  webhook: new GithubWebhook("strong secret goes here")
 });
 
-const server = createServer(webhookMiddleware);
-server.listen(PORT, () => logger.info(`Server running on http://localhost:${PORT}`));
+app.addServers([githubServer]);
 app.run();
 
 // Enable graceful shutdown
-process.once("SIGINT", () => {
-  app.stop();
-  server.close();
-});
-process.once("SIGTERM", () => {
-  app.stop();
-  server.close();
-});
+process.once("SIGINT", () => app.stop());
+process.once("SIGTERM", () => app.stop());
