@@ -17,12 +17,12 @@ esbuild
       "remark-parse",
       "rxjs",
       "sanitize-html",
-      "telegraf",
+      "grammy",
       "templite",
       "unified"
     ],
     outdir: "./dist",
-    target: ["es2020", "node16.10"],
+    target: ["node16.15"],
     tsconfig: "tsconfig.json"
   })
   .catch((e) => {
