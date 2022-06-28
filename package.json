@@ -35,6 +35,7 @@
     "esbuild-node-loader": "^0.8.0",
     "esbuild-register": "^3.3.3",
     "eslint": "^8.18.0",
+    "eslint-plugin-import": "^2.26.0",
     "husky": "^8.0.1",
     "nodemon": "^2.0.17",
     "tslib": "^2.4.0",

@@ -1,5 +1,5 @@
-import type { ILogger } from "../application/interfaces/ILogger";
 import * as c from "colorette";
+import type { ILogger } from "../application/interfaces/ILogger";
 
 export class ConsoleLogger implements ILogger {
   private readonly _debugPrefix = c.bold(c.blue("[DEBUG] ➤ "));

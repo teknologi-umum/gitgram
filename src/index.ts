@@ -1,7 +1,11 @@
+import { readFile } from "fs/promises";
+import path from "path";
 import { Webhooks } from "@octokit/webhooks";
 import { Bot } from "grammy";
-import { LocalGroupMapping } from "./infrastructure/LocalGroupMapping";
+import { parse as parseGura } from "gura";
+import polka from "polka";
 import { BOT_TOKEN, PORT, WEBHOOK_SECRET } from "../env";
+import { LocalGroupMapping } from "./infrastructure/LocalGroupMapping";
 import { ConsoleLogger } from "./infrastructure/ConsoleLogger";
 import { App } from "./application/App";
 import {
@@ -12,11 +16,7 @@ import {
   ReviewEventHandler,
   VulnerabilityEventHandler
 } from "./infrastructure/event-handlers";
-import { parse as parseGura } from "gura";
-import { readFile } from "fs/promises";
-import path from "path";
 import type { AppConfig } from "./types";
-import polka from "polka";
 import { GithubServer } from "./infrastructure/server/GithubServer";
 import { GithubWebhook } from "./application/webhook/github";
 
