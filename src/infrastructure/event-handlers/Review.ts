@@ -1,10 +1,10 @@
-import type { HandlerFunction } from "@octokit/webhooks/dist-types/types";
 import type { Context } from "grammy";
 import { Subject, throttleTime, asyncScheduler } from "rxjs";
 import templite from "templite";
 import { HOME_GROUP } from "~/env";
 import type { IReviewEvent } from "~/application/interfaces/events";
 import { markdownToHTML } from "~/utils/markdown";
+import type { HandlerFunction } from "~/application/webhook/types";
 
 export type ReviewTemplate = {
   submitted: {
@@ -36,7 +36,7 @@ export class ReviewEventHandler implements IReviewEvent {
       });
   }
 
-  submitted(ctx: Context): HandlerFunction<"pull_request_review.submitted", unknown> {
+  submitted(ctx: Context): HandlerFunction<"pull_request_review.submitted"> {
     return async (event) => {
       if (event.payload.review.body === null) {
         // don't do anything because Github sends this event with `null` body whenever
@@ -71,7 +71,7 @@ export class ReviewEventHandler implements IReviewEvent {
     };
   }
 
-  edited(ctx: Context): HandlerFunction<"pull_request_review.edited", unknown> {
+  edited(ctx: Context): HandlerFunction<"pull_request_review.edited"> {
     const template = `
     <b>🔮 PR review on <a href="{{url}}">#{{no}} {{title}}</a> was edited by {{actor}}</b>
     
@@ -98,7 +98,7 @@ export class ReviewEventHandler implements IReviewEvent {
     };
   }
 
-  created(ctx: Context): HandlerFunction<"pull_request_review_comment.created", unknown> {
+  created(ctx: Context): HandlerFunction<"pull_request_review_comment.created"> {
     const template = `
     <b>💬 PR review comment on <a href="{{url}}">#{{no}} {{title}}</a> was created by {{actor}}</b>
     

@@ -1,11 +1,11 @@
-import type { HandlerFunction } from "@octokit/webhooks/dist-types/types";
 import type { Context } from "grammy";
+import type { HandlerFunction } from "~/application/webhook/types";
 
 export interface IIssueEvent {
-  closed(ctx: Context): HandlerFunction<"issues.closed", unknown>;
-  opened(ctx: Context): HandlerFunction<"issues.opened", unknown>;
-  reopened(ctx: Context): HandlerFunction<"issues.reopened", unknown>;
-  edited(ctx: Context): HandlerFunction<"issues.edited", unknown>;
-  commentCreated(ctx: Context): HandlerFunction<"issue_comment.created", unknown>;
-  commentEdited(ctx: Context): HandlerFunction<"issue_comment.edited", unknown>;
+  closed(ctx: Context): HandlerFunction<"issue.closed">;
+  opened(ctx: Context): HandlerFunction<"issue.opened">;
+  reopened(ctx: Context): HandlerFunction<"issue.reopened">;
+  edited(ctx: Context): HandlerFunction<"issue.edited">;
+  commentCreated(ctx: Context): HandlerFunction<"issue_comment.created">;
+  commentEdited(ctx: Context): HandlerFunction<"issue_comment.edited">;
 }

@@ -1,9 +1,9 @@
-import type { HandlerFunction } from "@octokit/webhooks/dist-types/types";
 import type { Context } from "grammy";
 import templite from "templite";
 import { HOME_GROUP } from "~/env";
 import type { IReleaseEvent } from "~/application/interfaces/events";
 import { markdownToHTML } from "~/utils/markdown";
+import type { HandlerFunction } from "~/application/webhook/types";
 
 export type ReleaseTemplate = {
   published: string;
@@ -13,7 +13,7 @@ export class ReleaseEventHandler implements IReleaseEvent {
   // eslint-disable-next-line no-useless-constructor
   constructor(private readonly _templates: ReleaseTemplate) {}
 
-  published(ctx: Context): HandlerFunction<"release.published", unknown> {
+  published(ctx: Context): HandlerFunction<"release.published"> {
     return async (event) => {
       const body = markdownToHTML(event.payload.release.body);
       const response = templite(this._templates.published, {

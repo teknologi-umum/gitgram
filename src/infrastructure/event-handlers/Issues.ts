@@ -1,4 +1,3 @@
-import type { HandlerFunction } from "@octokit/webhooks/dist-types/types";
 import type { Context } from "grammy";
 import { asyncScheduler, Subject, throttleTime } from "rxjs";
 import templite from "templite";
@@ -6,6 +5,7 @@ import { HOME_GROUP } from "~/env";
 import type { IIssueEvent } from "~/application/interfaces/events";
 import { markdownToHTML } from "~/utils/markdown";
 import { transformLabels } from "~/utils/transformLabels";
+import type { HandlerFunction } from "~/application/webhook/types";
 
 export type IssueTemplate = {
   closed: string;
@@ -37,7 +37,7 @@ export class IssuesEventHandler implements IIssueEvent {
       });
   }
 
-  closed(ctx: Context): HandlerFunction<"issues.closed", unknown> {
+  closed(ctx: Context): HandlerFunction<"issue.closed"> {
     return async (event) => {
       const response =
         templite(this._templates.closed, {
@@ -62,7 +62,7 @@ export class IssuesEventHandler implements IIssueEvent {
     };
   }
 
-  opened(ctx: Context): HandlerFunction<"issues.opened", unknown> {
+  opened(ctx: Context): HandlerFunction<"issue.opened"> {
     return async (event) => {
       const body = markdownToHTML(event.payload.issue?.body ?? "");
       const response =
@@ -88,7 +88,7 @@ export class IssuesEventHandler implements IIssueEvent {
     };
   }
 
-  reopened(ctx: Context): HandlerFunction<"issues.reopened", unknown> {
+  reopened(ctx: Context): HandlerFunction<"issue.reopened"> {
     return async (event) => {
       const response =
         templite(this._templates.reopened, {
@@ -113,7 +113,7 @@ export class IssuesEventHandler implements IIssueEvent {
     };
   }
 
-  edited(ctx: Context): HandlerFunction<"issues.edited", unknown> {
+  edited(ctx: Context): HandlerFunction<"issue.edited"> {
     return (event) => {
       const response =
         templite(this._templates.edited, {
@@ -130,7 +130,7 @@ export class IssuesEventHandler implements IIssueEvent {
     };
   }
 
-  commentCreated(ctx: Context): HandlerFunction<"issue_comment.created", unknown> {
+  commentCreated(ctx: Context): HandlerFunction<"issue_comment.created"> {
     return async (event) => {
       const isPR = event.payload.issue.pull_request?.url;
       const body = markdownToHTML(event.payload.comment.body);
@@ -157,7 +157,7 @@ export class IssuesEventHandler implements IIssueEvent {
     };
   }
 
-  commentEdited(ctx: Context): HandlerFunction<"issue_comment.edited", unknown> {
+  commentEdited(ctx: Context): HandlerFunction<"issue_comment.edited"> {
     return (event) => {
       const body = markdownToHTML(event.payload.issue?.body ?? "");
       const response =

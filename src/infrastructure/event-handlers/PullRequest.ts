@@ -1,4 +1,3 @@
-import type { HandlerFunction } from "@octokit/webhooks/dist-types/types";
 import type { Context } from "grammy";
 import { Subject, throttleTime, asyncScheduler } from "rxjs";
 import templite from "templite";
@@ -6,6 +5,7 @@ import { HOME_GROUP } from "~/env";
 import type { IPullRequestEvent } from "~/application/interfaces/events";
 import { markdownToHTML } from "~/utils/markdown";
 import { transformLabels } from "~/utils/transformLabels";
+import type { HandlerFunction } from "~/application/webhook/types";
 
 export type PullRequestTemplate = {
   closed: {
@@ -40,7 +40,7 @@ export class PullRequestEventHandler implements IPullRequestEvent {
       });
   }
 
-  closed(ctx: Context): HandlerFunction<"pull_request.closed", unknown> {
+  closed(ctx: Context): HandlerFunction<"pull_request.closed"> {
     return async (event) => {
       let template = this._templates.closed.base;
 
@@ -75,7 +75,7 @@ export class PullRequestEventHandler implements IPullRequestEvent {
     };
   }
 
-  opened(ctx: Context): HandlerFunction<"pull_request.opened", unknown> {
+  opened(ctx: Context): HandlerFunction<"pull_request.opened"> {
     const template = this._templates.opened;
     return async (event) => {
       const body = markdownToHTML(event.payload.pull_request?.body ?? "");
@@ -102,7 +102,7 @@ export class PullRequestEventHandler implements IPullRequestEvent {
     };
   }
 
-  edited(ctx: Context): HandlerFunction<"pull_request.edited", unknown> {
+  edited(ctx: Context): HandlerFunction<"pull_request.edited"> {
     return (event) => {
       const body = markdownToHTML(event.payload.pull_request?.body ?? "");
       const response =

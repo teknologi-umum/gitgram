@@ -1,6 +1,6 @@
-import type { HandlerFunction } from "@octokit/webhooks/dist-types/types";
 import type { Context } from "grammy";
+import type { HandlerFunction } from "~/application/webhook/types";
 
 export interface IReleaseEvent {
-  published(ctx: Context): HandlerFunction<"release.published", unknown>;
+  published(ctx: Context): HandlerFunction<"release.published">;
 }

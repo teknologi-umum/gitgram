@@ -1,5 +1,5 @@
-import { Webhooks } from "@octokit/webhooks";
-import { Bot, Context, GrammyError, HttpError } from "grammy";
+import { Bot, GrammyError, HttpError } from "grammy";
+import type { Polka } from "polka";
 import type {
   IDeploymentEvent,
   IIssueEvent,
@@ -10,10 +10,10 @@ import type {
 } from "./interfaces/events";
 import type { IGroupMapping } from "./interfaces/IGroupMapping";
 import type { ILogger } from "./interfaces/ILogger";
-import type { IHttpServer, IServer } from "./interfaces/IServer";
-import { DEV, DEV_PROXY_URL, HOME_GROUP } from "~/env";
+import type { IServer } from "./interfaces/IServer";
+import { HOME_GROUP } from "~/env";
 
-type EventHandlerMapping = {
+export type EventHandlerMapping = {
   deployment: IDeploymentEvent;
   issues: IIssueEvent;
   pr: IPullRequestEvent;
@@ -27,48 +27,38 @@ export class App {
   private _startedDate = new Date();
   private readonly _supportedProviders = ["github"];
   private readonly _bot: Bot;
-  private readonly _webhook: Webhooks;
   private readonly _logger: ILogger;
   private readonly _groupMapping: IGroupMapping;
-  private readonly _eventHandlerMapping: EventHandlerMapping;
-  private readonly _httpServer: IHttpServer;
+  private readonly _httpServer: Polka;
   private readonly _port: number;
+  private readonly _servers: IServer[];
 
   constructor(config: {
     port: number;
     bot: Bot;
-    webhook: Webhooks;
     logger: ILogger;
     groupMapping: IGroupMapping;
-    eventHandlers: EventHandlerMapping;
-    httpServer: IHttpServer;
+    httpServer: Polka;
+    servers: IServer[];
   }) {
     if (!(config.bot instanceof Bot)) throw new Error("config.bot is not an instance of grammy bot.");
-    if (!(config.webhook instanceof Webhooks)) throw new Error("config.webhook is not an instance of octokit webhook.");
     if (config.logger === undefined || config.logger === null || typeof config.logger !== "object") {
       throw new Error("config.logger should be an instance implementing ILogger.");
     }
     if (config.groupMapping === undefined || config.groupMapping === null || typeof config.groupMapping !== "object") {
       throw new Error("config.groupMapping should be an instance implementing IGroupMapping.");
     }
-    if (
-      config.eventHandlers === undefined ||
-      config.eventHandlers === null ||
-      typeof config.eventHandlers !== "object"
-    ) {
-      throw new Error("config.eventHandlers should be provided to handle webhook events.");
-    }
     if (config.port === undefined || config.port === null || typeof config.port !== "number") {
       throw new Error("config.port should be a number.");
     }
+    if (config.servers.length === 0) throw new Error("config.servers should contain at least one webhook server");
 
     this._bot = config.bot;
-    this._webhook = config.webhook;
     this._logger = config.logger;
     this._groupMapping = config.groupMapping;
-    this._eventHandlerMapping = config.eventHandlers;
     this._httpServer = config.httpServer;
     this._port = config.port;
+    this._servers = config.servers;
   }
 
   private addGroupAdditionCommand() {
@@ -119,24 +109,27 @@ export class App {
 
       // Development purposes
       // See: https://github.com/octokit/webhooks.js#local-development
-      if (DEV) {
-        this._logger.info("Running on development EventSource with proxy");
-        const source = new EventSource(DEV_PROXY_URL);
-        source.onmessage = (event) => {
-          const webhookEvent = JSON.parse(event.data);
-          this._webhook
-            .verifyAndReceive({
-              id: webhookEvent["x-request-id"],
-              name: webhookEvent["x-github-event"],
-              signature: webhookEvent["x-hub-signature"],
-              payload: webhookEvent.body
-            })
-            // TODO: proper logging
-            .catch(console.error);
-        };
-      }
+      // if (DEV) {
+      //   this._logger.info("Running on development EventSource with proxy");
+      //   const source = new EventSource(DEV_PROXY_URL);
+      //   source.onmessage = (event) => {
+      //     const webhookEvent = JSON.parse(event.data);
+      //     this._webhook
+      //       .verifyAndReceive({
+      //         id: webhookEvent["x-request-id"],
+      //         name: webhookEvent["x-github-event"],
+      //         signature: webhookEvent["x-hub-signature"],
+      //         payload: webhookEvent.body
+      //       })
+      //       // TODO: proper logging
+      //       .catch(console.error);
+      //   };
+      // }
 
-      this.handleWebHookEvents(ctx);
+      // register webhook server routes
+      for (const server of this._servers) {
+        server.register(ctx);
+      }
     });
   }
 
@@ -153,95 +146,44 @@ export class App {
     });
   }
 
-  private handleWebHookEvents(ctx: Context) {
-    /**
-     * For the list of events that can be listened to, go see:
-     * https://github.com/octokit/webhooks.js#webhook-events
-     *
-     * For the Github webhooks documentation link below, please
-     * do not open them on different tabs, because they are all
-     * resides within one page.
-     */
+  private addJsonParser() {
+    this._httpServer.use(async (req, res, next) => {
+      try {
+        let body = "";
 
-    /**
-     * A deployment is created. The type of activity is specified in the action property of the payload object.
-     * https://docs.github.com/en/developers/webhooks-and-events/webhooks/webhook-events-and-payloads#deployment_status
-     * Also see: https://docs.github.com/en/rest/reference/deployments#list-deployment-statuses
-     */
-    this._webhook.on("deployment_status", this._eventHandlerMapping.deployment.status(ctx));
+        for await (const chunk of req) {
+          body += chunk;
+        }
 
-    /**
-     * Activity related to an issue. The type of activity is specified in the action property of the payload object.
-     * https://docs.github.com/en/developers/webhooks-and-events/webhooks/webhook-events-and-payloads#issues
-     * Also see: https://docs.github.com/en/rest/reference/issues#comments
-     */
-    this._webhook.on("issues.closed", this._eventHandlerMapping.issues.closed(ctx));
-    this._webhook.on("issues.opened", this._eventHandlerMapping.issues.opened(ctx));
-    this._webhook.on("issues.reopened", this._eventHandlerMapping.issues.reopened(ctx));
-    this._webhook.on("issues.edited", this._eventHandlerMapping.issues.edited(ctx));
-    this._webhook.on("issue_comment.created", this._eventHandlerMapping.issues.commentCreated(ctx));
-    this._webhook.on("issue_comment.edited", this._eventHandlerMapping.issues.commentEdited(ctx));
-
-    /**
-     * When you create a new webhook, we'll send you a simple ping event to let you know you've set up the webhook correctly.
-     * This event isn't stored so it isn't retrievable via the Events API endpoint.
-     * https://docs.github.com/en/developers/webhooks-and-events/webhooks/webhook-events-and-payloads#ping
-     */
-    this._webhook.on("ping", async (event) => {
-      await ctx.api.sendMessage(ctx.chat?.id ?? HOME_GROUP, `You got pinged! ${event.payload.zen}`);
+        switch (req.headers["content-type"]) {
+          case "application/x-www-form-urlencoded": {
+            const url = new URLSearchParams(body);
+            req.body = Object.fromEntries(url.entries());
+            break;
+          }
+          case "application/json":
+          default:
+            req.body = JSON.parse(body);
+        }
+        next();
+      } catch (error) {
+        res.writeHead(400, { "Content-Type": "application/json" }).end(
+          JSON.stringify({
+            msg: "Invalid body content with the Content-Type header specification"
+          })
+        );
+      }
     });
-
-    /**
-     * Activity related to pull requests. The type of activity is specified in the action property of the payload object.
-     * If the action is closed and the merged key is false, the pull request was closed with unmerged commits.
-     * If the action is closed and the merged key is true, the pull request was merged.
-     *
-     * https://docs.github.com/en/developers/webhooks-and-events/webhooks/webhook-events-and-payloads#pull_request
-     * Also see: https://docs.github.com/en/rest/reference/pulls
-     */
-    this._webhook.on("pull_request.closed", this._eventHandlerMapping.pr.closed(ctx));
-    this._webhook.on("pull_request.opened", this._eventHandlerMapping.pr.opened(ctx));
-    this._webhook.on("pull_request.edited", this._eventHandlerMapping.pr.edited(ctx));
-
-    /**
-     * Activity related to pull request reviews. The type of activity is specified in the action property of the payload object.
-     * A pull request review is submitted into a non-pending state.
-     *
-     * https://docs.github.com/en/developers/webhooks-and-events/webhooks/webhook-events-and-payloads#pull_request_review
-     * Also see: https://docs.github.com/en/rest/reference/pulls#reviews
-     */
-    this._webhook.on("pull_request_review.submitted", this._eventHandlerMapping.review.submitted(ctx));
-    this._webhook.on("pull_request_review.edited", this._eventHandlerMapping.review.edited(ctx));
-    this._webhook.on("pull_request_review_comment.created", this._eventHandlerMapping.review.created(ctx));
-
-    /**
-     * a release, pre-release, or draft of a release is published
-     * https://docs.github.com/en/developers/webhooks-and-events/webhooks/webhook-events-and-payloads#release
-     * Also see: https://docs.github.com/en/rest/reference/repos#releases
-     */
-    this._webhook.on("release.published", this._eventHandlerMapping.release.published(ctx));
-
-    /**
-     * Activity related to security vulnerability alerts in a repository.
-     * The type of activity is specified in the action property of the payload object.
-     *
-     * https://docs.github.com/en/developers/webhooks-and-events/webhooks/webhook-events-and-payloads#repository_vulnerability_alert
-     * Also see: https://docs.github.com/en/github/managing-security-vulnerabilities/about-alerts-for-vulnerable-dependencies
-     */
-    this._webhook.on("repository_vulnerability_alert.create", this._eventHandlerMapping.alert.created(ctx));
-  }
-
-  public addServers(servers: IServer[]) {
-    for (const server of servers) {
-      server.register();
-    }
   }
 
   public run() {
     this.addErrorHandling();
-    this.addOnStartHandler();
+    this.addJsonParser();
     this.addGroupAdditionCommand();
-    this._bot.start();
+    this.addOnStartHandler();
+    this._bot.start({
+      onStart: (botInfo) => this._logger.info(`Bot ${botInfo.username} has been started.`)
+    });
     this._httpServer.listen(this._port, () => this._logger.info(`Server running on port ${this._port}`));
   }
 

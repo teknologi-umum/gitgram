@@ -1,8 +1,8 @@
-import type { HandlerFunction } from "@octokit/webhooks/dist-types/types";
 import type { Context } from "grammy";
+import type { HandlerFunction } from "~/application/webhook/types";
 
 export interface IReviewEvent {
-  submitted(ctx: Context): HandlerFunction<"pull_request_review.submitted", unknown>;
-  edited(ctx: Context): HandlerFunction<"pull_request_review.edited", unknown>;
-  created(ctx: Context): HandlerFunction<"pull_request_review_comment.created", unknown>;
+  submitted(ctx: Context): HandlerFunction<"pull_request_review.submitted">;
+  edited(ctx: Context): HandlerFunction<"pull_request_review.edited">;
+  created(ctx: Context): HandlerFunction<"pull_request_review_comment.created">;
 }

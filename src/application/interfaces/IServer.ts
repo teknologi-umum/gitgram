@@ -1,10 +1,5 @@
-export interface IServer {
-  register(): void;
-}
+import type { Context } from "grammy";
 
-export interface IHttpServer {
-  listen(port: number, cb?: () => void): void;
-  server: {
-    close(): void;
-  };
+export interface IServer {
+  register(ctx: Context): void;
 }

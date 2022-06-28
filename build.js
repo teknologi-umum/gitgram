@@ -8,10 +8,10 @@ esbuild
     format: "esm",
     platform: "node",
     external: [
-      "@octokit/webhooks",
+      "polka",
       "dotenv",
       "eventsource",
-      "kleur",
+      "colorette",
       "remark-gfm",
       "remark-html",
       "remark-parse",

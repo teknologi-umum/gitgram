@@ -1,7 +1,7 @@
 // Webhook documentation for Github: https://docs.github.com/en/github-ae@latest/developers/webhooks-and-events/webhooks/webhook-events-and-payloads
 
 import { createHmac, timingSafeEqual } from "node:crypto";
-import type { HandlerFunction, IWebhook, WebhookEventName } from "./types";
+import type { EventPayload, HandlerFunction, IWebhook, WebhookEventName } from "./types";
 
 export class GithubWebhook implements IWebhook {
   public readonly provider = "github";
@@ -36,5 +36,15 @@ export class GithubWebhook implements IWebhook {
       this._handlers[event] = [];
     }
     this._handlers[event]!.push(handler as HandlerFunction<WebhookEventName>);
+  }
+
+  public async handle<E extends WebhookEventName>(eventName: E, payload: EventPayload[E]): Promise<void> {
+    // no handler available
+    const handlers = this._handlers[eventName] as HandlerFunction<WebhookEventName>[];
+    if (handlers === undefined || handlers.length === 0) return;
+
+    for await (const handler of handlers) {
+      handler({ type: eventName, payload });
+    }
   }
 }

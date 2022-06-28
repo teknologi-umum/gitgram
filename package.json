@@ -42,7 +42,6 @@
     "typescript": "^4.7.4"
   },
   "dependencies": {
-    "@octokit/webhooks": "^9.26.0",
     "cheerio": "^1.0.0-rc.11",
     "colorette": "^2.0.19",
     "dotenv": "^16.0.1",

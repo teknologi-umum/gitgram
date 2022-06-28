@@ -1,8 +1,8 @@
-import type { HandlerFunction } from "@octokit/webhooks/dist-types/types";
 import type { Context } from "grammy";
 import templite from "templite";
 import { HOME_GROUP } from "~/env";
 import type { IDeploymentEvent } from "~/application/interfaces/events/IDeploymentEvent";
+import type { HandlerFunction } from "~/application/webhook/types";
 
 export type DeploymentTemplate = {
   status: {
@@ -15,9 +15,9 @@ export class DeploymentEventHandler implements IDeploymentEvent {
   // eslint-disable-next-line no-useless-constructor
   constructor(private readonly _templates: DeploymentTemplate) {}
 
-  status(ctx: Context): HandlerFunction<"deployment_status", unknown> {
+  status(ctx: Context): HandlerFunction<"deployment_status"> {
     return async (event) => {
-      const description = event.payload.deployment_status?.description ?? "";
+      const description = event.payload.deployment_status.description;
       const response = templite(
         this._templates.status.statuses[event.payload.deployment_status.state.toLowerCase()] +
           this._templates.status.base,
