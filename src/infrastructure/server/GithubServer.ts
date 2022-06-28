@@ -17,9 +17,13 @@ export class GithubServer implements IServer {
   }
 
   private async verifySignature(req: Request, res: Response, next: NextHandler) {
-    const hubSignature = req.headers["X-Hub-Signature-256"] as string;
-    const isEqual = await this._config.webhook.verify(JSON.stringify(req.body), hubSignature);
+    const hubSignature = req.headers["x-hub-signature-256"] as string | undefined;
+    if (hubSignature === undefined || hubSignature.length === 0) {
+      res.writeHead(401, { "Content-Type": "application/json" }).end(JSON.stringify({ msg: "Invalid signature" }));
+      return;
+    }
 
+    const isEqual = await this._config.webhook.verify(JSON.stringify(req.body), hubSignature);
     if (!isEqual) {
       res.writeHead(401, { "Content-Type": "application/json" }).end(JSON.stringify({ msg: "Invalid signature" }));
       return;

@@ -16,8 +16,14 @@ export class GithubWebhook implements IWebhook {
   public async verify(payload: string, signature: string) {
     if (payload.length === 0 || signature.length === 0) throw Error("payload or signature wasn't provided.");
 
-    const digest = await this.sign(payload);
-    return timingSafeEqual(Buffer.from(signature), Buffer.from("sha256=" + digest));
+    const signatureBuffer = Buffer.from(signature);
+    const verificationBuffer = Buffer.from(await this.sign(payload));
+
+    if (signatureBuffer.length !== verificationBuffer.length) {
+      return false;
+    }
+
+    return timingSafeEqual(signatureBuffer, verificationBuffer);
   }
 
   public sign(payload: string): Promise<string> {
