@@ -59,11 +59,12 @@ export class App {
       }
 
       // register webhook server routes
+      this._logger.info("Registering webhook servers");
       for (const server of this._servers) {
         server.register();
       }
+      this._logger.info("Webhook servers have been registered");
 
-      this._logger.info("Telegram bot /start triggered");
       await ctx.api.sendMessage(ctx.chat.id, "I'm alive!");
 
       this._hasStarted = true;
