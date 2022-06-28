@@ -1,4 +1,6 @@
 export const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET ?? "";
+export const GITHUB_WEBHOOK_SECRET = process.env.GITHUB_WEBHOOK_SECRET || WEBHOOK_SECRET;
+export const GITLAB_WEBHOOK_SECRET = process.env.GITLAB_WEBHOOK_SECRET || WEBHOOK_SECRET;
 export const HOME_GROUP = process.env.HOME_GROUP ?? "";
 export const BOT_TOKEN = process.env.BOT_TOKEN ?? "";
 export const DEV_PROXY_URL = process.env.DEV_PROXY_URL ?? "";

@@ -4,8 +4,8 @@ import { Webhooks } from "@octokit/webhooks";
 import { Bot } from "grammy";
 import { parse as parseGura } from "gura";
 import polka from "polka";
-import { BOT_TOKEN, PORT, WEBHOOK_SECRET } from "../env";
-import { LocalGroupMapping } from "./infrastructure/LocalGroupMapping";
+import { BOT_TOKEN, GITHUB_WEBHOOK_SECRET, PORT, WEBHOOK_SECRET } from "../env";
+import { InMemoryGroupMapping } from "./infrastructure/LocalGroupMapping";
 import { ConsoleLogger } from "./infrastructure/ConsoleLogger";
 import { App } from "./application/App";
 import {
@@ -28,7 +28,7 @@ const config = parseGura(configFile) as AppConfig;
 const webhook = new Webhooks({ secret: WEBHOOK_SECRET });
 const bot = new Bot(BOT_TOKEN);
 const logger = new ConsoleLogger();
-const groupMapping = new LocalGroupMapping();
+const groupMapping = new InMemoryGroupMapping();
 const polkaInstance = polka();
 
 // main bot app instance
@@ -52,7 +52,7 @@ const app = new App({
 // webhook server and handlers
 const githubServer = new GithubServer(polkaInstance, {
   path: "/github",
-  webhook: new GithubWebhook("strong secret goes here")
+  webhook: new GithubWebhook(GITHUB_WEBHOOK_SECRET)
 });
 
 app.addServers([githubServer]);

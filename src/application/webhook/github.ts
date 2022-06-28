@@ -5,9 +5,13 @@ import type { HandlerFunction, IWebhook, WebhookEventName } from "./types";
 
 export class GithubWebhook implements IWebhook {
   public readonly provider = "github";
+  public readonly secretToken: string;
   private readonly _handlers: Partial<Record<WebhookEventName, HandlerFunction<WebhookEventName>[]>> = {};
 
-  constructor(public readonly secretToken: string) {}
+  constructor(secretToken: string) {
+    if (secretToken.length === 0) throw Error("Please provided a proper secret token.");
+    this.secretToken = secretToken;
+  }
 
   public async verify(payload: string, signature: string) {
     if (payload.length === 0 || signature.length === 0) throw Error("payload or signature wasn't provided.");

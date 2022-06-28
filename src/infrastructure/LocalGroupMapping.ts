@@ -10,7 +10,7 @@ type GroupMap = {
  * A group mapping for multiple repositories and groups support. This version stores
  * the group mapping using an array in memory.
  */
-export class LocalGroupMapping implements IGroupMapping {
+export class InMemoryGroupMapping implements IGroupMapping {
   groupMapping: GroupMap[];
 
   constructor() {
