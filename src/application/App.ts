@@ -106,18 +106,18 @@ export class App {
 
   private addJsonParser() {
     this._httpServer.use(async (req, res, next) => {
-      if (req.body === undefined || req.body.length === 0) {
-        res
-          .writeHead(422, { "Content-Type": "application/json" })
-          .end(JSON.stringify({ msg: "Body shouldn't be empty" }));
-        return;
-      }
-
       try {
         let body = "";
 
         for await (const chunk of req) {
           body += chunk;
+        }
+
+        if (body === undefined || body.length === 0) {
+          res
+            .writeHead(422, { "Content-Type": "application/json" })
+            .end(JSON.stringify({ msg: "Body shouldn't be empty" }));
+          return;
         }
 
         switch (req.headers["content-type"]) {
