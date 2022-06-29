@@ -15,10 +15,10 @@ import {
   ReleaseEventHandler,
   ReviewEventHandler,
   VulnerabilityEventHandler
-} from "~/infrastructure/event-handlers";
-import { GithubRoute } from "~/infrastructure/routes/GithubRoute";
-import { GithubWebhook } from "~/application/webhook/github";
-import { TelegramPresenter } from "~/presentation/TelegramHub";
+} from "~/presentation/event-handlers";
+import { GithubRoute } from "~/presentation/routes/GithubRoute";
+import { GithubWebhook } from "~/application/webhook/GithubWebhook";
+import { TelegramPresenter } from "~/presentation/TelegramPresenter";
 
 // configurations
 const configFile = await readFile(path.resolve("config", "config.ura"), { encoding: "utf-8" });

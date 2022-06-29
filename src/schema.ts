@@ -6,7 +6,7 @@ import {
   releaseTemplateSchema,
   reviewTemplateSchema,
   vulnerabilityTemplateSchema
-} from "~/infrastructure/event-handlers";
+} from "~/presentation/event-handlers";
 
 export const appConfigSchema = z.object({
   group_mappings: z
