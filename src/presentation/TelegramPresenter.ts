@@ -1,9 +1,9 @@
 import type { Bot } from "grammy";
 import { map, Subject } from "rxjs";
-import type { IHub, MessageData } from "~/application/interfaces/IHub";
+import type { IPresenter, MessageData } from "~/application/interfaces/IPresenter";
 import type { ILogger } from "~/application/interfaces/ILogger";
 
-export class TelegramHub implements IHub {
+export class TelegramPresenter implements IPresenter {
   private readonly _messageHub$ = new Subject<[string, number]>();
 
   constructor(private readonly _bot: Bot, private readonly _logger: ILogger) {

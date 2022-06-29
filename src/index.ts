@@ -16,9 +16,9 @@ import {
   ReviewEventHandler,
   VulnerabilityEventHandler
 } from "~/infrastructure/event-handlers";
-import { GithubServer } from "~/infrastructure/server/GithubServer";
+import { GithubRoute } from "~/infrastructure/routes/GithubRoute";
 import { GithubWebhook } from "~/application/webhook/github";
-import { TelegramHub } from "~/infrastructure/TelegramHub";
+import { TelegramPresenter } from "~/presentation/TelegramHub";
 
 // configurations
 const configFile = await readFile(path.resolve("config", "config.ura"), { encoding: "utf-8" });
@@ -27,7 +27,7 @@ const config = appConfigSchema.parse(parseGura(configFile));
 // app dependencies
 const bot = new Bot(BOT_TOKEN);
 const logger = new ConsoleLogger();
-const telegramHub = new TelegramHub(bot, logger);
+const telegramHub = new TelegramPresenter(bot, logger);
 
 // insert group_mapping from configuration
 const groupMapping = new InMemoryGroupMapping();
@@ -37,8 +37,6 @@ groupMapping.addMultiple(
     groupId: g.group_id
   }))
 );
-
-const polkaInstance = polka();
 
 const eventHandlers: EventHandlerMapping = {
   deployment: new DeploymentEventHandler(config.templates.deployment, telegramHub),
@@ -50,7 +48,8 @@ const eventHandlers: EventHandlerMapping = {
 };
 
 // webhook server and handlers
-const githubServer = new GithubServer(polkaInstance, {
+const polkaInstance = polka();
+const githubRoute = new GithubRoute(polkaInstance, {
   path: "/github",
   webhook: new GithubWebhook(GITHUB_WEBHOOK_SECRET),
   handlers: eventHandlers,
@@ -63,7 +62,7 @@ const app = new App({
   port: parseInt(PORT),
   bot,
   logger,
-  servers: [githubServer]
+  routes: [githubRoute]
 });
 
 app.run();

@@ -3,7 +3,7 @@ import type { IIssueEvent } from "~/application/interfaces/events";
 import { markdownToHTML } from "~/utils/markdown";
 import { transformLabels } from "~/utils/transformLabels";
 import type { HandlerFunction } from "~/application/webhook/types";
-import type { IHub } from "~/application/interfaces/IHub";
+import type { IPresenter } from "~/application/interfaces/IPresenter";
 import { interpolate } from "~/utils/interpolate";
 
 export const issueTemplateSchema = z.object({
@@ -19,19 +19,19 @@ export type IssueTemplate = z.infer<typeof issueTemplateSchema>;
 
 export class IssuesEventHandler implements IIssueEvent {
   // eslint-disable-next-line no-useless-constructor
-  constructor(private readonly _templates: IssueTemplate, private readonly _hub: IHub) {}
+  constructor(private readonly _templates: IssueTemplate, private readonly _hub: IPresenter) {}
 
   closed(): HandlerFunction<"issue.closed"> {
     return (event) => {
       const response =
         interpolate(this._templates.closed, {
-          repoName: event.payload.repository.full_name,
-          url: event.payload.issue.html_url,
+          repoName: event.payload.repository.fullName,
+          url: event.payload.issue.url,
           no: event.payload.issue.number,
           title: event.payload.issue.title,
-          assignee: event.payload.issue.assignee?.login ?? "No Assignee",
-          author: event.payload.issue.user.login,
-          actor: event.payload.sender.login
+          assignee: event.payload.issue.assignee?.name ?? "No Assignee",
+          author: event.payload.issue.user.name,
+          actor: event.payload.sender.name
         }) + transformLabels(event.payload.issue.labels);
 
       this._hub.send({
@@ -46,13 +46,13 @@ export class IssuesEventHandler implements IIssueEvent {
       const body = markdownToHTML(event.payload.issue?.body ?? "");
       const response =
         interpolate(this._templates.opened, {
-          repoName: event.payload.repository.full_name,
-          url: event.payload.issue.html_url,
+          repoName: event.payload.repository.fullName,
+          url: event.payload.issue.url,
           no: event.payload.issue.number,
           title: event.payload.issue.title,
           body: body || "<i>No description provided.</i>",
-          assignee: event.payload.issue.assignee?.login ?? "No Assignee",
-          author: event.payload.issue.user.login
+          assignee: event.payload.issue.assignee?.name ?? "No Assignee",
+          author: event.payload.issue.user.name
         }) + transformLabels(event.payload.issue.labels);
 
       this._hub.send({
@@ -66,13 +66,13 @@ export class IssuesEventHandler implements IIssueEvent {
     return (event) => {
       const response =
         interpolate(this._templates.reopened, {
-          repoName: event.payload.repository.full_name,
-          url: event.payload.issue.html_url,
+          repoName: event.payload.repository.fullName,
+          url: event.payload.issue.url,
           no: event.payload.issue.number,
           title: event.payload.issue.title,
-          assignee: event.payload.issue.assignee?.login ?? "No Assignee",
-          author: event.payload.issue.user.login,
-          actor: event.payload.sender.login
+          assignee: event.payload.issue.assignee?.name ?? "No Assignee",
+          author: event.payload.issue.user.name,
+          actor: event.payload.sender.name
         }) + transformLabels(event.payload.issue.labels);
 
       this._hub.send({
@@ -86,13 +86,13 @@ export class IssuesEventHandler implements IIssueEvent {
     return (event) => {
       const response =
         interpolate(this._templates.edited, {
-          repoName: event.payload.repository.full_name,
-          url: event.payload.issue.html_url,
+          repoName: event.payload.repository.fullName,
+          url: event.payload.issue.url,
           no: event.payload.issue.number,
           title: event.payload.issue.title,
-          assignee: event.payload.issue.assignee?.login ?? "No Assignee",
-          author: event.payload.issue.user.login,
-          actor: event.payload.sender.login
+          assignee: event.payload.issue.assignee?.name ?? "No Assignee",
+          author: event.payload.issue.user.name,
+          actor: event.payload.sender.name
         }) + transformLabels(event.payload.issue.labels);
 
       this._hub.send({
@@ -104,16 +104,16 @@ export class IssuesEventHandler implements IIssueEvent {
 
   commentCreated(): HandlerFunction<"issue_comment.created"> {
     return (event) => {
-      const isPR = event.payload.issue.pull_request?.url;
+      const isPR = event.payload.issue.pullRequest?.url;
       const body = markdownToHTML(event.payload.comment.body);
       const response = interpolate(this._templates.commentCreated, {
-        repoName: event.payload.repository.full_name,
-        url: event.payload.comment.html_url,
+        repoName: event.payload.repository.fullName,
+        url: event.payload.comment.url,
         no: event.payload.issue.number,
         title: event.payload.issue.title,
         body: body || "<i>Comment was empty.</i>",
-        author: event.payload.issue.user.login,
-        actor: event.payload.comment.user.login,
+        author: event.payload.issue.user.name,
+        actor: event.payload.comment.user.name,
         where: isPR ? "PR" : "Issue"
       });
 
@@ -129,14 +129,14 @@ export class IssuesEventHandler implements IIssueEvent {
       const body = markdownToHTML(event.payload.issue?.body ?? "");
       const response =
         interpolate(this._templates.commentEdited, {
-          repoName: event.payload.repository.full_name,
-          url: event.payload.issue.html_url,
+          repoName: event.payload.repository.fullName,
+          url: event.payload.issue.url,
           no: event.payload.issue.number,
           title: event.payload.issue.title,
           body: body || "<i>No description provided.</i>",
-          assignee: event.payload.issue.assignee?.login ?? "No Assignee",
-          author: event.payload.issue.user.login,
-          actor: event.payload.sender.login
+          assignee: event.payload.issue.assignee?.name ?? "No Assignee",
+          author: event.payload.issue.user.name,
+          actor: event.payload.sender.name
         }) + transformLabels(event.payload.issue.labels);
 
       this._hub.send({

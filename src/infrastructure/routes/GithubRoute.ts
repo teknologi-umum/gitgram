@@ -1,11 +1,12 @@
+import type { WebhookEvent } from "@octokit/webhooks-types";
 import type { NextHandler, Polka, Request, Response } from "polka";
-import type { IServer } from "src/application/interfaces/IServer";
 import type { ServerConfig } from "./types";
+import type { IRoute } from "~/application/interfaces/IRoute";
 import type { WebhookEventName } from "~/application/webhook/types";
 
-export class GithubServer implements IServer {
+export class GithubRoute implements IRoute {
   // eslint-disable-next-line no-useless-constructor
-  constructor(private readonly _polka: Polka<Request>, private readonly _config: ServerConfig) {}
+  constructor(private readonly _polka: Polka<Request>, private readonly _config: ServerConfig<WebhookEvent>) {}
 
   public register() {
     // handle issues events

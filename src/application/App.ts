@@ -9,7 +9,7 @@ import type {
   IVulnerabilityEvent
 } from "./interfaces/events";
 import type { ILogger } from "./interfaces/ILogger";
-import type { IServer } from "./interfaces/IServer";
+import type { IRoute } from "./interfaces/IRoute";
 import { HOME_GROUP } from "~/env";
 
 export type EventHandlerMapping = {
@@ -28,9 +28,9 @@ export class App {
   private readonly _logger: ILogger;
   private readonly _httpServer: Polka;
   private readonly _port: number;
-  private readonly _servers: IServer[];
+  private readonly _routes: IRoute[];
 
-  constructor(config: { port: number; bot: Bot; logger: ILogger; httpServer: Polka; servers: IServer[] }) {
+  constructor(config: { port: number; bot: Bot; logger: ILogger; httpServer: Polka; routes: IRoute[] }) {
     if (!(config.bot instanceof Bot)) throw new Error("config.bot is not an instance of grammy bot.");
     if (config.logger === undefined || config.logger === null || typeof config.logger !== "object") {
       throw new Error("config.logger should be an instance implementing ILogger.");
@@ -38,13 +38,13 @@ export class App {
     if (config.port === undefined || config.port === null || typeof config.port !== "number") {
       throw new Error("config.port should be a number.");
     }
-    if (config.servers.length === 0) throw new Error("config.servers should contain at least one webhook server");
+    if (config.routes.length === 0) throw new Error("config.servers should contain at least one webhook server");
 
     this._bot = config.bot;
     this._logger = config.logger;
     this._httpServer = config.httpServer;
     this._port = config.port;
-    this._servers = config.servers;
+    this._routes = config.routes;
   }
 
   private addOnStartHandler() {
@@ -60,7 +60,7 @@ export class App {
 
       // register webhook server routes
       this._logger.info("Registering webhook servers");
-      for (const server of this._servers) {
+      for (const server of this._routes) {
         server.register();
       }
       this._logger.info("Webhook servers have been registered");

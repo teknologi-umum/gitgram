@@ -2,7 +2,7 @@ import { z } from "zod";
 import type { IReviewEvent } from "~/application/interfaces/events";
 import { markdownToHTML } from "~/utils/markdown";
 import type { HandlerFunction } from "~/application/webhook/types";
-import type { IHub } from "~/application/interfaces/IHub";
+import type { IPresenter } from "~/application/interfaces/IPresenter";
 import { interpolate } from "~/utils/interpolate";
 
 export const reviewTemplateSchema = z.object({
@@ -18,7 +18,7 @@ export type ReviewTemplate = z.infer<typeof reviewTemplateSchema>;
 
 export class ReviewEventHandler implements IReviewEvent {
   // eslint-disable-next-line no-useless-constructor
-  constructor(private readonly _templates: ReviewTemplate, private readonly _hub: IHub) {}
+  constructor(private readonly _templates: ReviewTemplate, private readonly _hub: IPresenter) {}
 
   submitted(): HandlerFunction<"pull_request_review.submitted"> {
     return (event) => {
@@ -32,14 +32,14 @@ export class ReviewEventHandler implements IReviewEvent {
       const response = interpolate(
         this._templates.submitted.type[event.payload.review.state.toLowerCase()] + this._templates.submitted.base,
         {
-          repoName: event.payload.repository.full_name,
-          url: event.payload.pull_request.html_url,
-          no: event.payload.pull_request.number,
-          title: event.payload.pull_request.title,
+          repoName: event.payload.repository.fullName,
+          url: event.payload.pullRequest.url,
+          no: event.payload.pullRequest.number,
+          title: event.payload.pullRequest.title,
           body: body,
-          author: event.payload.pull_request.user.login,
-          reviewUrl: event.payload.review.html_url,
-          actor: event.payload.sender.login
+          author: event.payload.pullRequest.user.name,
+          reviewUrl: event.payload.review.url,
+          actor: event.payload.sender.name
         }
       );
 
@@ -55,14 +55,14 @@ export class ReviewEventHandler implements IReviewEvent {
       if (!event.payload.review.body) return;
       const body = markdownToHTML(event.payload.review.body);
       const response = interpolate(this._templates.edited, {
-        repoName: event.payload.repository.full_name,
-        url: event.payload.pull_request.html_url,
-        no: event.payload.pull_request.number,
-        title: event.payload.pull_request.title,
+        repoName: event.payload.repository.fullName,
+        url: event.payload.pullRequest.url,
+        no: event.payload.pullRequest.number,
+        title: event.payload.pullRequest.title,
         body: body,
-        author: event.payload.pull_request.user.login,
-        reviewUrl: event.payload.review.html_url,
-        actor: event.payload.sender.login
+        author: event.payload.pullRequest.user.name,
+        reviewUrl: event.payload.review.url,
+        actor: event.payload.sender.name
       });
 
       this._hub.send({
@@ -76,14 +76,14 @@ export class ReviewEventHandler implements IReviewEvent {
     return (event) => {
       const body = markdownToHTML(event.payload.comment.body);
       const response = interpolate(this._templates.created, {
-        repoName: event.payload.repository.full_name,
-        url: event.payload.pull_request.html_url,
-        no: event.payload.pull_request.number,
-        title: event.payload.pull_request.title,
+        repoName: event.payload.repository.fullName,
+        url: event.payload.pullRequest.url,
+        no: event.payload.pullRequest.number,
+        title: event.payload.pullRequest.title,
         body: body || "<i>No description provided.</i>",
-        author: event.payload.pull_request.user.login,
+        author: event.payload.pullRequest.user.name,
         reviewUrl: event.payload.comment.url,
-        actor: event.payload.sender.login
+        actor: event.payload.sender.name
       });
 
       this._hub.send({
