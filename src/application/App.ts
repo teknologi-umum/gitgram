@@ -22,8 +22,6 @@ export type EventHandlerMapping = {
 };
 
 export class App {
-  private _hasStarted = false;
-  private _startedDate = new Date();
   private readonly _bot: Bot;
   private readonly _logger: ILogger;
   private readonly _httpServer: Polka;
@@ -47,48 +45,32 @@ export class App {
     this._routes = config.routes;
   }
 
-  private addOnStartHandler() {
-    this._bot.command("start", async (ctx) => {
-      this._logger.info("Telegram bot /start triggered");
+  private registerServers() {
+    // register webhook server routes
+    this._logger.info("Registering webhook servers");
+    for (const server of this._routes) {
+      server.register();
+    }
+    this._logger.info("Webhook servers have been registered");
 
-      if (this._hasStarted) {
-        await ctx.reply(
-          `This bot is already running since ${this._startedDate.toLocaleDateString()} To restart it, please stop it first.`
-        );
-        return;
-      }
-
-      // register webhook server routes
-      this._logger.info("Registering webhook servers");
-      for (const server of this._routes) {
-        server.register();
-      }
-      this._logger.info("Webhook servers have been registered");
-
-      await ctx.api.sendMessage(ctx.chat.id, "I'm alive!");
-
-      this._hasStarted = true;
-      this._startedDate = new Date();
-
-      // Development purposes
-      // See: https://github.com/octokit/webhooks.js#local-development
-      // if (DEV) {
-      //   this._logger.info("Running on development EventSource with proxy");
-      //   const source = new EventSource(DEV_PROXY_URL);
-      //   source.onmessage = (event) => {
-      //     const webhookEvent = JSON.parse(event.data);
-      //     this._webhook
-      //       .verifyAndReceive({
-      //         id: webhookEvent["x-request-id"],
-      //         name: webhookEvent["x-github-event"],
-      //         signature: webhookEvent["x-hub-signature"],
-      //         payload: webhookEvent.body
-      //       })
-      //       // TODO: proper logging
-      //       .catch(console.error);
-      //   };
-      // }
-    });
+    // Development purposes
+    // See: https://github.com/octokit/webhooks.js#local-development
+    // if (DEV) {
+    //   this._logger.info("Running on development EventSource with proxy");
+    //   const source = new EventSource(DEV_PROXY_URL);
+    //   source.onmessage = (event) => {
+    //     const webhookEvent = JSON.parse(event.data);
+    //     this._webhook
+    //       .verifyAndReceive({
+    //         id: webhookEvent["x-request-id"],
+    //         name: webhookEvent["x-github-event"],
+    //         signature: webhookEvent["x-hub-signature"],
+    //         payload: webhookEvent.body
+    //       })
+    //       // TODO: proper logging
+    //       .catch(console.error);
+    //   };
+    // }
   }
 
   private addErrorHandling() {
@@ -144,9 +126,11 @@ export class App {
   public run() {
     this.addErrorHandling();
     this.addJsonParser();
-    this.addOnStartHandler();
     this._bot.start({
-      onStart: (botInfo) => this._logger.info(`@${botInfo.username} has been started.`)
+      onStart: (botInfo) => {
+        this.registerServers();
+        this._logger.info(`@${botInfo.username} has been started.`);
+      }
     });
     this._httpServer.listen(this._port, () => this._logger.info(`Server running on port ${this._port}`));
   }
