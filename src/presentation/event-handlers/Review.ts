@@ -44,6 +44,7 @@ export class ReviewEventHandler implements IReviewEvent {
       );
 
       this._hub.send({
+        event: "pull_request_review.submitted",
         targetsId: event.targetsId,
         payload: response
       });
@@ -66,6 +67,7 @@ export class ReviewEventHandler implements IReviewEvent {
       });
 
       this._hub.send({
+        event: "pull_request_review.edited",
         targetsId: event.targetsId,
         payload: response
       });
@@ -87,6 +89,7 @@ export class ReviewEventHandler implements IReviewEvent {
       });
 
       this._hub.send({
+        event: "pull_request_review_comment.created",
         targetsId: event.targetsId,
         payload: response
       });

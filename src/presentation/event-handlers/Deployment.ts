@@ -33,6 +33,7 @@ export class DeploymentEventHandler implements IDeploymentEvent {
       );
 
       this._hub.send({
+        event: "deployment_status",
         targetsId: event.targetsId,
         payload: response
       });

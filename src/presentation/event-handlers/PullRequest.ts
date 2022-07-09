@@ -48,6 +48,7 @@ export class PullRequestEventHandler implements IPullRequestEvent {
         }) + transformLabels(event.payload.pullRequest.labels);
 
       this._hub.send({
+        event: "pull_request.closed",
         targetsId: event.targetsId,
         payload: response
       });
@@ -70,6 +71,7 @@ export class PullRequestEventHandler implements IPullRequestEvent {
         }) + transformLabels(event.payload.pullRequest.labels);
 
       this._hub.send({
+        event: "pull_request.opened",
         targetsId: event.targetsId,
         payload: response
       });
@@ -92,6 +94,7 @@ export class PullRequestEventHandler implements IPullRequestEvent {
         }) + transformLabels(event.payload.pullRequest.labels);
 
       this._hub.send({
+        event: "pull_request.edited",
         targetsId: event.targetsId,
         payload: response
       });

@@ -28,6 +28,7 @@ export class ReleaseEventHandler implements IReleaseEvent {
       });
 
       this._hub.send({
+        event: "release.published",
         targetsId: event.targetsId,
         payload: response
       });

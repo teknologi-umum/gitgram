@@ -35,6 +35,7 @@ export class IssuesEventHandler implements IIssueEvent {
         }) + transformLabels(event.payload.issue.labels);
 
       this._hub.send({
+        event: "issue.closed",
         targetsId: event.targetsId,
         payload: response
       });
@@ -56,6 +57,7 @@ export class IssuesEventHandler implements IIssueEvent {
         }) + transformLabels(event.payload.issue.labels);
 
       this._hub.send({
+        event: "issue.opened",
         targetsId: event.targetsId,
         payload: response
       });
@@ -76,6 +78,7 @@ export class IssuesEventHandler implements IIssueEvent {
         }) + transformLabels(event.payload.issue.labels);
 
       this._hub.send({
+        event: "issue.reopened",
         targetsId: event.targetsId,
         payload: response
       });
@@ -96,6 +99,7 @@ export class IssuesEventHandler implements IIssueEvent {
         }) + transformLabels(event.payload.issue.labels);
 
       this._hub.send({
+        event: "issue.edited",
         targetsId: event.targetsId,
         payload: response
       });
@@ -118,6 +122,7 @@ export class IssuesEventHandler implements IIssueEvent {
       });
 
       this._hub.send({
+        event: "issue_comment.created",
         targetsId: event.targetsId,
         payload: response
       });
@@ -140,6 +145,7 @@ export class IssuesEventHandler implements IIssueEvent {
         }) + transformLabels(event.payload.issue.labels);
 
       this._hub.send({
+        event: "issue_comment.edited",
         targetsId: event.targetsId,
         payload: response
       });
