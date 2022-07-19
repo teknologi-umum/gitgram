@@ -35,25 +35,29 @@
     "esbuild-node-loader": "^0.8.0",
     "esbuild-register": "^3.3.3",
     "eslint": "^8.18.0",
+    "eslint-plugin-import": "^2.26.0",
     "husky": "^8.0.1",
     "nodemon": "^2.0.17",
     "tslib": "^2.4.0",
     "typescript": "^4.7.4"
   },
   "dependencies": {
-    "@octokit/webhooks": "^9.26.0",
+    "@octokit/webhooks-types": "^5.8.0",
     "cheerio": "^1.0.0-rc.11",
+    "colorette": "^2.0.19",
     "dotenv": "^16.0.1",
     "eventsource": "^2.0.2",
-    "kleur": "^4.1.4",
+    "grammy": "^1.9.0",
+    "gura": "^1.4.4",
+    "polka": "^1.0.0-next.22",
     "remark-gfm": "^3.0.1",
     "remark-html": "^15.0.1",
     "remark-parse": "^10.0.1",
     "rxjs": "^7.5.5",
     "sanitize-html": "^2.7.0",
-    "telegraf": "^4.8.5",
     "templite": "^1.2.0",
-    "unified": "^10.1.2"
+    "unified": "^10.1.2",
+    "zod": "^3.17.3"
   },
   "engineStrict": true,
   "engines": {

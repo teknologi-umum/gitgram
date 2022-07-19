@@ -8,21 +8,24 @@ esbuild
     format: "esm",
     platform: "node",
     external: [
-      "@octokit/webhooks",
+      "cheerio",
+      "colorette",
       "dotenv",
       "eventsource",
-      "kleur",
+      "grammy",
+      "gura",
+      "polka",
       "remark-gfm",
       "remark-html",
       "remark-parse",
       "rxjs",
       "sanitize-html",
-      "telegraf",
       "templite",
-      "unified"
+      "unified",
+      "zod"
     ],
     outdir: "./dist",
-    target: ["es2020", "node16.10"],
+    target: ["node16.15"],
     tsconfig: "tsconfig.json"
   })
   .catch((e) => {
