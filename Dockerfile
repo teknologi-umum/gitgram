@@ -8,7 +8,8 @@ RUN npm install
 
 ENV NODE_ENV=production
 
-RUN npm run build \
+RUN npm install \
+    && npm run build \
     && rm -rf node_modules \
     && npm install --production
 
