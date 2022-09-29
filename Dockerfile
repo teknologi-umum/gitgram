@@ -4,14 +4,12 @@ WORKDIR /home/app
 
 COPY . .
 
-RUN npm install
-
-ENV NODE_ENV=production
-
 RUN npm install \
     && npm run build \
     && rm -rf node_modules \
     && npm install --production
+
+ENV NODE_ENV=production
 
 EXPOSE 3000
 
