@@ -36,11 +36,13 @@ export class GithubRoute implements IRoute {
   }
 
   private handleWebhook(req: Request, res: Response) {
-    const eventName = `${req.body.event}.${req.body.payload.action}` as WebhookEventName;
-    const targetId = this._config.groupMapping.findGroupsIn(req.body.payload.repository.html_url);
+    const event = req.headers["X-Github-Event"];
+    const eventType = req.body.action !== undefined ? `.${req.body.action}` : "";
+    const eventName = `${event}${eventType}` as WebhookEventName;
+    const targetId = this._config.groupMapping.findGroupsIn(req.body.repository.html_url);
     // reply back first so github knows we've received it before waiting us handling the response
     res.writeHead(200, { "Content-Type": "application/json" }).end(JSON.stringify({ msg: "OK" }));
-    this._config.webhook.handle(eventName, req.body.payload, targetId);
+    this._config.webhook.handle(eventName, req.body, targetId);
   }
 
   private async verifySignature(req: Request, res: Response, next: NextHandler) {
