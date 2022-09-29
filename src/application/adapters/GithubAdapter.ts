@@ -150,7 +150,9 @@ export class GithubAdapter {
     // pull request related events
     if (eventName.startsWith("pull_request.")) {
       const payload = {
-        pullRequest: this._pullRequest
+        pullRequest: this._pullRequest,
+        repository: this._repository,
+        sender: this._sender
       };
       switch (eventName) {
         case "pull_request.opened":
@@ -166,7 +168,9 @@ export class GithubAdapter {
     if (eventName.startsWith("pull_request_review")) {
       const payload = {
         pullRequest: this._pullRequest,
-        repository: this._repository
+        repository: this._repository,
+        review: this._review,
+        sender: this._sender
       };
       switch (eventName) {
         case "pull_request_review.edited":
