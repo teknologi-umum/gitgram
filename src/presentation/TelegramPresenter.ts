@@ -40,7 +40,7 @@ export class TelegramPresenter implements IPresenter {
         })
       )
       .subscribe((targetId) => {
-        this._logger.info(`Message has been sent to ${targetId}`);
+        this._logger.info(`Message has been sent to ${targetId.chat.id}`);
       });
   }
 

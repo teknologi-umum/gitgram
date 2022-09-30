@@ -6,7 +6,7 @@ import type { WebhookEventName } from "~/application/webhook/types";
 
 export class GithubRoute implements IRoute {
   // eslint-disable-next-line no-useless-constructor
-  constructor(private readonly _polka: Polka<Request>, private readonly _config: ServerConfig<WebhookEvent>) {}
+  constructor(private readonly _polka: Polka<Request>, private readonly _config: ServerConfig<WebhookEvent>) { }
 
   public register() {
     // handle issues events
@@ -36,11 +36,13 @@ export class GithubRoute implements IRoute {
   }
 
   private handleWebhook(req: Request, res: Response) {
-    const eventName = `${req.body.event}.${req.body.payload.action}` as WebhookEventName;
-    const targetId = this._config.groupMapping.findGroupsIn(req.body.payload.repository.html_url);
+    const event = req.headers["x-github-event"];
+    const eventType = req.body.action !== undefined ? `.${req.body.action}` : "";
+    const eventName = `${event}${eventType}` as WebhookEventName;
+    const targetId = this._config.groupMapping.findGroupsIn(req.body.repository.html_url);
     // reply back first so github knows we've received it before waiting us handling the response
     res.writeHead(200, { "Content-Type": "application/json" }).end(JSON.stringify({ msg: "OK" }));
-    this._config.webhook.handle(eventName, req.body.payload, targetId);
+    this._config.webhook.handle(eventName, req.body, targetId);
   }
 
   private async verifySignature(req: Request, res: Response, next: NextHandler) {
