@@ -15,28 +15,11 @@ export function markdownToHTML(payload: string): string {
   // string or any other types which I don't know.
   if (!payload) return "";
 
-  const html = unified()
-    .use(remarkParse)
-    .use(remarkGfm)
-    .use(remarkHtml)
-    .processSync(payload).toString("utf-8");
-  const trimmedHtml = trimHtml(100, html);
-  const sanitized = sanitize(trimmedHtml,
-    {
-      allowedTags: ["a",
-        "b",
-        "i",
-        "s",
-        "u",
-        "em",
-        "strong",
-        "strike",
-        "del",
-        "code",
-        "pre",
-        "br"],
-      allowedAttributes: {"a": ["href"] }
-    });
-    
-  return sanitized;
+  const html = unified().use(remarkParse).use(remarkGfm).use(remarkHtml).processSync(payload).toString("utf-8");
+  const sanitized = sanitize(html, {
+    allowedTags: ["a", "b", "i", "s", "u", "em", "strong", "strike", "del", "code", "pre", "br"],
+    allowedAttributes: { a: ["href"] }
+  });
+  const trimmedHtml = trimHtml(200, sanitized);
+  return trimmedHtml;
 }
