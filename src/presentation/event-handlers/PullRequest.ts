@@ -29,9 +29,9 @@ export class PullRequestEventHandler implements IPullRequestEvent {
       let template = this._templates.closed.base;
 
       if (event.payload.pullRequest.isMerged) {
-        template = this._templates.closed.type.merged + this._templates.closed.base;
+        template = this._templates.closed.type.merged + "\n" + this._templates.closed.base;
       } else {
-        template = this._templates.closed.type.closed + this._templates.closed.base;
+        template = this._templates.closed.type.closed + "\n" + this._templates.closed.base;
       }
 
       const body = markdownToHTML(event.payload.pullRequest?.body ?? "");
@@ -41,7 +41,7 @@ export class PullRequestEventHandler implements IPullRequestEvent {
           no: event.payload.pullRequest.number,
           title: event.payload.pullRequest.title,
           body: body || "<i>No description provided.</i>",
-          assignee: event.payload.pullRequest.assignee?.name || "No Assignee",
+          assignee: event.payload.pullRequest.assignee?.name || "<i>No Assignee</i>",
           author: event.payload.pullRequest.user.name,
           repoName: event.payload.repository.fullName,
           actor: event.payload.sender.name
@@ -66,7 +66,7 @@ export class PullRequestEventHandler implements IPullRequestEvent {
           no: event.payload.pullRequest.number,
           title: event.payload.pullRequest.title,
           body: body || "<i>No description provided.</i>",
-          assignee: event.payload.pullRequest.assignee?.name || "No Assignee",
+          assignee: event.payload.pullRequest.assignee?.name || "<i>No Assignee</i>",
           author: event.payload.pullRequest.user.name
         }) + transformLabels(event.payload.pullRequest.labels);
 
@@ -88,7 +88,7 @@ export class PullRequestEventHandler implements IPullRequestEvent {
           no: event.payload.pullRequest.number,
           title: event.payload.pullRequest.title,
           body: body || "<i>No description provided.</i>",
-          assignee: event.payload.pullRequest.assignee?.name || "No Assignee",
+          assignee: event.payload.pullRequest.assignee?.name || "<i>No Assignee</i>",
           author: event.payload.pullRequest.user.name,
           actor: event.payload.sender.name
         }) + transformLabels(event.payload.pullRequest.labels);

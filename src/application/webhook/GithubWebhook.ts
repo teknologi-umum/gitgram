@@ -2,14 +2,17 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 import type { WebhookEvent } from "@octokit/webhooks-types";
 import { GithubAdapter } from "../adapters/GithubAdapter";
 import type { HandlerFunction, IWebhook, WebhookEventName } from "./types";
+import type { ILogger } from "../interfaces/ILogger";
 
 export class GithubWebhook implements IWebhook<WebhookEvent> {
   public readonly secretToken: string;
   private readonly _handlers: Partial<Record<WebhookEventName, HandlerFunction<WebhookEventName>[]>> = {};
+  private readonly _logger: ILogger;
 
-  constructor(secretToken: string) {
+  constructor(secretToken: string, logger: ILogger) {
     if (secretToken.length === 0) throw Error("Please provided a proper secret token.");
     this.secretToken = secretToken;
+    this._logger = logger;
   }
 
   public async verify(payload: string, signature: string) {
@@ -40,12 +43,17 @@ export class GithubWebhook implements IWebhook<WebhookEvent> {
   public async handle(eventName: WebhookEventName, payload: WebhookEvent, targetsId: number[]): Promise<void> {
     // no handler available
     const handlers = this._handlers[eventName] as HandlerFunction<WebhookEventName>[];
-    if (handlers === undefined || handlers.length === 0) return;
+    if (handlers === undefined || handlers.length === 0) {
+      this._logger.warn(`No handler available for ${eventName}`);
+      return;
+    }
 
     const p = new GithubAdapter(payload);
 
     for await (const handler of handlers) {
       handler({ type: eventName, payload: p.get(eventName), targetsId });
     }
+
+    this._logger.info(`Handled: ${eventName} to ${targetsId.join(" ")}`);
   }
 }

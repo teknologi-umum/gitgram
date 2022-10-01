@@ -28,16 +28,16 @@ export class GithubAdapter {
       this._repository = {
         name: ghRepository.name,
         fullName: ghRepository.full_name,
-        description: ghRepository.description ?? "Not Available",
+        description: ghRepository.description ?? "<i>Not Available</i>",
         gitUrl: ghRepository.git_url,
         owner: {
           name: ghRepository.owner.login
         },
         isPrivate: ghRepository.private,
         sshUrl: ghRepository.ssh_url,
-        homepage: ghRepository.homepage ?? "Not Available",
-        language: ghRepository.language ?? "Unknown",
-        license: ghRepository.license?.name ?? "Not Available"
+        homepage: ghRepository.homepage ?? "<i>Not Available</i>",
+        language: ghRepository.language ?? "<i>Unknown</i>",
+        license: ghRepository.license?.name ?? "<i>Not Available</i>"
       };
     }
 
@@ -52,9 +52,9 @@ export class GithubAdapter {
           name: ghIssue.user.login
         },
         assignee: {
-          name: ghIssue.assignee?.login ?? "Unknown"
+          name: ghIssue.assignee?.login ?? "<i>Unknown</i>"
         },
-        body: ghIssue.body ?? "Empty body"
+        body: ghIssue.body ?? "<i>Empty body</i>"
       };
     }
 
@@ -69,9 +69,9 @@ export class GithubAdapter {
       this._pullRequest = {
         url: ghPullRequest.html_url,
         assignee: {
-          name: ghPullRequest.assignee?.login ?? "Not available"
+          name: ghPullRequest.assignee?.login ?? "<i>Not available</i>"
         },
-        body: ghPullRequest.body ?? "Empty body",
+        body: ghPullRequest.body ?? "<i>Empty body</i>",
         labels: ghPullRequest.labels,
         isMerged: ghPullRequest.merged_at !== null,
         number: ghPullRequest.number,
@@ -95,7 +95,7 @@ export class GithubAdapter {
     if ("review" in payload && payload.review !== undefined) {
       const ghReview = payload.review;
       this._review = {
-        body: ghReview.body ?? "Empty body",
+        body: ghReview.body ?? "<i>Empty body</i>",
         state: ghReview.state,
         url: ghReview.html_url
       };
@@ -114,7 +114,7 @@ export class GithubAdapter {
     if ("release" in payload && payload.release !== undefined) {
       const ghRelease = payload.release;
       this._release = {
-        body: ghRelease.body ?? "Empty body",
+        body: ghRelease.body ?? "<i>Empty body</i>",
         name: ghRelease.name,
         tagName: ghRelease.tag_name,
         url: ghRelease.html_url
@@ -132,14 +132,14 @@ export class GithubAdapter {
       };
 
       switch (eventName) {
-        case "issue.opened":
-          return payload as EventPayload["issue.opened"];
-        case "issue.closed":
-          return payload as EventPayload["issue.closed"];
-        case "issue.edited":
-          return payload as EventPayload["issue.edited"];
-        case "issue.reopened":
-          return payload as EventPayload["issue.reopened"];
+        case "issues.opened":
+          return payload as EventPayload["issues.opened"];
+        case "issues.closed":
+          return payload as EventPayload["issues.closed"];
+        case "issues.edited":
+          return payload as EventPayload["issues.edited"];
+        case "issues.reopened":
+          return payload as EventPayload["issues.reopened"];
         case "issue_comment.created":
           return { ...payload, comment: this._comment } as EventPayload["issue_comment.created"];
         case "issue_comment.edited":
@@ -152,6 +152,7 @@ export class GithubAdapter {
       const payload = {
         pullRequest: this._pullRequest,
         repository: this._repository,
+        review: this._review,
         sender: this._sender
       };
       switch (eventName) {

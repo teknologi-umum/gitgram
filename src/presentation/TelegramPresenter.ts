@@ -13,10 +13,10 @@ export class TelegramPresenter implements IPresenter {
       .pipe(
         // throttle each event type individually
         groupBy((info) => info.event),
-        mergeMap((grouped) => grouped.pipe(throttleTime(1000))),
+        mergeMap((grouped) => grouped.pipe(throttleTime(5000))),
         // we can only send 1 message / second for each targetId, this is a limitation from telegram API
         groupBy((info) => info.targetId),
-        mergeMap((grouped) => grouped.pipe(throttleTime(1000))),
+        mergeMap((grouped) => grouped.pipe(throttleTime(15000))),
         // send 'em
         mergeMap(({ targetId, payload }) => {
           return this._bot.api.sendMessage(targetId, payload, {
@@ -39,8 +39,8 @@ export class TelegramPresenter implements IPresenter {
           }
         })
       )
-      .subscribe((targetId) => {
-        this._logger.info(`Message has been sent to ${targetId.chat.id}`);
+      .subscribe((message) => {
+        this._logger.info(`Message has been sent to ${message.chat.id}`);
       });
   }
 

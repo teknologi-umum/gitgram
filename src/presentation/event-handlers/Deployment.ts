@@ -27,8 +27,8 @@ export class DeploymentEventHandler implements IDeploymentEvent {
           repoName: event.payload.repository.fullName,
           environment: event.payload.deploymentStatus.environment,
           description:
-            (description.length > 100 ? description.slice(0, 100) : description) || "No description provided",
-          targetUrl: event.payload.deploymentStatus?.targetUrl ?? "No target URL provided"
+            (description.length > 100 ? description.slice(0, 100) : description) || "<i>No description provided</i>",
+          targetUrl: event.payload.deploymentStatus?.targetUrl ?? "<i>No target URL provided</i>"
         }
       );
 
