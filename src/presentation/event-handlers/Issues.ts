@@ -131,14 +131,16 @@ export class IssuesEventHandler implements IIssueEvent {
 
   commentEdited(): HandlerFunction<"issue_comment.edited"> {
     return (event) => {
-      const body = markdownToHTML(event.payload.issue?.body ?? "");
+      const oldBody = markdownToHTML(event.payload.changes!.body.from ?? "");
+      const newBody = markdownToHTML(event.payload.comment.body ?? "");
       const response =
         interpolate(this._templates.commentEdited, {
           repoName: event.payload.repository.fullName,
           url: event.payload.issue.url,
           no: event.payload.issue.number,
           title: event.payload.issue.title,
-          body: body || "<i>No description provided.</i>",
+          oldBody: oldBody,
+          newBody: newBody,
           assignee: event.payload.issue.assignee?.name ?? "No Assignee",
           author: event.payload.issue.user.name,
           actor: event.payload.sender.name

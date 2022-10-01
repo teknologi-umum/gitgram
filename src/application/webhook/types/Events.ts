@@ -1,4 +1,4 @@
-import type { Deployment, Issue, PullRequest, Repository, Sender, Comment, Review, Alert, Release } from "./Entity";
+import type { Deployment, Issue, PullRequest, Repository, Sender, Comment, Review, Alert, Release, CommentChanges } from "./Entity";
 
 export type BaseEvent = {
   repository: Repository;
@@ -12,6 +12,7 @@ export type IssueEventPayload = {
 export type IssueCommentEventPayload = {
   issue: Issue;
   comment: Comment;
+  changes?: CommentChanges;
   sender: Sender;
 };
 
