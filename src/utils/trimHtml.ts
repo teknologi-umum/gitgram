@@ -7,8 +7,8 @@ import * as cheerio from "cheerio";
  * @returns {number}
  */
 const closest = (needle: number, haystack: number[]): number => {
-  return haystack.length < 1
-    ? haystack.at(-1)! // we like bliding ej, Array.prototype.at is only available from 16.6.0
+  return haystack.length < 2
+    ? haystack.at(-1)!
     : haystack.reduce((curr, acc) => {
       const aDiff = Math.abs(curr - needle);
       const bDiff = Math.abs(acc - needle);
@@ -19,11 +19,14 @@ const closest = (needle: number, haystack: number[]): number => {
 
 /**
  * Trim HTML according to tag
- * @param {number} max
  * @param {string} content
+ * @param {number} maxLength
  * @returns {string}
  */
-export const trimHtml = (max: number, content: string): string => {
+export const trimHtml = (content: string, maxLength: number): string => {
+  // if the string is shorter than the maxLength, just return it as is
+  if (content.length < maxLength) return content.trim();
+
   // add wrapper div for cheerio.children selector to work
   // we want to select all tags _without_ their children
   const $ = cheerio.load(`<div>${content}</div>`, {
@@ -39,5 +42,5 @@ export const trimHtml = (max: number, content: string): string => {
     .map((el) => el.endIndex! + 1);
 
   // -5 because the first `<div>` tag counts but we don't actually use them
-  return content.substring(0, closest(max, endIndices) - 5);
+  return content.substring(0, endIndices.length < 1 ? content.length : closest(maxLength, endIndices) - 5).trim();
 };
