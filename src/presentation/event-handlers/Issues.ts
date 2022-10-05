@@ -131,7 +131,7 @@ export class IssuesEventHandler implements IIssueEvent {
 
   commentEdited(): HandlerFunction<"issue_comment.edited"> {
     return (event) => {
-      const oldBody = markdownToHTML(event.payload.changes!.body.from ?? "");
+      const oldBody = markdownToHTML(event.payload.changes?.body.from ?? "");
       const newBody = markdownToHTML(event.payload.comment.body ?? "");
       const response =
         interpolate(this._templates.commentEdited, {
