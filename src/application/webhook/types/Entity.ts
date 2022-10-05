@@ -18,6 +18,12 @@ export type Comment = {
   user: User;
 };
 
+export type CommentChanges = {
+  body: {
+    from: string
+  }
+}
+
 export type Assignee = {
   name: string;
 };
