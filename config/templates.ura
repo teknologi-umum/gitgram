@@ -60,7 +60,8 @@ templates:
         commentEdited: """
         <b>💬 Issue comment on <a href="{{url}}">#{{no}} {{title}}</a> was edited by {{actor}}</b>
 
-        {{body}}
+        <b>Old</b>: {{oldBody}}
+        <b>New</b>: {{newBody}}
 
         <b>Issue author</b>: {{author}}
         <b>Repo</b>: <a href="https://github.com/{{repoName}}">{{repoName}}</a>
