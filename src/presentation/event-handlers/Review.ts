@@ -29,8 +29,9 @@ export class ReviewEventHandler implements IReviewEvent {
       }
 
       const body = markdownToHTML(event.payload.review.body);
+      const reviewState = event.payload.review.state.toLowerCase();
       const response = interpolate(
-        this._templates.submitted.type[event.payload.review.state.toLowerCase()] + this._templates.submitted.base,
+        this._templates.submitted.type[reviewState] + "\n" + this._templates.submitted.base,
         {
           repoName: event.payload.repository.fullName,
           url: event.payload.pullRequest.url,

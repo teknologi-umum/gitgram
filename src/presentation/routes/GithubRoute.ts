@@ -10,10 +10,10 @@ export class GithubRoute implements IRoute {
 
   public register() {
     // handle issues events
-    this._config.webhook.on("issue.opened", this._config.handlers.issues.opened());
-    this._config.webhook.on("issue.closed", this._config.handlers.issues.closed());
-    this._config.webhook.on("issue.edited", this._config.handlers.issues.edited());
-    this._config.webhook.on("issue.reopened", this._config.handlers.issues.reopened());
+    this._config.webhook.on("issues.opened", this._config.handlers.issues.opened());
+    this._config.webhook.on("issues.closed", this._config.handlers.issues.closed());
+    this._config.webhook.on("issues.edited", this._config.handlers.issues.edited());
+    this._config.webhook.on("issues.reopened", this._config.handlers.issues.reopened());
     this._config.webhook.on("issue_comment.created", this._config.handlers.issues.commentCreated());
     this._config.webhook.on("issue_comment.edited", this._config.handlers.issues.commentEdited());
 

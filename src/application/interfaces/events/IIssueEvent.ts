@@ -1,10 +1,10 @@
 import type { HandlerFunction } from "~/application/webhook/types";
 
 export interface IIssueEvent {
-  closed(): HandlerFunction<"issue.closed">;
-  opened(): HandlerFunction<"issue.opened">;
-  reopened(): HandlerFunction<"issue.reopened">;
-  edited(): HandlerFunction<"issue.edited">;
+  closed(): HandlerFunction<"issues.closed">;
+  opened(): HandlerFunction<"issues.opened">;
+  reopened(): HandlerFunction<"issues.reopened">;
+  edited(): HandlerFunction<"issues.edited">;
   commentCreated(): HandlerFunction<"issue_comment.created">;
   commentEdited(): HandlerFunction<"issue_comment.edited">;
 }

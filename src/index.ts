@@ -52,7 +52,7 @@ const polkaInstance = polka();
 polkaInstance.get("/", (_, res) => void res.writeHead(200).end("OK"));
 const githubRoute = new GithubRoute(polkaInstance, {
   path: "/github",
-  webhook: new GithubWebhook(GITHUB_WEBHOOK_SECRET),
+  webhook: new GithubWebhook(GITHUB_WEBHOOK_SECRET, logger),
   handlers: eventHandlers,
   groupMapping: groupMapping
 });

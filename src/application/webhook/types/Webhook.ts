@@ -17,11 +17,11 @@ export type EventPayload = {
   "branch.deleted": BaseEvent;
   "tag.created": BaseEvent;
   "tag.deleted": BaseEvent;
-  "issue.opened": BaseEvent & IssueEventPayload;
-  "issue.closed": BaseEvent & IssueEventPayload;
-  "issue.reopened": BaseEvent & IssueEventPayload;
-  "issue.edited": BaseEvent & IssueEventPayload;
-  "issue.updated": BaseEvent & IssueEventPayload;
+  "issues.opened": BaseEvent & IssueEventPayload;
+  "issues.closed": BaseEvent & IssueEventPayload;
+  "issues.reopened": BaseEvent & IssueEventPayload;
+  "issues.edited": BaseEvent & IssueEventPayload;
+  "issues.updated": BaseEvent & IssueEventPayload;
   "issue_comment.created": BaseEvent & IssueCommentEventPayload;
   "issue_comment.edited": BaseEvent & IssueCommentEventPayload;
   "pull_request.opened": BaseEvent & PullRequestEventPayload;

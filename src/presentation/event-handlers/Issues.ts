@@ -21,7 +21,7 @@ export class IssuesEventHandler implements IIssueEvent {
   // eslint-disable-next-line no-useless-constructor
   constructor(private readonly _templates: IssueTemplate, private readonly _hub: IPresenter) {}
 
-  closed(): HandlerFunction<"issue.closed"> {
+  closed(): HandlerFunction<"issues.closed"> {
     return (event) => {
       const response =
         interpolate(this._templates.closed, {
@@ -29,20 +29,20 @@ export class IssuesEventHandler implements IIssueEvent {
           url: event.payload.issue.url,
           no: event.payload.issue.number,
           title: event.payload.issue.title,
-          assignee: event.payload.issue.assignee?.name ?? "No Assignee",
+          assignee: event.payload.issue.assignee?.name ?? "<i>No Assignee</i>",
           author: event.payload.issue.user.name,
           actor: event.payload.sender.name
         }) + transformLabels(event.payload.issue.labels);
 
       this._hub.send({
-        event: "issue.closed",
+        event: "issues.closed",
         targetsId: event.targetsId,
         payload: response
       });
     };
   }
 
-  opened(): HandlerFunction<"issue.opened"> {
+  opened(): HandlerFunction<"issues.opened"> {
     return (event) => {
       const body = markdownToHTML(event.payload.issue?.body ?? "");
       const response =
@@ -52,19 +52,19 @@ export class IssuesEventHandler implements IIssueEvent {
           no: event.payload.issue.number,
           title: event.payload.issue.title,
           body: body || "<i>No description provided.</i>",
-          assignee: event.payload.issue.assignee?.name ?? "No Assignee",
+          assignee: event.payload.issue.assignee?.name ?? "<i>No Assignee</i>",
           author: event.payload.issue.user.name
         }) + transformLabels(event.payload.issue.labels);
 
       this._hub.send({
-        event: "issue.opened",
+        event: "issues.opened",
         targetsId: event.targetsId,
         payload: response
       });
     };
   }
 
-  reopened(): HandlerFunction<"issue.reopened"> {
+  reopened(): HandlerFunction<"issues.reopened"> {
     return (event) => {
       const response =
         interpolate(this._templates.reopened, {
@@ -72,20 +72,20 @@ export class IssuesEventHandler implements IIssueEvent {
           url: event.payload.issue.url,
           no: event.payload.issue.number,
           title: event.payload.issue.title,
-          assignee: event.payload.issue.assignee?.name ?? "No Assignee",
+          assignee: event.payload.issue.assignee?.name ?? "<i>No Assignee</i>",
           author: event.payload.issue.user.name,
           actor: event.payload.sender.name
         }) + transformLabels(event.payload.issue.labels);
 
       this._hub.send({
-        event: "issue.reopened",
+        event: "issues.reopened",
         targetsId: event.targetsId,
         payload: response
       });
     };
   }
 
-  edited(): HandlerFunction<"issue.edited"> {
+  edited(): HandlerFunction<"issues.edited"> {
     return (event) => {
       const response =
         interpolate(this._templates.edited, {
@@ -93,13 +93,13 @@ export class IssuesEventHandler implements IIssueEvent {
           url: event.payload.issue.url,
           no: event.payload.issue.number,
           title: event.payload.issue.title,
-          assignee: event.payload.issue.assignee?.name ?? "No Assignee",
+          assignee: event.payload.issue.assignee?.name ?? "<i>No Assignee</i>",
           author: event.payload.issue.user.name,
           actor: event.payload.sender.name
         }) + transformLabels(event.payload.issue.labels);
 
       this._hub.send({
-        event: "issue.edited",
+        event: "issues.edited",
         targetsId: event.targetsId,
         payload: response
       });
@@ -141,7 +141,7 @@ export class IssuesEventHandler implements IIssueEvent {
           title: event.payload.issue.title,
           oldBody: oldBody,
           newBody: newBody,
-          assignee: event.payload.issue.assignee?.name ?? "No Assignee",
+          assignee: event.payload.issue.assignee?.name ?? "<i>No Assignee</i>",
           author: event.payload.issue.user.name,
           actor: event.payload.sender.name
         }) + transformLabels(event.payload.issue.labels);
