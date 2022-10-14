@@ -11,5 +11,6 @@ export function interpolate(text: string, values: Values) {
     .split("\n")
     .map((l) => l.trim())
     .join("\n");
-  return templite(cleanedText, values);
+  // interpolate and trim unnecessary newline
+  return templite(cleanedText, values).replace(/\n+$/gm, "\n");
 }
