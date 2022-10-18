@@ -95,9 +95,10 @@ export class GithubAdapter {
     }
 
     if ("changes" in payload && payload.changes !== undefined) {
+      const changes = payload.changes as CommentChanges;
       this._changes = {
         body: {
-          from: payload.changes.body.from
+          from: changes.body.from
         }
       };
     }
