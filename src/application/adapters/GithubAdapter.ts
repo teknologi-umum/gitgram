@@ -1,6 +1,7 @@
 import type { WebhookEvent } from "@octokit/webhooks-types";
 import type {
   Comment,
+  CommentChanges,
   Deployment,
   EventPayload,
   Issue,
@@ -21,6 +22,7 @@ export class GithubAdapter {
   private readonly _comment?: Comment;
   private readonly _deploymentStatus?: Deployment;
   private readonly _release?: Release;
+  private readonly _changes?: CommentChanges;
 
   constructor(payload: WebhookEvent) {
     if ("repository" in payload && payload.repository !== undefined) {
@@ -92,6 +94,15 @@ export class GithubAdapter {
       };
     }
 
+    if ("changes" in payload && payload.changes !== undefined) {
+      const changes = payload.changes as CommentChanges;
+      this._changes = {
+        body: {
+          from: changes.body.from
+        }
+      };
+    }
+
     if ("review" in payload && payload.review !== undefined) {
       const ghReview = payload.review;
       this._review = {
@@ -143,7 +154,7 @@ export class GithubAdapter {
         case "issue_comment.created":
           return { ...payload, comment: this._comment } as EventPayload["issue_comment.created"];
         case "issue_comment.edited":
-          return { ...payload, comment: this._comment } as EventPayload["issue_comment.edited"];
+          return { ...payload, comment: this._comment, changes: this._changes } as EventPayload["issue_comment.edited"];
       }
     }
 
