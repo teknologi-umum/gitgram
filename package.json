@@ -12,8 +12,8 @@
     "test:coverage": "vitest run --coverage",
     "test:tdd": "vitest",
     "test": "npm run test:tdd",
-    "lint:fix": "eslint --fix --ext .js,.ts --ignore-path .gitignore .",
-    "lint:check": "eslint --ext .js,.ts --ignore-path .gitignore .",
+    "lint:fix": "eslint --fix --ext .js,.ts .",
+    "lint:check": "eslint --ext .js,.ts .",
     "prepare": "node ./prepare.cjs"
   },
   "repository": {
