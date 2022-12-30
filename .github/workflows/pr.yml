@@ -17,27 +17,45 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Setup Node
-        uses: actions/setup-node@v2.1.5
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2.2.2
+        id: pnpm-install
         with:
-          node-version: 16.x
+          version: 7
+          run_install: false
 
-      - name: Installling dependencies
-        run: npm install
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        run: |
+          echo "::set-output name=pnpm_cache_dir::$(pnpm store path)"
 
-      - name: ESLint check
-        run: npx eslint --ignore-path .gitignore .
+      - uses: actions/cache@v3
+        name: Setup pnpm cache
+        with:
+          path: ${{ steps.pnpm-cache.outputs.pnpm_cache_dir }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
 
-      - name: Build test
-        run: npm run build
+      - name: Install dependencies
+        run: pnpm install
 
-      # - name: Initialize CodeQL
-      #   uses: github/codeql-action/init@v1
-      #   with:
-      #     languages: javascript
+      - name: Lint check
+        run: pnpm lint:check
 
-      # - name: Perform CodeQL Analysis
-      #   uses: github/codeql-action/analyze@v1
+      - name: Build
+        run: pnpm build
 
-      # - name: Send coverage report to Codecov
-      #   uses: codecov/codecov-action@v2
+      - name: Run Tests
+        run: pnpm test:unit
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v1
+        with:
+          languages: javascript
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v1
+
+      - name: Send coverage report to Codecov
+        uses: codecov/codecov-action@v2
