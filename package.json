@@ -31,6 +31,7 @@
     "@teknologi-umum/eslint-config-typescript": "^0.0.7",
     "@types/eventsource": "^1.1.10",
     "@types/node": "^18.11.18",
+    "@types/node-fetch": "^2.6.2",
     "@types/sanitize-html": "^2.8.0",
     "@vitest/coverage-c8": "^0.26.2",
     "esbuild": "^0.16.12",

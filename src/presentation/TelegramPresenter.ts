@@ -1,7 +1,9 @@
-import { Bot, HttpError } from "grammy";
-import { groupBy, mergeMap, retry, Subject, throttleTime } from "rxjs";
+import type { Bot } from "grammy";
+import { bufferTime, distinctUntilKeyChanged, groupBy, mergeMap, Subject } from "rxjs";
 import type { IPresenter, MessageData } from "~/application/interfaces/IPresenter";
 import type { ILogger } from "~/application/interfaces/ILogger";
+
+const BUFFER_TIME = 10 * 60 * 1000; // 10 minutes
 
 type SingleMessageData = Omit<MessageData, "targetsId"> & { targetId: number };
 
@@ -11,36 +13,33 @@ export class TelegramPresenter implements IPresenter {
   constructor(private readonly _bot: Bot, private readonly _logger: ILogger) {
     this._messageHub$
       .pipe(
-        // throttle each event type individually
-        groupBy((info) => info.event),
-        mergeMap((grouped) => grouped.pipe(throttleTime(5000))),
-        // we can only send 1 message / second for each targetId, this is a limitation from telegram API
+        // separate each target group
         groupBy((info) => info.targetId),
-        mergeMap((grouped) => grouped.pipe(throttleTime(15000))),
-        // send 'em
-        mergeMap(({ targetId, payload }) => {
-          return this._bot.api.sendMessage(targetId, payload, {
+        mergeMap((group) =>
+          group.pipe(
+            // prevent duplicate
+            distinctUntilKeyChanged("payload"),
+            // group burst messages
+            bufferTime(BUFFER_TIME)
+          )
+        )
+      )
+      .subscribe(async (info) => {
+        if (info.length < 1 || info[0] === undefined) return;
+
+        const message = info.map((i) => i.payload).join(`\n${"-".repeat(20)}\n\n`);
+        try {
+          await this._bot.api.sendMessage(info[0]!.targetId, message, {
             parse_mode: "HTML",
             disable_web_page_preview: true
           });
-        }),
-        // retry based on `retry_after` that telegram gave us just in case we broke our rate limiter
-        retry({
-          count: 2,
-          delay: (error) => {
-            if (error instanceof HttpError) {
-              // @ts-ignore 
-              // I'm too lazy to type this one out but trust me 
-              // this is correct according to telegram documentation
-              // - elianiva
-              return error.error?.response.data.parameters.retry_after;
-            }
-            return null;
+        } catch (err: unknown) {
+          if (err instanceof Error) {
+            this._logger.error(err.message);
           }
-        })
-      )
-      .subscribe((message) => {
-        this._logger.info(`Message has been sent to ${message.chat.id}`);
+
+          this._logger.error("Unknown error: " + err);
+        }
       });
   }
 
