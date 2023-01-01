@@ -10,6 +10,7 @@ declare global {
       BOT_TOKEN: string;
       DEV_PROXY_URL: string;
       PORT: string;
+      IGNORE_PRIVATE_REPOSITORY?: string
     }
   }
 }

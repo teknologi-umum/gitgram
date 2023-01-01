@@ -70,6 +70,10 @@ To make the bot work properly, you will need these environment variables.
 	Your telegram bot token.
 - `DEV_PROXY_URL`
 	Webhook proxy URL used for easier development process.
+- `HOME_GROUP` (Optional)
+	Default group if the repository was not found on the mapping.
+- `IGNORE_PRIVATE_REPOSITORY` (Optional)
+	Set to anything other than empty to make it ignore every notification from private repository.
 
 Example:
 
