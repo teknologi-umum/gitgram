@@ -3,6 +3,7 @@ import type { WebhookEvent } from "@octokit/webhooks-types";
 import { GithubAdapter } from "../adapters/GithubAdapter";
 import type { ILogger } from "../interfaces/ILogger";
 import type { HandlerFunction, IWebhook, WebhookEventName } from "./types";
+import { IGNORE_PRIVATE_REPOSITORY } from "~/env";
 
 export class GithubWebhook implements IWebhook<WebhookEvent> {
   public readonly secretToken: string;
@@ -49,6 +50,12 @@ export class GithubWebhook implements IWebhook<WebhookEvent> {
       return;
     }
 
+    // Ignore event from private repository if IGNORE_PRIVATE_REPOSITORY is set to not empty
+    if ("repository" in payload && payload.repository !== undefined && payload.repository.private && IGNORE_PRIVATE_REPOSITORY) {
+      this._logger.info(`Ignored private repository for ${eventName}`);
+      return;
+    }
+    
     const adapter = new GithubAdapter(payload);
 
     for await (const handler of handlers) {
