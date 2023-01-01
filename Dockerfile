@@ -1,16 +1,19 @@
-FROM node:16.13.1-bullseye
+FROM node:18.12-bullseye
 
 WORKDIR /home/app
 
-COPY . .
+RUN curl -f https://get.pnpm.io/v6.16.js | node - add --global pnpm
 
-RUN npm install \
-    && npm run build \
-    && rm -rf node_modules \
-    && npm install --production
+COPY pnpm-lock.yaml ./
+RUN pnpm fetch
+
+ADD . ./
+
+RUN pnpm install -r --offline
 
 ENV NODE_ENV=production
+ENV PORT=3000
 
-EXPOSE 3000
+EXPOSE ${PORT}
 
 CMD [ "node", "dist/index.js" ]
