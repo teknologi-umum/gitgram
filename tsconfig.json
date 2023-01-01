@@ -3,10 +3,10 @@
     "incremental": true /* Enable incremental compilation */,
 
     /* Language and Environment */
-    "target": "es2020",
+    "target": "ES2022",
 
     /* Modules */
-    "module": "esnext",
+    "module": "ESNext",
     "rootDir": "./",
     "moduleResolution": "node",
     "baseUrl": ".",

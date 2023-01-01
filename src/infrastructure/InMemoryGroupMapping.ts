@@ -13,6 +13,13 @@ type GroupMap = {
 export class InMemoryGroupMapping implements IGroupMapping {
   private _groupMapping: GroupMap[] = [];
   private readonly _supportedProviders = ["github.com", "gitlab.com"];
+  private readonly _defaultGroupId: number[] = [];
+
+  constructor(defaultGroupId?: number[]) {
+    if (defaultGroupId !== undefined) {
+      this._defaultGroupId.push(...defaultGroupId);
+    }
+  }
 
   private groupExists(groupId: number, repositoryUrl: string) {
     return this._groupMapping.findIndex((item) => item.groupId === groupId && item.repositoryUrl === repositoryUrl) > 0;
@@ -72,6 +79,11 @@ export class InMemoryGroupMapping implements IGroupMapping {
   }
 
   findGroupsIn(repositoryUrl: string): number[] {
-    return this._groupMapping.filter((g) => g.repositoryUrl === repositoryUrl).map((g) => g.groupId);
+    const groupIds = this._groupMapping.filter((g) => g.repositoryUrl === repositoryUrl).map((g) => g.groupId);
+    if (this._defaultGroupId.length > 0 && groupIds.length === 0) {
+      return this._defaultGroupId;
+    }
+
+    return groupIds;
   }
 }
