@@ -5,7 +5,7 @@ import type { ILogger } from "~/application/interfaces/ILogger";
 
 const BUFFER_TIME = 10 * 60 * 1000; // 10 minutes
 
-type SingleMessageData = Omit<MessageData, "targetsId"> & { targetId: number };
+type SingleMessageData = Omit<MessageData, "targetsId"> & { targetId: BigInt };
 
 export class TelegramPresenter implements IPresenter {
   private readonly _messageHub$ = new Subject<SingleMessageData>();
@@ -29,7 +29,7 @@ export class TelegramPresenter implements IPresenter {
 
         const message = info.map((i) => i.payload).join(`\n${"-".repeat(20)}\n\n`);
         try {
-          await this._bot.api.sendMessage(info[0]!.targetId, message, {
+          await this._bot.api.sendMessage(info[0]!.targetId.toString(), message, {
             parse_mode: "HTML",
             disable_web_page_preview: true
           });

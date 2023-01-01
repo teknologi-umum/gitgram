@@ -13,7 +13,7 @@ export const appConfigSchema = z.object({
     .array(
       z.object({
         repository_url: z.string().trim(),
-        group_id: z.number()
+        group_id: z.bigint()
       })
     )
     .min(1),
