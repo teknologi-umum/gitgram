@@ -2,7 +2,7 @@ FROM node:18.12-bullseye
 
 WORKDIR /home/app
 
-RUN curl -fsSL https://get.pnpm.io/install.sh | env PNPM_VERSION=7.21.0 sh -
+RUN curl -fsSL https://get.pnpm.io/install.sh | env PNPM_VERSION=7.21.0 bash -
 
 COPY pnpm-lock.yaml ./
 RUN pnpm fetch
