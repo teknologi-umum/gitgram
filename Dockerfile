@@ -2,16 +2,16 @@ FROM node:18.12-bullseye
 
 WORKDIR /home/app
 
-RUN curl -fsSL https://get.pnpm.io/install.sh | env PNPM_VERSION=7.21.0 bash -
-
 COPY pnpm-lock.yaml ./
-RUN pnpm fetch
+
+RUN npm i --global pnpm && pnpm fetch
 
 ADD . ./
 
 RUN pnpm install -r --prefer-offline --frozen-lockfile && \
     pnpm run build && \
-    pnpm install -r --prefer-offline --frozen-lockfile --prod
+    pnpm install -r --prefer-offline --frozen-lockfile --prod && \
+    npm uninstall --global pnpm
 
 ENV NODE_ENV=production
 ENV PORT=3000
