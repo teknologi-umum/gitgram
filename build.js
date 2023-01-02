@@ -25,7 +25,7 @@ esbuild
       "zod"
     ],
     outdir: "./dist",
-    target: ["node16.15"],
+    target: ["node18.12"],
     tsconfig: "tsconfig.json"
   })
   .catch((e) => {

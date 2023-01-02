@@ -2,7 +2,7 @@ import type { IGroupMapping, Pair } from "~/application/interfaces/IGroupMapping
 
 type GroupMap = {
   repositoryUrl: string;
-  groupId: number;
+  groupId: BigInt;
   activeSince: Date;
 };
 
@@ -13,8 +13,15 @@ type GroupMap = {
 export class InMemoryGroupMapping implements IGroupMapping {
   private _groupMapping: GroupMap[] = [];
   private readonly _supportedProviders = ["github.com", "gitlab.com"];
+  private readonly _defaultGroupId: BigInt[] = [];
 
-  private groupExists(groupId: number, repositoryUrl: string) {
+  constructor(defaultGroupId?: BigInt[]) {
+    if (defaultGroupId !== undefined) {
+      this._defaultGroupId.push(...defaultGroupId);
+    }
+  }
+
+  private groupExists(groupId: BigInt, repositoryUrl: string) {
     return this._groupMapping.findIndex((item) => item.groupId === groupId && item.repositoryUrl === repositoryUrl) > 0;
   }
 
@@ -24,7 +31,7 @@ export class InMemoryGroupMapping implements IGroupMapping {
     }
   }
 
-  add(repositoryUrl: string, groupId: number) {
+  add(repositoryUrl: string, groupId: BigInt) {
     if (repositoryUrl === "") {
       throw new Error("Please provide a valid repository URL. Example: https://github.com/teknologi-umum/gitgram");
     }
@@ -56,7 +63,7 @@ export class InMemoryGroupMapping implements IGroupMapping {
     });
   }
 
-  remove(repositoryUrl: string, groupId: number) {
+  remove(repositoryUrl: string, groupId: BigInt) {
     if (!this.groupExists(groupId, repositoryUrl)) {
       throw new Error(`Group ${groupId} is not registered for ${repositoryUrl}`);
     }
@@ -67,11 +74,16 @@ export class InMemoryGroupMapping implements IGroupMapping {
     this._groupMapping.splice(removedIndex, 1);
   }
 
-  has(repositoryUrl: string, groupId: number): boolean {
+  has(repositoryUrl: string, groupId: BigInt): boolean {
     return this.groupExists(groupId, repositoryUrl);
   }
 
-  findGroupsIn(repositoryUrl: string): number[] {
-    return this._groupMapping.filter((g) => g.repositoryUrl === repositoryUrl).map((g) => g.groupId);
+  findGroupsIn(repositoryUrl: string): BigInt[] {
+    const groupIds = this._groupMapping.filter((g) => g.repositoryUrl === repositoryUrl).map((g) => g.groupId);
+    if (this._defaultGroupId.length > 0 && groupIds.length === 0) {
+      return this._defaultGroupId;
+    }
+
+    return groupIds;
   }
 }

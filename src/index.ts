@@ -4,7 +4,7 @@ import { Bot } from "grammy";
 import { parse as parseGura } from "gura";
 import polka from "polka";
 import { appConfigSchema } from "~/schema";
-import { BOT_TOKEN, GITHUB_WEBHOOK_SECRET, PORT } from "~/env";
+import { BOT_TOKEN, GITHUB_WEBHOOK_SECRET, PORT, HOME_GROUP } from "~/env";
 import { InMemoryGroupMapping } from "~/infrastructure/InMemoryGroupMapping";
 import { ConsoleLogger } from "~/infrastructure/ConsoleLogger";
 import { App, EventHandlerMapping } from "~/application/App";
@@ -30,7 +30,10 @@ const logger = new ConsoleLogger();
 const telegramHub = new TelegramPresenter(bot, logger);
 
 // insert group_mapping from configuration
-const groupMapping = new InMemoryGroupMapping();
+const defaultGroups: BigInt[] | undefined = HOME_GROUP !== ""
+  ? HOME_GROUP.split(",").map((n) => BigInt(n))
+  : undefined;
+const groupMapping = new InMemoryGroupMapping(defaultGroups);
 groupMapping.addMultiple(
   config.group_mappings.map((g) => ({
     repositoryUrl: g.repository_url,

@@ -1,12 +1,12 @@
 export type Pair = {
   repositoryUrl: string;
-  groupId: number;
+  groupId: BigInt;
 };
 
 export interface IGroupMapping {
   addMultiple(pairs: Pair[]): void;
-  add(repositoryUrl: string, groupId: number): void;
-  remove(repositoryUrl: string, groupId: number): void;
-  has(repositoryUrl: string, groupId: number): boolean;
-  findGroupsIn(repositoryUrl: string): number[];
+  add(repositoryUrl: string, groupId: BigInt): void;
+  remove(repositoryUrl: string, groupId: BigInt): void;
+  has(repositoryUrl: string, groupId: BigInt): boolean;
+  findGroupsIn(repositoryUrl: string): BigInt[];
 }
