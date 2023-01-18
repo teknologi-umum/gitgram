@@ -1,4 +1,4 @@
-import { beforeAll, describe, it, expect, test } from "vitest";
+import { beforeAll, describe, it, expect, test, expectTypeOf } from "vitest";
 import { InMemoryGroupMapping } from "~/infrastructure/InMemoryGroupMapping";
 
 describe("invalid add validations", () => {
@@ -43,7 +43,7 @@ describe("find groups", () => {
 
   it("should return empty array because of no default value", () => {
     const groupIds = groupMapping.findGroupsIn("https://github.com/teknologi-umum/botnet");
-    expect(groupIds).toBeTypeOf("object");
+    expectTypeOf(groupIds).toBeArray();
     expect(groupIds).toHaveLength(0);
   });
 });
