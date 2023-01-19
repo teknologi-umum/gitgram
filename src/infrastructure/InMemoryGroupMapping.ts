@@ -22,7 +22,7 @@ export class InMemoryGroupMapping implements IGroupMapping {
   }
 
   private groupExists(groupId: BigInt, repositoryUrl: string) {
-    return this._groupMapping.findIndex((item) => item.groupId === groupId && item.repositoryUrl === repositoryUrl) > 0;
+    return this._groupMapping.findIndex((item) => item.groupId === groupId && item.repositoryUrl === repositoryUrl) >= 0;
   }
 
   addMultiple(pairs: Pair[]) {
