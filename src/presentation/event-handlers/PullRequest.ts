@@ -45,7 +45,7 @@ export class PullRequestEventHandler implements IPullRequestEvent {
           author: event.payload.pullRequest.user.name,
           repoName: event.payload.repository.fullName,
           actor: event.payload.sender.name
-        }) + transformLabels(event.payload.pullRequest.labels);
+        }) + "\n" + transformLabels(event.payload.pullRequest.labels);
 
       this._hub.send({
         event: "pull_request.closed",
@@ -68,7 +68,7 @@ export class PullRequestEventHandler implements IPullRequestEvent {
           body: body || "<i>No description provided.</i>",
           assignee: event.payload.pullRequest.assignee?.name || "<i>No Assignee</i>",
           author: event.payload.pullRequest.user.name
-        }) + transformLabels(event.payload.pullRequest.labels);
+        }) + "\n" + transformLabels(event.payload.pullRequest.labels);
 
       this._hub.send({
         event: "pull_request.opened",
@@ -91,7 +91,7 @@ export class PullRequestEventHandler implements IPullRequestEvent {
           assignee: event.payload.pullRequest.assignee?.name || "<i>No Assignee</i>",
           author: event.payload.pullRequest.user.name,
           actor: event.payload.sender.name
-        }) + transformLabels(event.payload.pullRequest.labels);
+        }) + "\n" + transformLabels(event.payload.pullRequest.labels);
 
       this._hub.send({
         event: "pull_request.edited",

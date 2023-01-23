@@ -32,7 +32,7 @@ export class IssuesEventHandler implements IIssueEvent {
           assignee: event.payload.issue.assignee?.name ?? "<i>No Assignee</i>",
           author: event.payload.issue.user.name,
           actor: event.payload.sender.name
-        }) + transformLabels(event.payload.issue.labels);
+        }) + "\n" + transformLabels(event.payload.issue.labels);
 
       this._hub.send({
         event: "issues.closed",
@@ -54,7 +54,7 @@ export class IssuesEventHandler implements IIssueEvent {
           body: body || "<i>No description provided.</i>",
           assignee: event.payload.issue.assignee?.name ?? "<i>No Assignee</i>",
           author: event.payload.issue.user.name
-        }) + transformLabels(event.payload.issue.labels);
+        }) + "\n" + transformLabels(event.payload.issue.labels);
 
       this._hub.send({
         event: "issues.opened",
@@ -75,7 +75,7 @@ export class IssuesEventHandler implements IIssueEvent {
           assignee: event.payload.issue.assignee?.name ?? "<i>No Assignee</i>",
           author: event.payload.issue.user.name,
           actor: event.payload.sender.name
-        }) + transformLabels(event.payload.issue.labels);
+        }) + "\n" + transformLabels(event.payload.issue.labels);
 
       this._hub.send({
         event: "issues.reopened",
@@ -96,7 +96,7 @@ export class IssuesEventHandler implements IIssueEvent {
           assignee: event.payload.issue.assignee?.name ?? "<i>No Assignee</i>",
           author: event.payload.issue.user.name,
           actor: event.payload.sender.name
-        }) + transformLabels(event.payload.issue.labels);
+        }) + "\n" + transformLabels(event.payload.issue.labels);
 
       this._hub.send({
         event: "issues.edited",
@@ -144,7 +144,7 @@ export class IssuesEventHandler implements IIssueEvent {
           assignee: event.payload.issue.assignee?.name ?? "<i>No Assignee</i>",
           author: event.payload.issue.user.name,
           actor: event.payload.sender.name
-        }) + transformLabels(event.payload.issue.labels);
+        }) + "\n" + transformLabels(event.payload.issue.labels);
 
       this._hub.send({
         event: "issue_comment.edited",
