@@ -36,7 +36,7 @@ export class GitlabWebhook implements IWebhook<unknown> {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  public handle(_eventName: WebhookEventName, _payload: unknown, _targetsId: BigInt[]): Promise<void> {
+  public handle(_eventName: WebhookEventName, _payload: unknown, _targetsId: bigint[]): Promise<void> {
     // TODO: implementation
     throw new Error("Not implemented");
   }

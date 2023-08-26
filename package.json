@@ -28,7 +28,7 @@
   "homepage": "https://github.com/teknologi-umum/gitgram#readme",
   "devDependencies": {
     "@esbuild-kit/esm-loader": "^2.5.5",
-    "@teknologi-umum/eslint-config-typescript": "^0.0.7",
+    "@teknologi-umum/eslint-config-typescript": "^0.0.10",
     "@types/eventsource": "^1.1.10",
     "@types/node": "^18.17.11",
     "@types/node-fetch": "^2.6.4",

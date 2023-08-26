@@ -30,7 +30,7 @@ const logger = new ConsoleLogger();
 const telegramHub = new TelegramPresenter(bot, logger);
 
 // insert group_mapping from configuration
-const defaultGroups: BigInt[] | undefined = HOME_GROUP !== ""
+const defaultGroups: bigint[] | undefined = HOME_GROUP !== ""
   ? HOME_GROUP.split(",").map((n) => BigInt(n))
   : undefined;
 const groupMapping = new InMemoryGroupMapping(defaultGroups);

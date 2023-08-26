@@ -5,7 +5,7 @@ import type { ILogger } from "~/application/interfaces/ILogger";
 
 const BUFFER_TIME = 10 * 60 * 1000; // 10 minutes
 
-type SingleMessageData = Omit<MessageData, "targetsId"> & { targetId: BigInt };
+type SingleMessageData = Omit<MessageData, "targetsId"> & { targetId: bigint };
 
 export class TelegramPresenter implements IPresenter {
   private readonly _messageHub$ = new Subject<SingleMessageData>();
