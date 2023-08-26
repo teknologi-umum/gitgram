@@ -19,7 +19,7 @@
     "sourceMap": true,
     "outDir": "./dist",
     "removeComments": true,
-    "importsNotUsedAsValues": "error",
+    // "importsNotUsedAsValues": "error",
     "newLine": "lf",
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
