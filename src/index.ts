@@ -7,7 +7,7 @@ import { appConfigSchema } from "~/schema";
 import { BOT_TOKEN, GITHUB_WEBHOOK_SECRET, PORT, HOME_GROUP } from "~/env";
 import { InMemoryGroupMapping } from "~/infrastructure/InMemoryGroupMapping";
 import { ConsoleLogger } from "~/infrastructure/ConsoleLogger";
-import { App, EventHandlerMapping } from "~/application/App";
+import { App, type EventHandlerMapping } from "~/application/App";
 import {
   DeploymentEventHandler,
   IssuesEventHandler,
