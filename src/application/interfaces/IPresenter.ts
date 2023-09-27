@@ -10,7 +10,7 @@ export type MessageData = {
   /**
    * The id of the message target
    */
-  targetsId: BigInt[]
+  targetsId: bigint[]
 }
 
 // we might want to support Discord in the future so it's good to have this interface

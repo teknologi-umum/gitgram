@@ -1,16 +1,15 @@
-FROM node:18.12-bullseye
+FROM node:18.17-bookworm
 
 WORKDIR /home/app
 
-COPY pnpm-lock.yaml ./
+COPY . .
 
-RUN npm i --global pnpm && pnpm fetch
-
-ADD . ./
-
-RUN pnpm install -r --prefer-offline --frozen-lockfile && \
+RUN npm i -g pnpm@latest && \
+    pnpm install && \
     pnpm run build && \
-    pnpm install -r --prefer-offline --frozen-lockfile --prod && \
+    rm -rf node_modules && \
+    pnpm install --prod && \
+    pnpm store prune && \
     npm uninstall --global pnpm
 
 ENV NODE_ENV=production

@@ -84,7 +84,7 @@ export class GithubAdapter {
       };
     }
 
-    if ("comment" in payload && payload.comment !== undefined) {
+    if ("comment" in payload && payload.comment !== undefined && typeof payload.comment !== "string") {
       this._comment = {
         url: payload.comment.html_url,
         body: payload.comment.body,

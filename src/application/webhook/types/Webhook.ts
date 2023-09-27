@@ -40,7 +40,7 @@ export type WebhookEventName = keyof EventPayload;
 
 export type TEvent<E extends WebhookEventName> = {
   type: E;
-  targetsId: BigInt[];
+  targetsId: bigint[];
   payload: EventPayload[E];
 };
 
@@ -52,5 +52,5 @@ export interface IWebhook<TPayload> {
   sign(payload: string): Promise<string>;
   verify(payload: string, signature: string): Promise<boolean>;
   on<E extends WebhookEventName>(event: E, handler: HandlerFunction<E>): void;
-  handle(eventName: WebhookEventName, payload: TPayload, targetsId: BigInt[]): Promise<void>;
+  handle(eventName: WebhookEventName, payload: TPayload, targetsId: bigint[]): Promise<void>;
 }

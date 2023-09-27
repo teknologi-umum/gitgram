@@ -1,9 +1,21 @@
-root=true
+root = true
 
 [*]
+charset = utf-8
 end_of_line = lf
-insert_final_newline = true
+indent_size = 4
+indent_style = space
+insert_final_newline = false
+max_line_length = 120
+tab_width = 4
 
-[*.{json,js,ts}]
-indent_style=space
-indent_size=2
+[{*.ats,*.cts,*.mts,*.ts}]
+indent_size = 2
+tab_width = 2
+
+[{*.cjs,*.js}]
+indent_size = 2
+tab_width = 2
+
+[{*.har,*.jsb2,*.jsb3,*.json,.babelrc,.eslintrc,.prettierrc,.stylelintrc,bowerrc,composer.lock,jest.config}]
+indent_size = 2

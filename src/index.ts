@@ -7,7 +7,7 @@ import { appConfigSchema } from "~/schema";
 import { BOT_TOKEN, GITHUB_WEBHOOK_SECRET, PORT, HOME_GROUP } from "~/env";
 import { InMemoryGroupMapping } from "~/infrastructure/InMemoryGroupMapping";
 import { ConsoleLogger } from "~/infrastructure/ConsoleLogger";
-import { App, EventHandlerMapping } from "~/application/App";
+import { App, type EventHandlerMapping } from "~/application/App";
 import {
   DeploymentEventHandler,
   IssuesEventHandler,
@@ -30,7 +30,7 @@ const logger = new ConsoleLogger();
 const telegramHub = new TelegramPresenter(bot, logger);
 
 // insert group_mapping from configuration
-const defaultGroups: BigInt[] | undefined = HOME_GROUP !== ""
+const defaultGroups: bigint[] | undefined = HOME_GROUP !== ""
   ? HOME_GROUP.split(",").map((n) => BigInt(n))
   : undefined;
 const groupMapping = new InMemoryGroupMapping(defaultGroups);
