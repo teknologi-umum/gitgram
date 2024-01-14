@@ -18,7 +18,7 @@ templates:
                 error: """
                 <b>💥 Error deploying <a href="https://github.com/{{repoName}}">{{repoName}}</a> ({{environment}})</b>
                 """
-                
+
     issues:
         closed: """
         <b>🚫 Issue <a href="{{url}}">#{{no}} {{title}}</a> was closed by {{actor}}</b>
@@ -162,3 +162,59 @@ templates:
                 moderate: "⚠️ Moderate"
                 high: "‼️ High"
                 critical: "⛔ Critical"
+    discussion:
+        created: """
+        <b>🗣️ New discussion <a href="{{url}}">#{{no}} {{title}}</a> was opened by {{author}}</b>
+
+        {{body}}
+
+        <b>Repo</b>: <a href="https://github.com/{{repoName}}">{{repoName}}</a>
+        <b>Category</b>: {{category}}
+        """
+        closed: """
+        <b>🚫 Discussion <a href="{{url}}">#{{no}} {{title}}</a> was closed by {{actor}}</b>
+
+        <b>Repo</b>: <a href="https://github.com/{{repoName}}">{{repoName}}</a>
+        <b>Category</b>: {{category}}
+        """
+        deleted: """
+        <b>🗑️ Discussion <a href="{{url}}">#{{no}} {{title}}</a> was deleted by {{actor}}</b>
+
+        <b>Repo</b>: <a href="https://github.com/{{repoName}}">{{repoName}}</a>
+        <b>Category</b>: {{category}}
+        """
+        edited: """
+        <b>🗣️ Discussion <a href="{{url}}">#{{no}} {{title}}</a> was edited by {{actor}}</b>
+
+        <b>Repo</b>: <a href="https://github.com/{{repoName}}">{{repoName}}</a>
+        <b>Category</b>: {{category}}
+        """
+        pinned: """
+        <b>📌 Discussion <a href="{{url}}">#{{no}} {{title}}</a> was pinned by {{actor}}</b>
+
+        <b>Repo</b>: <a href="https://github.com/{{repoName}}">{{repoName}}</a>
+        <b>Category</b>: {{category}}
+        """
+        reopened: """
+        <b>🗣️ Discussion <a href="{{url}}">#{{no}} {{title}}</a> was reopened by {{actor}}</b>
+        
+        <b>Repo</b>: <a href="https://github.com/{{repoName}}">{{repoName}}</a>
+        <b>Category</b>: {{category}}
+        """
+        answered: """
+        <b>🗣️ Discussion <a href="{{url}}">#{{no}} {{title}}</a> was answered by {{actor}}</b>
+      
+        {{body}}
+
+        <b>Repo</b>: <a href="https://github.com/{{repoName}}">{{repoName}}</a>
+        <b>Category</b>: {{category}}
+        """
+        comment_created: """
+        <b>💬 New comment on discussion <a href="{{url}}">#{{no}} {{title}}</a> by {{actor}}</b>
+
+        {{body}}
+
+        <b>Repo</b>: <a href="https://github.com/{{repoName}}">{{repoName}}</a>
+        <b>Category</b>: {{category}}
+        <b>Replies</b>: {{replyCount}}
+        """

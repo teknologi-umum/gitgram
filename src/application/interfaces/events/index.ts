@@ -4,3 +4,4 @@ export * from "./IPullRequestEvent";
 export * from "./IReviewEvent";
 export * from "./IReleaseEvent";
 export * from "./IVulnerabilityEvent";
+export * from "./IDiscussionEvent";

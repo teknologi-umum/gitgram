@@ -20,9 +20,9 @@ export type Comment = {
 
 export type CommentChanges = {
   body: {
-    from: string
-  }
-}
+    from: string;
+  };
+};
 
 export type Assignee = {
   name: string;
@@ -94,3 +94,39 @@ export type Release = {
   url: string;
   tagName: string;
 };
+
+export type Category = {
+  name: string;
+  slug: string;
+  emoji: string;
+  description: string;
+};
+
+export type Reactions = {
+  "+1": number;
+  "-1": number;
+  laugh: number;
+  hooray: number;
+  confused: number;
+  heart: number;
+  rocket: number;
+  eyes: number;
+  total_count: number;
+};
+
+export type Discussion = {
+  number: number;
+  title: string;
+  body: string | null;
+  state: "open" | "locked" | "converting" | "transferring";
+  user: User;
+  answerUrl: string | null;
+  url: string;
+  category: Category;
+  reactions: Reactions;
+};
+
+export type DiscussionComment = Comment & {
+  replyCount: number;
+  reactions: Reactions;
+}
