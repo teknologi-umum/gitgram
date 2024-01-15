@@ -31,7 +31,9 @@ export class TelegramPresenter implements IPresenter {
         try {
           await this._bot.api.sendMessage(info[0]!.targetId.toString(), message, {
             parse_mode: "HTML",
-            disable_web_page_preview: true
+            link_preview_options: {
+              is_disabled: true
+            }
           });
         } catch (err: unknown) {
           if (err instanceof Error) {
