@@ -31,6 +31,15 @@ export class GithubRoute implements IRoute {
     this._config.webhook.on("release.published", this._config.handlers.release.published());
     this._config.webhook.on("deployment_status", this._config.handlers.deployment.status());
 
+    // handle discussion events
+    this._config.webhook.on("discussion.created", this._config.handlers.discussion.created());
+    this._config.webhook.on("discussion.edited", this._config.handlers.discussion.edited());
+    this._config.webhook.on("discussion.deleted", this._config.handlers.discussion.deleted());
+    this._config.webhook.on("discussion.pinned", this._config.handlers.discussion.pinned());
+    this._config.webhook.on("discussion.answered", this._config.handlers.discussion.answered());
+    this._config.webhook.on("discussion.reopened", this._config.handlers.discussion.reopened());
+    this._config.webhook.on("discussion_comment.created", this._config.handlers.discussion.commentCreated());
+
     // attach routes
     this._polka.post(this._config.path, this.verifySignature.bind(this), this.handleWebhook.bind(this));
   }

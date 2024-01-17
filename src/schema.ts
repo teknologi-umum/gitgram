@@ -5,7 +5,8 @@ import {
   pullRequestTemplateSchema,
   releaseTemplateSchema,
   reviewTemplateSchema,
-  vulnerabilityTemplateSchema
+  vulnerabilityTemplateSchema,
+  discussionTemplateSchema
 } from "~/presentation/event-handlers";
 
 export const appConfigSchema = z.object({
@@ -23,6 +24,7 @@ export const appConfigSchema = z.object({
     pr: pullRequestTemplateSchema,
     release: releaseTemplateSchema,
     review: reviewTemplateSchema,
-    vulnerability: vulnerabilityTemplateSchema
+    vulnerability: vulnerabilityTemplateSchema,
+    discussion: discussionTemplateSchema
   })
 });

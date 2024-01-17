@@ -14,7 +14,8 @@ import {
   PullRequestEventHandler,
   ReleaseEventHandler,
   ReviewEventHandler,
-  VulnerabilityEventHandler
+  VulnerabilityEventHandler,
+  DiscussionEventHandler
 } from "~/presentation/event-handlers";
 import { GithubRoute } from "~/presentation/routes/GithubRoute";
 import { GithubWebhook } from "~/application/webhook/GithubWebhook";
@@ -47,7 +48,8 @@ const eventHandlers: EventHandlerMapping = {
   review: new ReviewEventHandler(config.templates.review, telegramHub),
   pr: new PullRequestEventHandler(config.templates.pr, telegramHub),
   alert: new VulnerabilityEventHandler(config.templates.vulnerability, telegramHub),
-  release: new ReleaseEventHandler(config.templates.release, telegramHub)
+  release: new ReleaseEventHandler(config.templates.release, telegramHub),
+  discussion: new DiscussionEventHandler(config.templates.discussion, telegramHub)
 };
 
 // webhook server and handlers

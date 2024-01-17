@@ -6,7 +6,8 @@ import type {
   IPullRequestEvent,
   IReleaseEvent,
   IReviewEvent,
-  IVulnerabilityEvent
+  IVulnerabilityEvent,
+  IDiscussionEvent
 } from "./interfaces/events";
 import type { ILogger } from "./interfaces/ILogger";
 import type { IRoute } from "./interfaces/IRoute";
@@ -19,6 +20,7 @@ export type EventHandlerMapping = {
   review: IReviewEvent;
   release: IReleaseEvent;
   alert: IVulnerabilityEvent;
+  discussion: IDiscussionEvent;
 };
 
 export class App {
