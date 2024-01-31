@@ -1,41 +1,11 @@
-name: Master
+name: Release
 
 on:
-  push:
-    branches:
-      - master
+  release:
+    types:
+      - published
 
 jobs:
-  ci:
-    name: Check
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2
-        id: pnpm-install
-        with:
-          version: latest
-          run_install: false
-
-      - name: Install dependencies
-        run: pnpm install
-
-      - name: Lint check
-        run: pnpm lint:check
-
-      - name: Build
-        run: pnpm build
-
-      - name: Run Tests
-        run: pnpm test:coverage
-
-      - name: Send coverage report to Codecov
-        uses: codecov/codecov-action@v3
-
   cd:
     name: CD
     needs:
@@ -46,7 +16,7 @@ jobs:
       packages: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -64,10 +34,9 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository }}
           flavor: |
-            latest=false
+            latest=true
           tags: |
-            type=edge
-            type=sha
+            type=semver,pattern={{version}}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
