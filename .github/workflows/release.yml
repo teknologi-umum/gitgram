@@ -8,8 +8,6 @@ on:
 jobs:
   cd:
     name: CD
-    needs:
-      - ci
     runs-on: ubuntu-latest
     permissions:
       contents: read
