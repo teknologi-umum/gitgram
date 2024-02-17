@@ -10,7 +10,6 @@ esbuild
     external: [
       "cheerio",
       "colorette",
-      "dotenv",
       "eventsource",
       "grammy",
       "gura",
