@@ -19,7 +19,7 @@
     "sourceMap": true,
     "outDir": "./dist",
     "removeComments": true,
-    "verbatimModuleSyntax": true,
+    "verbatimModuleSyntax": false,
     "newLine": "lf",
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
@@ -47,5 +47,9 @@
     /* Completeness */
     "skipDefaultLibCheck": false,
     "skipLibCheck": true
+  },
+  "tsc-alias": {
+    "resolveFullPaths": true,
+    "verbose": true
   }
 }

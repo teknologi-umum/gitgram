@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/node";
 import type { Bot } from "grammy";
 import { bufferTime, distinctUntilKeyChanged, groupBy, mergeMap, Subject } from "rxjs";
 import type { IPresenter, MessageData } from "~/application/interfaces/IPresenter";
@@ -57,6 +58,7 @@ export class TelegramPresenter implements IPresenter {
               }
             });
           } catch (err: unknown) {
+            Sentry.captureException(err);
             if (err instanceof Error) {
               this._logger.error(err.message);
             }

@@ -1,12 +1,12 @@
 import type { WebhookEvent } from "@octokit/webhooks-types";
-import type { NextHandler, Polka, Request, Response } from "polka";
+import { Hono, type Context, type Next } from "hono";
 import type { ServerConfig } from "./types";
 import type { IRoute } from "~/application/interfaces/IRoute";
 import type { WebhookEventName } from "~/application/webhook/types";
 
 export class GithubRoute implements IRoute {
   // eslint-disable-next-line no-useless-constructor
-  constructor(private readonly _polka: Polka<Request>, private readonly _config: ServerConfig<WebhookEvent>) { }
+  constructor(private readonly _server: Hono, private readonly _config: ServerConfig<WebhookEvent>) { }
 
   public register() {
     // handle issues events
@@ -41,34 +41,34 @@ export class GithubRoute implements IRoute {
     this._config.webhook.on("discussion_comment.created", this._config.handlers.discussion.commentCreated());
 
     // attach routes
-    this._polka.post(this._config.path, this.verifySignature.bind(this), this.handleWebhook.bind(this));
+    this._server.use(this._config.path, this.verifySignature.bind(this));
+    this._server.post(this._config.path, this.handleWebhook.bind(this));
   }
 
-  private handleWebhook(req: Request, res: Response) {
-    const event = req.headers["x-github-event"];
-    const eventType = req.body.action !== undefined ? `.${req.body.action}` : "";
+  private async handleWebhook(c: Context) {
+    const requestBody = await c.req.json();
+    const event = c.req.header("x-github-event");
+    const eventType = requestBody.action !== undefined ? `.${requestBody.action}` : "";
     const eventName = `${event}${eventType}` as WebhookEventName;
-    const targetIds = this._config.groupMapping.findGroupsIn(req.body.repository.html_url);
+    const targetIds = this._config.groupMapping.findGroupsIn(requestBody.repository.html_url);
     // reply back first so github knows we've received it before waiting us handling the response
-    res.writeHead(200, { "Content-Type": "application/json" }).end(JSON.stringify({ msg: "OK" }));
-    this._config.webhook.handle(eventName, req.body, targetIds);
+    this._config.webhook.handle(eventName, requestBody, targetIds);
+    return c.json({ msg: "OK" }, 200);
   }
 
-  private async verifySignature(req: Request, res: Response, next: NextHandler) {
-    const hubSignature = req.headers["x-hub-signature-256"] as string | undefined;
+  private async verifySignature(c: Context, next: Next) {
+    const hubSignature = c.req.header("x-hub-signature-256");
     if (hubSignature === undefined || hubSignature.length === 0) {
-      res
-        .writeHead(401, { "Content-Type": "application/json" })
-        .end(JSON.stringify({ msg: "Signature length is not the same." }));
-      return;
+      return c.json({ msg: "Signature length is not the same." }, 401);
     }
 
-    const isEqual = await this._config.webhook.verify(JSON.stringify(req.body), hubSignature);
+    const requestBody = await c.req.json();
+    
+    const isEqual = await this._config.webhook.verify(JSON.stringify(requestBody), hubSignature);
     if (!isEqual) {
-      res.writeHead(401, { "Content-Type": "application/json" }).end(JSON.stringify({ msg: "Invalid signature" }));
-      return;
+      return c.json({ msg: "Invalid signature" }, 401);
     }
 
-    next();
+    return next();
   }
 }

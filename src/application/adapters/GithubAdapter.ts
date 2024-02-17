@@ -1,4 +1,5 @@
 import type { WebhookEvent } from "@octokit/webhooks-types";
+import { trace } from "@opentelemetry/api";
 import type {
   Comment,
   CommentChanges,
@@ -12,6 +13,8 @@ import type {
   Sender,
   WebhookEventName
 } from "~/application/webhook/types";
+
+const tracer = trace.getTracer("application.adaptersGithubAdapter");
 
 export class GithubAdapter {
   private readonly _repository?: Repository;
@@ -134,93 +137,97 @@ export class GithubAdapter {
   }
 
   get(eventName: WebhookEventName) {
-    // issue related events
-    if (eventName.startsWith("issue")) {
-      const payload = {
-        issue: this._issue,
-        repository: this._repository,
-        sender: this._sender
-      };
+    return tracer.startActiveSpan("get", (span) => {
+      span.setAttribute("event_name", eventName);
 
-      switch (eventName) {
-        case "issues.opened":
-          return payload as EventPayload["issues.opened"];
-        case "issues.closed":
-          return payload as EventPayload["issues.closed"];
-        case "issues.edited":
-          return payload as EventPayload["issues.edited"];
-        case "issues.reopened":
-          return payload as EventPayload["issues.reopened"];
-        case "issue_comment.created":
-          return { ...payload, comment: this._comment } as EventPayload["issue_comment.created"];
-        case "issue_comment.edited":
-          return { ...payload, comment: this._comment, changes: this._changes } as EventPayload["issue_comment.edited"];
+      // issue related events
+      if (eventName.startsWith("issue")) {
+        const payload = {
+          issue: this._issue,
+          repository: this._repository,
+          sender: this._sender
+        };
+  
+        switch (eventName) {
+          case "issues.opened":
+            return payload as EventPayload["issues.opened"];
+          case "issues.closed":
+            return payload as EventPayload["issues.closed"];
+          case "issues.edited":
+            return payload as EventPayload["issues.edited"];
+          case "issues.reopened":
+            return payload as EventPayload["issues.reopened"];
+          case "issue_comment.created":
+            return { ...payload, comment: this._comment } as EventPayload["issue_comment.created"];
+          case "issue_comment.edited":
+            return { ...payload, comment: this._comment, changes: this._changes } as EventPayload["issue_comment.edited"];
+        }
       }
-    }
-
-    // pull request related events
-    if (eventName.startsWith("pull_request.")) {
-      const payload = {
-        pullRequest: this._pullRequest,
-        repository: this._repository,
-        review: this._review,
-        sender: this._sender
-      };
-      switch (eventName) {
-        case "pull_request.opened":
-          return payload as EventPayload["pull_request.opened"];
-        case "pull_request.closed":
-          return payload as EventPayload["pull_request.closed"];
-        case "pull_request.edited":
-          return payload as EventPayload["pull_request.edited"];
+  
+      // pull request related events
+      if (eventName.startsWith("pull_request.")) {
+        const payload = {
+          pullRequest: this._pullRequest,
+          repository: this._repository,
+          review: this._review,
+          sender: this._sender
+        };
+        switch (eventName) {
+          case "pull_request.opened":
+            return payload as EventPayload["pull_request.opened"];
+          case "pull_request.closed":
+            return payload as EventPayload["pull_request.closed"];
+          case "pull_request.edited":
+            return payload as EventPayload["pull_request.edited"];
+        }
       }
-    }
-
-    // pr review related events
-    if (eventName.startsWith("pull_request_review")) {
-      const payload = {
-        pullRequest: this._pullRequest,
-        repository: this._repository,
-        review: this._review,
-        sender: this._sender
-      };
-      switch (eventName) {
-        case "pull_request_review.edited":
-          return { ...payload, review: this._review } as EventPayload["pull_request_review.edited"];
-        case "pull_request_review.submitted":
-          return { ...payload, sender: this._sender } as EventPayload["pull_request_review.submitted"];
-        case "pull_request_review_comment.created":
-          return {
-            ...payload,
-            sender: this._sender,
-            comment: this._comment
-          } as EventPayload["pull_request_review_comment.created"];
+  
+      // pr review related events
+      if (eventName.startsWith("pull_request_review")) {
+        const payload = {
+          pullRequest: this._pullRequest,
+          repository: this._repository,
+          review: this._review,
+          sender: this._sender
+        };
+        switch (eventName) {
+          case "pull_request_review.edited":
+            return { ...payload, review: this._review } as EventPayload["pull_request_review.edited"];
+          case "pull_request_review.submitted":
+            return { ...payload, sender: this._sender } as EventPayload["pull_request_review.submitted"];
+          case "pull_request_review_comment.created":
+            return {
+              ...payload,
+              sender: this._sender,
+              comment: this._comment
+            } as EventPayload["pull_request_review_comment.created"];
+        }
       }
-    }
-
-    // deployment related events
-    if (eventName.startsWith("deployment")) {
-      switch (eventName) {
-        case "deployment_status":
-          return {
-            repository: this._repository,
-            deploymentStatus: this._deploymentStatus
-          } as EventPayload["deployment_status"];
+  
+      // deployment related events
+      if (eventName.startsWith("deployment")) {
+        switch (eventName) {
+          case "deployment_status":
+            return {
+              repository: this._repository,
+              deploymentStatus: this._deploymentStatus
+            } as EventPayload["deployment_status"];
+        }
       }
-    }
-
-    // release related events
-    if (eventName.startsWith("release.")) {
-      switch (eventName) {
-        case "release.published":
-          return {
-            release: this._release,
-            repository: this._repository,
-            sender: this._sender
-          } as EventPayload["release.published"];
+  
+      // release related events
+      if (eventName.startsWith("release.")) {
+        switch (eventName) {
+          case "release.published":
+            return {
+              release: this._release,
+              repository: this._repository,
+              sender: this._sender
+            } as EventPayload["release.published"];
+        }
       }
-    }
-
-    throw new Error(`Unhandle event. Event name: ${eventName}`);
+  
+      throw new Error(`Unhandle event. Event name: ${eventName}`);
+    });
   }
 }

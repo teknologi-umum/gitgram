@@ -1,5 +1,7 @@
+import { Server, createServer } from "http";
 import { Bot, GrammyError, HttpError } from "grammy";
-import type { Polka } from "polka";
+import { Hono } from "hono";
+import { serve } from "@hono/node-server";
 import type {
   IDeploymentEvent,
   IIssueEvent,
@@ -26,11 +28,12 @@ export type EventHandlerMapping = {
 export class App {
   private readonly _bot: Bot;
   private readonly _logger: ILogger;
-  private readonly _httpServer: Polka;
+  private readonly _hono: Hono;
+  private _httpServer: Server | undefined;
   private readonly _port: number;
   private readonly _routes: IRoute[];
 
-  constructor(config: { port: number; bot: Bot; logger: ILogger; httpServer: Polka; routes: IRoute[] }) {
+  constructor(config: { port: number; bot: Bot; logger: ILogger; hono: Hono; routes: IRoute[] }) {
     if (!(config.bot instanceof Bot)) throw new Error("config.bot is not an instance of grammy bot.");
     if (config.logger === undefined || config.logger === null || typeof config.logger !== "object") {
       throw new Error("config.logger should be an instance implementing ILogger.");
@@ -42,7 +45,7 @@ export class App {
 
     this._bot = config.bot;
     this._logger = config.logger;
-    this._httpServer = config.httpServer;
+    this._hono = config.hono;
     this._port = config.port;
     this._routes = config.routes;
   }
@@ -88,57 +91,26 @@ export class App {
     });
   }
 
-  private addJsonParser() {
-    this._httpServer.use(async (req, res, next) => {
-      try {
-        let body = "";
-
-        for await (const chunk of req) {
-          body += chunk;
-        }
-
-        if (body === undefined || body.length === 0) {
-          res
-            .writeHead(422, { "Content-Type": "application/json" })
-            .end(JSON.stringify({ msg: "Body shouldn't be empty" }));
-          return;
-        }
-
-        switch (req.headers["content-type"]) {
-          case "application/x-www-form-urlencoded": {
-            const url = new URLSearchParams(body);
-            req.body = Object.fromEntries(url.entries());
-            break;
-          }
-          case "application/json":
-          default:
-            req.body = JSON.parse(body);
-        }
-        next();
-      } catch (error) {
-        res.writeHead(400, { "Content-Type": "application/json" }).end(
-          JSON.stringify({
-            msg: "Invalid body content with the Content-Type header specification"
-          })
-        );
-      }
-    });
-  }
-
   public run() {
     this.addErrorHandling();
-    this.addJsonParser();
     this._bot.start({
       onStart: (botInfo) => {
         this.registerServers();
         this._logger.info(`@${botInfo.username} has been started.`);
       }
     });
+
+    this._httpServer = serve({
+      fetch: this._hono.fetch,
+      port: this._port,
+      createServer: createServer
+    }, () => this._logger.info(`Server running on port ${this._port}`)) as Server;
+
     this._httpServer.listen(this._port, () => this._logger.info(`Server running on port ${this._port}`));
   }
 
   public stop() {
     this._bot.stop();
-    this._httpServer.server.close();
+    this._httpServer?.close();
   }
 }
