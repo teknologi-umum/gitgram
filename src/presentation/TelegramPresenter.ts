@@ -27,20 +27,42 @@ export class TelegramPresenter implements IPresenter {
       .subscribe(async (info) => {
         if (info.length < 1 || info[0] === undefined) return;
 
-        const message = info.map((i) => i.payload).join(`\n${"-".repeat(20)}\n\n`);
-        try {
-          await this._bot.api.sendMessage(info[0]!.targetId.toString(), message, {
-            parse_mode: "HTML",
-            link_preview_options: {
-              is_disabled: true
-            }
-          });
-        } catch (err: unknown) {
-          if (err instanceof Error) {
-            this._logger.error(err.message);
+        // Telegram limits each message box to have 4096 UTF-8 characters
+        const messages: string[] = [];
+        let currentMessage = "";
+        // This is actually the safe length of `\n${"-".repeat(20)}\n\n`
+        const MAGIC_DELIMITER_NUMBER = 26; 
+        for (const item of info) {
+          if (currentMessage === "") {
+            currentMessage = item.payload;
+            continue;
           }
 
-          this._logger.error("Unknown error: " + err);
+          if (currentMessage.length + item.payload.length + MAGIC_DELIMITER_NUMBER >= 4096) {
+            messages.push(currentMessage);
+            currentMessage = item.payload;
+            continue;
+          }
+
+          currentMessage += `\n${"-".repeat(20)}\n\n`;
+          currentMessage += item.payload;
+        }
+
+        for (const message of messages) {
+          try {
+            await this._bot.api.sendMessage(info[0]!.targetId.toString(), message, {
+              parse_mode: "HTML",
+              link_preview_options: {
+                is_disabled: true
+              }
+            });
+          } catch (err: unknown) {
+            if (err instanceof Error) {
+              this._logger.error(err.message);
+            }
+  
+            this._logger.error("Unknown error: " + err);
+          }
         }
       });
   }
