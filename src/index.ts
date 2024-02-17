@@ -2,7 +2,8 @@ import { readFile } from "fs/promises";
 import path from "path";
 import { Bot } from "grammy";
 import { parse as parseGura } from "gura";
-import polka from "polka";
+import { Hono } from "hono";
+import { otelTracer } from "./utils/honoOtelTracer";
 import { appConfigSchema } from "~/schema";
 import { BOT_TOKEN, GITHUB_WEBHOOK_SECRET, PORT, HOME_GROUP } from "~/env";
 import { InMemoryGroupMapping } from "~/infrastructure/InMemoryGroupMapping";
@@ -53,26 +54,27 @@ const eventHandlers: EventHandlerMapping = {
 };
 
 // webhook server and handlers
-const polkaInstance = polka();
-polkaInstance.get("/", (_, res) => void res.writeHead(200).end("OK"));
-const githubRoute = new GithubRoute(polkaInstance, {
+const serverInstance = new Hono();
+serverInstance.get("/", (c) => c.text("OK"));
+serverInstance.use("*", otelTracer("gitgram"));
+const githubRoute = new GithubRoute(serverInstance, {
   path: "/github",
   webhook: new GithubWebhook(GITHUB_WEBHOOK_SECRET, logger),
   handlers: eventHandlers,
   groupMapping: groupMapping
 });
 
-// main bot app instance
+// main bot app instances
 const app = new App({
-  httpServer: polkaInstance,
+  hono: serverInstance,
   port: parseInt(PORT),
   bot,
   logger,
   routes: [githubRoute]
 });
 
-app.run();
-
 // Enable graceful shutdown
 process.once("SIGINT", () => app.stop());
 process.once("SIGTERM", () => app.stop());
+
+app.run();

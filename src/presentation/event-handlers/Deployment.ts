@@ -1,8 +1,11 @@
+import { trace } from "@opentelemetry/api";
 import { z } from "zod";
 import type { IDeploymentEvent } from "~/application/interfaces/events/IDeploymentEvent";
 import type { IPresenter } from "~/application/interfaces/IPresenter";
 import type { HandlerFunction } from "~/application/webhook/types";
 import { interpolate } from "~/utils/interpolate";
+
+const tracer = trace.getTracer("presentation.event-handlers.Deployment");
 
 export const deploymentTemplateSchema = z.object({
   status: z.object({
@@ -19,23 +22,25 @@ export class DeploymentEventHandler implements IDeploymentEvent {
 
   status(): HandlerFunction<"deployment_status"> {
     return (event) => {
-      const description = event.payload.deploymentStatus.description;
-      const response = interpolate(
-        this._templates.status.statuses[event.payload.deploymentStatus.state.toLowerCase()] +
-          this._templates.status.base,
-        {
-          repoName: event.payload.repository.fullName,
-          environment: event.payload.deploymentStatus.environment,
-          description:
-            (description.length > 100 ? description.slice(0, 100) : description) || "<i>No description provided</i>",
-          targetUrl: event.payload.deploymentStatus?.targetUrl ?? "<i>No target URL provided</i>"
-        }
-      );
-
-      this._hub.send({
-        event: "deployment_status",
-        targetsId: event.targetsId,
-        payload: response
+      return tracer.startActiveSpan("status", () => {
+        const description = event.payload.deploymentStatus.description;
+        const response = interpolate(
+          this._templates.status.statuses[event.payload.deploymentStatus.state.toLowerCase()] +
+            this._templates.status.base,
+          {
+            repoName: event.payload.repository.fullName,
+            environment: event.payload.deploymentStatus.environment,
+            description:
+              (description.length > 100 ? description.slice(0, 100) : description) || "<i>No description provided</i>",
+            targetUrl: event.payload.deploymentStatus?.targetUrl ?? "<i>No target URL provided</i>"
+          }
+        );
+  
+        this._hub.send({
+          event: "deployment_status",
+          targetsId: event.targetsId,
+          payload: response
+        });
       });
     };
   }
