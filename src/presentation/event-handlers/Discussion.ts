@@ -1,11 +1,9 @@
-import { trace } from "@opentelemetry/api";
+import * as Sentry from "@sentry/node";
 import { z } from "zod";
 import type { IPresenter } from "~/application/interfaces/IPresenter";
 import type { IDiscussionEvent } from "~/application/interfaces/events/IDiscussionEvent";
 import type { HandlerFunction } from "~/application/webhook/types";
 import { interpolate } from "~/utils/interpolate";
-
-const tracer = trace.getTracer("presentation.event-handlers.Discussion");
 
 export const discussionTemplateSchema = z.object({
   created: z.string().trim(),
@@ -27,7 +25,10 @@ export class DiscussionEventHandler implements IDiscussionEvent {
 
   created(): HandlerFunction<"discussion.created"> {
     return (event) => {
-      return tracer.startActiveSpan("created", () => {
+      return Sentry.startSpan({
+        name: "created",
+        op: "presentation.event-handlers.Discussion"
+      }, () => {
         const message = this._templates.created;
         const payload = interpolate(message, {
           url: event.payload.discussion.url,
@@ -49,7 +50,10 @@ export class DiscussionEventHandler implements IDiscussionEvent {
 
   closed(): HandlerFunction<"discussion.closed"> {
     return (event) => {
-      return tracer.startActiveSpan("closed", () => {
+      return Sentry.startSpan({ 
+        name: "closed",
+        op: "presentation.event-handlers.Discussion"
+      }, () => {
         const message = this._templates.closed;
         const payload = interpolate(message, {
           url: event.payload.discussion.url,
@@ -71,7 +75,10 @@ export class DiscussionEventHandler implements IDiscussionEvent {
 
   reopened(): HandlerFunction<"discussion.reopened"> {
     return (event) => {
-      return tracer.startActiveSpan("reopened", () => {
+      return Sentry.startSpan({ 
+        name: "reopened",
+        op: "presentation.event-handlers.Discussion"
+      }, () => {
         const message = this._templates.reopened;
         const payload = interpolate(message, {
           url: event.payload.discussion.url,
@@ -93,7 +100,10 @@ export class DiscussionEventHandler implements IDiscussionEvent {
 
   edited(): HandlerFunction<"discussion.edited"> {
     return (event) => {
-      return tracer.startActiveSpan("edited", () => {
+      return Sentry.startSpan({ 
+        name: "edited",
+        op: "presentation.event-handlers.Discussion"
+      }, () => {
         const message = this._templates.edited;
         const payload = interpolate(message, {
           url: event.payload.discussion.url,
@@ -115,7 +125,10 @@ export class DiscussionEventHandler implements IDiscussionEvent {
 
   deleted(): HandlerFunction<"discussion.deleted"> {
     return (event) => {
-      return tracer.startActiveSpan("deleted", () => {
+      return Sentry.startSpan({ 
+        name: "deleted",
+        op: "presentation.event-handlers.Discussion"
+      }, () => {
         const message = this._templates.deleted;
         const payload = interpolate(message, {
           url: event.payload.discussion.url,
@@ -137,7 +150,10 @@ export class DiscussionEventHandler implements IDiscussionEvent {
 
   pinned(): HandlerFunction<"discussion.pinned"> {
     return (event) => {
-      return tracer.startActiveSpan("pinned", () => {
+      return Sentry.startSpan({ 
+        name: "pinned",
+        op: "presentation.event-handlers.Discussion"
+      }, () => {
         const message = this._templates.pinned;
         const payload = interpolate(message, {
           url: event.payload.discussion.url,

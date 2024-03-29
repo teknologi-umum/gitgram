@@ -1,5 +1,5 @@
 import type { WebhookEvent } from "@octokit/webhooks-types";
-import { trace } from "@opentelemetry/api";
+import * as Sentry from "@sentry/node";
 import type {
   Comment,
   CommentChanges,
@@ -13,8 +13,6 @@ import type {
   Sender,
   WebhookEventName
 } from "~/application/webhook/types";
-
-const tracer = trace.getTracer("application.adaptersGithubAdapter");
 
 export class GithubAdapter {
   private readonly _repository?: Repository;
@@ -137,9 +135,13 @@ export class GithubAdapter {
   }
 
   get(eventName: WebhookEventName) {
-    return tracer.startActiveSpan("get", (span) => {
-      span.setAttribute("event_name", eventName);
-
+    return Sentry.startSpan({
+      name: "get",
+      op: "application.adaptersGithubAdapter",
+      attributes: {
+        "event_name": eventName
+      }
+    }, () => {
       // issue related events
       if (eventName.startsWith("issue")) {
         const payload = {

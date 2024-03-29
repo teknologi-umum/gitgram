@@ -1,12 +1,10 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import type { WebhookEvent } from "@octokit/webhooks-types";
-import { trace } from "@opentelemetry/api";
+import * as Sentry from "@sentry/node";
 import { GithubAdapter } from "../adapters/GithubAdapter";
 import type { ILogger } from "../interfaces/ILogger";
 import type { HandlerFunction, IWebhook, WebhookEventName } from "./types";
 import { IGNORE_PRIVATE_REPOSITORY } from "~/env";
-
-const tracer = trace.getTracer("application.webhook.GithubWebhook");
 
 export class GithubWebhook implements IWebhook<WebhookEvent> {
   public readonly secretToken: string;
@@ -20,7 +18,10 @@ export class GithubWebhook implements IWebhook<WebhookEvent> {
   }
 
   public verify(payload: string, signature: string) {
-    return tracer.startActiveSpan("verify", async () => {
+    return Sentry.startSpan({
+      name: "verify",
+      op: "application.webhook.GithubWebhook"
+    }, async () => {
       if (payload.length === 0 || signature.length === 0) throw Error("payload or signature wasn't provided.");
   
       const signatureBuffer = Buffer.from(signature);
@@ -35,15 +36,23 @@ export class GithubWebhook implements IWebhook<WebhookEvent> {
   }
 
   public sign(payload: string): Promise<string> {
-    return tracer.startActiveSpan("sign", () => {
+    return Sentry.startSpan({
+      name: "sign", 
+      op: "application.webhook.GithubWebhook"
+    }, () => {
       if (payload.length === 0) throw Error("payload wasn't provided.");
       return Promise.resolve(`sha256=${createHmac("sha256", this.secretToken).update(payload).digest("hex")}`);
     });
   }
 
   public on<E extends WebhookEventName>(event: E, handler: HandlerFunction<E>): void {
-    return tracer.startActiveSpan("on", (span) => {
-      span.setAttribute("event", event);
+    return Sentry.startSpan({
+      name: "on",
+      op: "application.webhook.GithubWebhook",
+      attributes: {
+        event: event
+      }
+    }, () => {
       if (this._handlers[event] === undefined) {
         this._handlers[event] = [];
       }
@@ -52,8 +61,13 @@ export class GithubWebhook implements IWebhook<WebhookEvent> {
   }
 
   public handle(eventName: WebhookEventName, payload: WebhookEvent, targetsId: bigint[]): Promise<void> {
-    return tracer.startActiveSpan("handle", async (span) => {
-      span.setAttribute("event_name", eventName);
+    return Sentry.startSpan({
+      name: "handle",
+      op: "application.webhook.GithubWebhook",
+      attributes: {
+        "event_name": eventName
+      }
+    }, async () => {
       const handlers = this._handlers[eventName] as HandlerFunction<WebhookEventName>[];
       
       // no handler available

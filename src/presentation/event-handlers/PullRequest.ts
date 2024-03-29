@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/node";
 import { z } from "zod";
 import type { IPullRequestEvent } from "~/application/interfaces/events";
 import { markdownToHTML } from "~/utils/markdown";
@@ -26,31 +27,36 @@ export class PullRequestEventHandler implements IPullRequestEvent {
 
   closed(): HandlerFunction<"pull_request.closed"> {
     return (event) => {
-      let template = this._templates.closed.base;
-
-      if (event.payload.pullRequest.isMerged) {
-        template = this._templates.closed.type.merged + "\n" + this._templates.closed.base;
-      } else {
-        template = this._templates.closed.type.closed + "\n" + this._templates.closed.base;
-      }
-
-      const body = markdownToHTML(event.payload.pullRequest?.body ?? "");
-      const response =
-        interpolate(template, {
-          url: event.payload.pullRequest.url,
-          no: event.payload.pullRequest.number,
-          title: event.payload.pullRequest.title,
-          body: body || "<i>No description provided.</i>",
-          assignee: event.payload.pullRequest.assignee?.name || "<i>No Assignee</i>",
-          author: event.payload.pullRequest.user.name,
-          repoName: event.payload.repository.fullName,
-          actor: event.payload.sender.name
-        }) + "\n" + transformLabels(event.payload.pullRequest.labels);
-
-      this._hub.send({
-        event: "pull_request.closed",
-        targetsId: event.targetsId,
-        payload: response
+      return Sentry.startSpan({
+        name: "closed",
+        op: "presentation.event-handlers.PullRequest"
+      }, () => {
+        let template = this._templates.closed.base;
+  
+        if (event.payload.pullRequest.isMerged) {
+          template = this._templates.closed.type.merged + "\n" + this._templates.closed.base;
+        } else {
+          template = this._templates.closed.type.closed + "\n" + this._templates.closed.base;
+        }
+  
+        const body = markdownToHTML(event.payload.pullRequest?.body ?? "");
+        const response =
+          interpolate(template, {
+            url: event.payload.pullRequest.url,
+            no: event.payload.pullRequest.number,
+            title: event.payload.pullRequest.title,
+            body: body || "<i>No description provided.</i>",
+            assignee: event.payload.pullRequest.assignee?.name || "<i>No Assignee</i>",
+            author: event.payload.pullRequest.user.name,
+            repoName: event.payload.repository.fullName,
+            actor: event.payload.sender.name
+          }) + "\n" + transformLabels(event.payload.pullRequest.labels);
+  
+        this._hub.send({
+          event: "pull_request.closed",
+          targetsId: event.targetsId,
+          payload: response
+        });
       });
     };
   }
@@ -58,45 +64,55 @@ export class PullRequestEventHandler implements IPullRequestEvent {
   opened(): HandlerFunction<"pull_request.opened"> {
     const template = this._templates.opened;
     return (event) => {
-      const body = markdownToHTML(event.payload.pullRequest?.body ?? "");
-      const response =
-        interpolate(template, {
-          url: event.payload.pullRequest.url,
-          repoName: event.payload.repository.fullName,
-          no: event.payload.pullRequest.number,
-          title: event.payload.pullRequest.title,
-          body: body || "<i>No description provided.</i>",
-          assignee: event.payload.pullRequest.assignee?.name || "<i>No Assignee</i>",
-          author: event.payload.pullRequest.user.name
-        }) + "\n" + transformLabels(event.payload.pullRequest.labels);
-
-      this._hub.send({
-        event: "pull_request.opened",
-        targetsId: event.targetsId,
-        payload: response
+      return Sentry.startSpan({
+        name: "opened",
+        op: "presentation.event-handlers.PullRequest"
+      }, () => {
+        const body = markdownToHTML(event.payload.pullRequest?.body ?? "");
+        const response =
+          interpolate(template, {
+            url: event.payload.pullRequest.url,
+            repoName: event.payload.repository.fullName,
+            no: event.payload.pullRequest.number,
+            title: event.payload.pullRequest.title,
+            body: body || "<i>No description provided.</i>",
+            assignee: event.payload.pullRequest.assignee?.name || "<i>No Assignee</i>",
+            author: event.payload.pullRequest.user.name
+          }) + "\n" + transformLabels(event.payload.pullRequest.labels);
+  
+        this._hub.send({
+          event: "pull_request.opened",
+          targetsId: event.targetsId,
+          payload: response
+        });
       });
     };
   }
 
   edited(): HandlerFunction<"pull_request.edited"> {
     return (event) => {
-      const body = markdownToHTML(event.payload.pullRequest?.body ?? "");
-      const response =
-        interpolate(this._templates.edited, {
-          url: event.payload.pullRequest.url,
-          repoName: event.payload.repository.fullName,
-          no: event.payload.pullRequest.number,
-          title: event.payload.pullRequest.title,
-          body: body || "<i>No description provided.</i>",
-          assignee: event.payload.pullRequest.assignee?.name || "<i>No Assignee</i>",
-          author: event.payload.pullRequest.user.name,
-          actor: event.payload.sender.name
-        }) + "\n" + transformLabels(event.payload.pullRequest.labels);
-
-      this._hub.send({
-        event: "pull_request.edited",
-        targetsId: event.targetsId,
-        payload: response
+      return Sentry.startSpan({
+        name: "edited",
+        op: "presentation.event-handlers.PullRequest"
+      }, () => {
+        const body = markdownToHTML(event.payload.pullRequest?.body ?? "");
+        const response =
+          interpolate(this._templates.edited, {
+            url: event.payload.pullRequest.url,
+            repoName: event.payload.repository.fullName,
+            no: event.payload.pullRequest.number,
+            title: event.payload.pullRequest.title,
+            body: body || "<i>No description provided.</i>",
+            assignee: event.payload.pullRequest.assignee?.name || "<i>No Assignee</i>",
+            author: event.payload.pullRequest.user.name,
+            actor: event.payload.sender.name
+          }) + "\n" + transformLabels(event.payload.pullRequest.labels);
+  
+        this._hub.send({
+          event: "pull_request.edited",
+          targetsId: event.targetsId,
+          payload: response
+        });
       });
     };
   }
