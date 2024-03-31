@@ -60,7 +60,7 @@
     "remark-html": "^16.0.1",
     "remark-parse": "^11.0.0",
     "rxjs": "^7.8.1",
-    "sanitize-html": "^2.11.0",
+    "sanitize-html": "^2.12.1",
     "templite": "^1.2.0",
     "unified": "^11.0.4",
     "zod": "^3.22.4"
