@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/node";
 import { z } from "zod";
 import type { IReleaseEvent } from "~/application/interfaces/events";
 import { markdownToHTML } from "~/utils/markdown";
@@ -17,20 +18,25 @@ export class ReleaseEventHandler implements IReleaseEvent {
 
   published(): HandlerFunction<"release.published"> {
     return (event) => {
-      const body = markdownToHTML(event.payload.release.body);
-      const response = interpolate(this._templates.published, {
-        tag_name: event.payload.release.tagName,
-        repoName: event.payload.repository.fullName,
-        name: event.payload.release.name,
-        url: event.payload.release.url,
-        body: body || "<i>No description provided.</i>",
-        actor: event.payload.sender.name
-      });
-
-      this._hub.send({
-        event: "release.published",
-        targetsId: event.targetsId,
-        payload: response
+      return Sentry.startSpan({
+        name: "published",
+        op: "presentation.event-handlers.Release"
+      }, () => {
+        const body = markdownToHTML(event.payload.release.body);
+        const response = interpolate(this._templates.published, {
+          tag_name: event.payload.release.tagName,
+          repoName: event.payload.repository.fullName,
+          name: event.payload.release.name,
+          url: event.payload.release.url,
+          body: body || "<i>No description provided.</i>",
+          actor: event.payload.sender.name
+        });
+  
+        this._hub.send({
+          event: "release.published",
+          targetsId: event.targetsId,
+          payload: response
+        });
       });
     };
   }

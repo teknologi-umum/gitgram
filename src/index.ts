@@ -3,7 +3,8 @@ import path from "path";
 import { Bot } from "grammy";
 import { parse as parseGura } from "gura";
 import { Hono } from "hono";
-import { otelTracer } from "./utils/honoOtelTracer";
+import * as Sentry from "@sentry/node";
+import { sentryMiddleware } from "./utils/honoSentryTracer";
 import { appConfigSchema } from "~/schema";
 import { BOT_TOKEN, GITHUB_WEBHOOK_SECRET, PORT, HOME_GROUP } from "~/env";
 import { InMemoryGroupMapping } from "~/infrastructure/InMemoryGroupMapping";
@@ -21,6 +22,15 @@ import {
 import { GithubRoute } from "~/presentation/routes/GithubRoute";
 import { GithubWebhook } from "~/application/webhook/GithubWebhook";
 import { TelegramPresenter } from "~/presentation/TelegramPresenter";
+
+Sentry.init({
+  dsn: process.env.SENTRY_DSN ?? "",
+  sampleRate: 1.0,
+  tracesSampleRate: 0.3,
+  integrations: [
+    Sentry.httpIntegration({ tracing: true })
+  ]
+});
 
 // configurations
 const configFile = await readFile(path.resolve("config", "config.ura"), { encoding: "utf-8" });
@@ -56,7 +66,11 @@ const eventHandlers: EventHandlerMapping = {
 // webhook server and handlers
 const serverInstance = new Hono();
 serverInstance.get("/", (c) => c.text("OK"));
-serverInstance.use("*", otelTracer("gitgram"));
+serverInstance.use(sentryMiddleware());
+serverInstance.onError((_, c) => {
+  c.status(500);
+  return c.json({ message: "Internal server error" });
+});
 const githubRoute = new GithubRoute(serverInstance, {
   path: "/github",
   webhook: new GithubWebhook(GITHUB_WEBHOOK_SECRET, logger),

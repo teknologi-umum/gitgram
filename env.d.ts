@@ -11,6 +11,7 @@ declare global {
       DEV_PROXY_URL: string;
       PORT: string;
       IGNORE_PRIVATE_REPOSITORY?: string
+      SENTRY_DSN?: string;
     }
   }
 }

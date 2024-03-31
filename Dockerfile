@@ -17,4 +17,4 @@ ENV PORT=3000
 
 EXPOSE ${PORT}
 
-CMD [ "node", "--import", "./dist/src/tracing.js", "./dist/src/index.js" ]
+CMD ["node", "./dist/src/index.js"]

@@ -1,11 +1,9 @@
-import { trace } from "@opentelemetry/api";
+import * as Sentry from "@sentry/node";
 import { z } from "zod";
 import type { IDeploymentEvent } from "~/application/interfaces/events/IDeploymentEvent";
 import type { IPresenter } from "~/application/interfaces/IPresenter";
 import type { HandlerFunction } from "~/application/webhook/types";
 import { interpolate } from "~/utils/interpolate";
-
-const tracer = trace.getTracer("presentation.event-handlers.Deployment");
 
 export const deploymentTemplateSchema = z.object({
   status: z.object({
@@ -22,7 +20,10 @@ export class DeploymentEventHandler implements IDeploymentEvent {
 
   status(): HandlerFunction<"deployment_status"> {
     return (event) => {
-      return tracer.startActiveSpan("status", () => {
+      return Sentry.startSpan({
+        name: "status",
+        op: "presentation.event-handlers.Deployment"
+      }, () => {
         const description = event.payload.deploymentStatus.description;
         const response = interpolate(
           this._templates.status.statuses[event.payload.deploymentStatus.state.toLowerCase()] +
