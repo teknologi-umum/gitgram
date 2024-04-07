@@ -40,13 +40,25 @@ export class TelegramPresenter implements IPresenter {
           }
 
           if (currentMessage.length + item.payload.length + MAGIC_DELIMITER_NUMBER >= 4096) {
+            // Push everything that's contained in currentMessages to messages.
             messages.push(currentMessage);
+            // Reset the currentMessage to current item payload.
             currentMessage = item.payload;
+            // See if currentMessage exceeds 4096, we'll just push it.
+            if (currentMessage.length >= 4096) {
+              messages.push(currentMessage.slice(0, 4096));
+              // Then we reset the currentMessage
+              currentMessage = "";
+            }
             continue;
           }
 
           currentMessage += `\n${"-".repeat(20)}\n\n`;
           currentMessage += item.payload;
+        }
+
+        if (currentMessage !== "") {
+          messages.push(currentMessage);
         }
 
         for (const message of messages) {
