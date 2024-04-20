@@ -6,8 +6,8 @@ settings:
 
 dependencies:
   '@hono/node-server':
-    specifier: ^1.8.0
-    version: 1.8.0
+    specifier: ^1.10.1
+    version: 1.10.1
   '@octokit/webhooks-types':
     specifier: ^7.3.2
     version: 7.3.2
@@ -826,8 +826,8 @@ packages:
     resolution: {integrity: sha512-KZlJcOdgD8N6SMIHWfwmb11L5/L2+rptWBxCexbzNCry/wfLXFFGFniyUrySnvFo+cWMxgy5GuImwY3mhUrP8g==}
     dev: false
 
-  /@hono/node-server@1.8.0:
-    resolution: {integrity: sha512-vlebYBWAE9PVbRXps8O918Cj34F1FLCJW+ZlepcIpLKp0SRXgDZ2tpYbSoJeT/QOkKVP6TQcjfTl5rs3z88rVw==}
+  /@hono/node-server@1.10.1:
+    resolution: {integrity: sha512-5BKW25JH5PQKPDkTcIgv3yNUPtOAbnnjFFgWvIxxAY/B/ZNeYjjWoAeDmqhIiCgOAJ3Tauuw+0G+VainhuZRYQ==}
     engines: {node: '>=18.14.1'}
     dev: false
 
