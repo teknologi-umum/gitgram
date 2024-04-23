@@ -55,7 +55,7 @@
     "eventsource": "^2.0.2",
     "grammy": "^1.21.1",
     "gura": "^1.4.4",
-    "hono": "^4.0.3",
+    "hono": "^4.2.7",
     "remark-gfm": "^4.0.0",
     "remark-html": "^16.0.1",
     "remark-parse": "^11.0.0",
